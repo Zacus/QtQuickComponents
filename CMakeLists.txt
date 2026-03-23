@@ -16,10 +16,18 @@ qt_standard_project_setup()
 # ── 库目标 ────────────────────────────────────────────────────
 qt_add_library(QtQuickComponents STATIC)
 
+# OUTPUT_DIRECTORY 必须由调用方（VideoPlayer）通过
+# QTC_QML_OUTPUT_BASE 传入，确保 qmldir 和插件输出到
+# VideoPlayer 构建目录下，QML 引擎才能找到。
+# 独立构建时回退到自己的 CMAKE_BINARY_DIR。
+if(NOT DEFINED QTC_QML_OUTPUT_BASE)
+    set(QTC_QML_OUTPUT_BASE "${CMAKE_BINARY_DIR}")
+endif()
+
 qt_add_qml_module(QtQuickComponents
     URI     "QuickUI.Components"
     VERSION 1.0
-    OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/QuickUI/Components"
+    OUTPUT_DIRECTORY "${QTC_QML_OUTPUT_BASE}/QuickUI/Components"
     SOURCES
         src/ComponentTheme.h
         src/ComponentTheme.cpp
@@ -38,26 +46,18 @@ target_link_libraries(QtQuickComponents PUBLIC
     Qt6::QuickControls2
 )
 
-# ── 安装规则 ──────────────────────────────────────────────────
-# 注意：qt_add_qml_module 会生成若干内部辅助 target（_resources_N、_init 等），
-# 这些 target 无法通过 install(EXPORT) 安全导出（Qt 版本不同数量会变）。
-# 因此安装只处理文件，不使用 EXPORT 机制。
-# 使用者通过 FetchContent 引入时直接使用 build tree target，无需 install。
+# ── 安装规则（仅文件，不用 EXPORT 机制）──────────────────────
 include(GNUInstallDirs)
 
 install(TARGETS QtQuickComponents
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
 )
-
 install(FILES src/ComponentTheme.h
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/QtQuickComponents
 )
-
 install(DIRECTORY qml/
     DESTINATION ${CMAKE_INSTALL_DATADIR}/QtQuickComponents/qml
 )
-
-# qmldir 和生成的资源文件
-install(DIRECTORY "${CMAKE_BINARY_DIR}/QuickUI/"
+install(DIRECTORY "${QTC_QML_OUTPUT_BASE}/QuickUI/"
     DESTINATION ${CMAKE_INSTALL_DATADIR}/QtQuickComponents/QuickUI
 )
