@@ -13,22 +13,36 @@ set(CMAKE_AUTOMOC ON)
 find_package(Qt6 REQUIRED COMPONENTS Quick QuickControls2)
 qt_standard_project_setup()
 
-# ── 库目标 ────────────────────────────────────────────────────
-# 含 C++ 类型时用 SHARED：插件会被编译成 .dylib/.so，
-# QML 引擎运行时按 qmldir 中的 plugin 行加载它。
-# STATIC 库不会生成插件动态库，运行时会报 plugin not found。
-qt_add_library(QtQuickComponents SHARED)
+# ── 检测 Qt 构建类型 ──────────────────────────────────────────
+# Qt 静态构建时 QT6_IS_SHARED_LIBS_BUILD 为 FALSE
+get_target_property(_qt_core_type Qt6::Core TYPE)
+if(_qt_core_type STREQUAL "STATIC_LIBRARY")
+    set(_QTC_STATIC_QT TRUE)
+else()
+    set(_QTC_STATIC_QT FALSE)
+endif()
 
-# OUTPUT_DIRECTORY 由调用方通过 QTC_QML_OUTPUT_BASE 传入，
-# 确保 qmldir 和插件 .dylib 输出到同一目录，QML 引擎才能找到。
+# ── 库类型随 Qt 构建类型切换 ──────────────────────────────────
+# 动态 Qt：SHARED，插件编译成 .dylib，运行时加载
+# 静态 Qt：STATIC，插件静态链入可执行文件，Qt 自动生成 Q_IMPORT_PLUGIN
+if(_QTC_STATIC_QT)
+    qt_add_library(QtQuickComponents STATIC)
+else()
+    qt_add_library(QtQuickComponents SHARED)
+endif()
+
+# OUTPUT_DIRECTORY 由调用方通过 QTC_QML_OUTPUT_BASE 传入
 if(NOT DEFINED QTC_QML_OUTPUT_BASE)
     set(QTC_QML_OUTPUT_BASE "${CMAKE_BINARY_DIR}")
 endif()
 
+# QML 模块路径（在 OUTPUT_DIRECTORY 和 install 规则中使用）
+set(QTC_QML_MODULE_PATH "${QTC_QML_OUTPUT_BASE}/QuickUI/Components")
+
 qt_add_qml_module(QtQuickComponents
     URI     "QuickUI.Components"
     VERSION 1.0
-    OUTPUT_DIRECTORY "${QTC_QML_OUTPUT_BASE}/QuickUI/Components"
+    OUTPUT_DIRECTORY "${QTC_QML_MODULE_PATH}"
     SOURCES
         src/ComponentTheme.h
         src/ComponentTheme.cpp
@@ -37,11 +51,14 @@ qt_add_qml_module(QtQuickComponents
         qml/ProgressSlider.qml
 )
 
-# 插件 .dylib 也必须输出到同一目录，QML 引擎才能按 qmldir 找到它
-set_target_properties(QtQuickComponentsplugin PROPERTIES
-    LIBRARY_OUTPUT_DIRECTORY "${QTC_QML_OUTPUT_BASE}/QuickUI/Components"
-    RUNTIME_OUTPUT_DIRECTORY "${QTC_QML_OUTPUT_BASE}/QuickUI/Components"
-)
+# 动态构建：qt_add_qml_module 创建的插件目标名为 QtQuickComponentsplugin（Qt 约定）
+# 需要确保插件 .dylib/.so 与 qmldir 输出到同一目录，QML 运行时才能找到
+if(NOT _QTC_STATIC_QT)
+    set_target_properties(QtQuickComponentsplugin PROPERTIES
+        LIBRARY_OUTPUT_DIRECTORY "${QTC_QML_MODULE_PATH}"
+        RUNTIME_OUTPUT_DIRECTORY "${QTC_QML_MODULE_PATH}"
+    )
+endif()
 
 target_include_directories(QtQuickComponents PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
@@ -53,13 +70,20 @@ target_link_libraries(QtQuickComponents PUBLIC
     Qt6::QuickControls2
 )
 
-# ── 安装规则（仅文件，不用 EXPORT 机制）──────────────────────
+# ── 安装规则 ──────────────────────────────────────────────────
 include(GNUInstallDirs)
 
-install(TARGETS QtQuickComponents QtQuickComponentsplugin
+install(TARGETS QtQuickComponents
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
+if(NOT _QTC_STATIC_QT)
+    install(TARGETS QtQuickComponentsplugin
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+    )
+endif()
 install(FILES src/ComponentTheme.h
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/QtQuickComponents
 )
