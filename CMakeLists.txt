@@ -14,12 +14,13 @@ find_package(Qt6 REQUIRED COMPONENTS Quick QuickControls2)
 qt_standard_project_setup()
 
 # ── 库目标 ────────────────────────────────────────────────────
-qt_add_library(QtQuickComponents STATIC)
+# 含 C++ 类型时用 SHARED：插件会被编译成 .dylib/.so，
+# QML 引擎运行时按 qmldir 中的 plugin 行加载它。
+# STATIC 库不会生成插件动态库，运行时会报 plugin not found。
+qt_add_library(QtQuickComponents SHARED)
 
-# OUTPUT_DIRECTORY 必须由调用方（VideoPlayer）通过
-# QTC_QML_OUTPUT_BASE 传入，确保 qmldir 和插件输出到
-# VideoPlayer 构建目录下，QML 引擎才能找到。
-# 独立构建时回退到自己的 CMAKE_BINARY_DIR。
+# OUTPUT_DIRECTORY 由调用方通过 QTC_QML_OUTPUT_BASE 传入，
+# 确保 qmldir 和插件 .dylib 输出到同一目录，QML 引擎才能找到。
 if(NOT DEFINED QTC_QML_OUTPUT_BASE)
     set(QTC_QML_OUTPUT_BASE "${CMAKE_BINARY_DIR}")
 endif()
@@ -36,6 +37,12 @@ qt_add_qml_module(QtQuickComponents
         qml/ProgressSlider.qml
 )
 
+# 插件 .dylib 也必须输出到同一目录，QML 引擎才能按 qmldir 找到它
+set_target_properties(QtQuickComponentsplugin PROPERTIES
+    LIBRARY_OUTPUT_DIRECTORY "${QTC_QML_OUTPUT_BASE}/QuickUI/Components"
+    RUNTIME_OUTPUT_DIRECTORY "${QTC_QML_OUTPUT_BASE}/QuickUI/Components"
+)
+
 target_include_directories(QtQuickComponents PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
     $<INSTALL_INTERFACE:include/QtQuickComponents>
@@ -49,8 +56,9 @@ target_link_libraries(QtQuickComponents PUBLIC
 # ── 安装规则（仅文件，不用 EXPORT 机制）──────────────────────
 include(GNUInstallDirs)
 
-install(TARGETS QtQuickComponents
-    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+install(TARGETS QtQuickComponents QtQuickComponentsplugin
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
 install(FILES src/ComponentTheme.h
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/QtQuickComponents
