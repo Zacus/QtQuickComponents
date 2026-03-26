@@ -49,6 +49,9 @@ qt_add_qml_module(QtQuickComponents
     QML_FILES
         qml/IconButton.qml
         qml/ProgressSlider.qml
+        qml/Button.qml
+        qml/Label.qml
+        qml/TextField.qml
 )
 
 # 动态构建：qt_add_qml_module 创建的插件目标名为 QtQuickComponentsplugin（Qt 约定）
