@@ -49,6 +49,8 @@ qt_add_qml_module(QtQuickComponents
         src/TimelineSegment.h
         src/TimelineModel.h
         src/TimelineModel.cpp
+        src/TimelineViewport.h
+        src/TimelineViewport.cpp
     QML_FILES
         qml/IconButton.qml
         qml/ProgressSlider.qml
@@ -94,6 +96,7 @@ install(FILES
     src/ComponentTheme.h
     src/TimelineSegment.h
     src/TimelineModel.h
+    src/TimelineViewport.h
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/QtQuickComponents
 )
 install(DIRECTORY qml/
