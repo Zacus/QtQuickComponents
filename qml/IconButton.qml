@@ -9,6 +9,7 @@ Item {
     property string iconText: "?"
     property string tooltip:  ""
     property int    fontSize: ComponentTheme.fontSize
+    property bool   enabled:  true
 
     signal clicked()
 
@@ -21,8 +22,10 @@ Item {
         color:  mouseArea.pressed
                 ? ComponentTheme.buttonPressed
                 : mouseArea.containsMouse ? ComponentTheme.buttonHover : "transparent"
+        opacity: root.enabled ? 1.0 : 0.4
 
-        Behavior on color { ColorAnimation { duration: ComponentTheme.durationFast } }
+        Behavior on color   { ColorAnimation { duration: ComponentTheme.durationFast } }
+        Behavior on opacity { NumberAnimation { duration: ComponentTheme.durationFast } }
 
         Text {
             anchors.centerIn: parent
@@ -34,7 +37,7 @@ Item {
         }
     }
 
-    ToolTip.visible: mouseArea.containsMouse && root.tooltip.length > 0
+    ToolTip.visible: mouseArea.containsMouse && root.tooltip.length > 0 && root.enabled
     ToolTip.text:    root.tooltip
     ToolTip.delay:   600
 
@@ -42,7 +45,8 @@ Item {
         id: mouseArea
         anchors.fill: parent
         hoverEnabled: true
-        cursorShape:  Qt.PointingHandCursor
+        enabled:      root.enabled          // enabled=false 时不接收任何鼠标事件
+        cursorShape:  root.enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
         onClicked:    root.clicked()
     }
 }

@@ -13,6 +13,11 @@
  *
  * 支持运行时切换主题（Dark / Light / Custom）：
  *   ComponentTheme.style = ComponentTheme.Light
+ *
+ * @note 线程安全约束：本单例基于函数级静态变量（C++11 保证初始化线程安全），
+ *       但属性读写及信号发射均未加锁，须在同一线程（通常为 GUI 线程）访问。
+ *       多 QQmlEngine 场景（如 Qt for Android 多线程渲染）下共享此单例时，
+ *       调用方有责任确保所有操作在同一线程执行，或在外部加锁。
  */
 class ComponentTheme : public QObject
 {
@@ -70,8 +75,11 @@ public:
     Q_PROPERTY(int handleSize   READ handleSize   NOTIFY styleChanged)
 
     // ── 动画时长 Token ────────────────────────────────────────
-    Q_PROPERTY(int durationFast   READ durationFast   CONSTANT)
-    Q_PROPERTY(int durationNormal READ durationNormal CONSTANT)
+    // 使用 NOTIFY styleChanged 而非 CONSTANT，以便未来支持
+    // 无障碍"低动效"模式：reducedMotion = true 时两值均归零。
+    Q_PROPERTY(int  durationFast    READ durationFast    NOTIFY styleChanged)
+    Q_PROPERTY(int  durationNormal  READ durationNormal  NOTIFY styleChanged)
+    Q_PROPERTY(bool reducedMotion   READ reducedMotion   WRITE setReducedMotion NOTIFY styleChanged)
 
     // ── 颜色访问器 ────────────────────────────────────────────
     QColor accent()          const { return m_accent; }
@@ -94,8 +102,10 @@ public:
     int handleSize()   const { return m_handleSize; }
 
     // ── 动画时长 ──────────────────────────────────────────────
-    int durationFast()   const { return 80; }
-    int durationNormal() const { return 120; }
+    int  durationFast()   const { return m_reducedMotion ? 0 : m_durationFast; }
+    int  durationNormal() const { return m_reducedMotion ? 0 : m_durationNormal; }
+    bool reducedMotion()  const { return m_reducedMotion; }
+    void setReducedMotion(bool reduced);
 
     // ── Custom 风格下允许逐项覆盖 ─────────────────────────────
     Q_INVOKABLE void setAccent(const QColor& c);
@@ -108,6 +118,7 @@ private:
     explicit ComponentTheme(QObject* parent = nullptr);
     void applyDark();
     void applyLight();
+    void applyDefaultSizes();   // Dark/Light 共用尺寸，避免重复
 
     Style  m_style = Dark;
 
@@ -128,4 +139,9 @@ private:
     int m_fontSize     = 16;
     int m_trackHeight  = 4;
     int m_handleSize   = 14;
+
+    // 动画时长基准值（reducedMotion = true 时对外返回 0）
+    int  m_durationFast   = 80;
+    int  m_durationNormal = 120;
+    bool m_reducedMotion  = false;
 };

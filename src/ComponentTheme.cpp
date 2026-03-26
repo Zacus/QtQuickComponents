@@ -39,12 +39,8 @@ void ComponentTheme::applyDark()
     m_trackBuffer = QColor("#ffffff12");
     m_handleBorder = QColor("#ffffff30");
 
-    // ── 尺寸（Dark/Light 共用默认值，Custom 可覆盖）──────────
-    m_buttonSize   = 34;
-    m_buttonRadius = 6;
-    m_fontSize     = 16;
-    m_trackHeight  = 4;
-    m_handleSize   = 14;
+    // ── 尺寸（交由 applyDefaultSizes 统一赋值）───────────────
+    applyDefaultSizes();
 }
 
 void ComponentTheme::applyLight()
@@ -68,12 +64,8 @@ void ComponentTheme::applyLight()
     m_trackBuffer  = QColor("#00000012");
     m_handleBorder = QColor("#00000030");
 
-    // ── 尺寸（与 Dark 相同）──────────────────────────────────
-    m_buttonSize   = 34;
-    m_buttonRadius = 6;
-    m_fontSize     = 16;
-    m_trackHeight  = 4;
-    m_handleSize   = 14;
+    // ── 尺寸（交由 applyDefaultSizes 统一赋值）───────────────
+    applyDefaultSizes();
 }
 
 void ComponentTheme::setAccent(const QColor& c)
@@ -91,5 +83,24 @@ void ComponentTheme::setButtonRadius(int r)
 {
     m_style        = Custom;
     m_buttonRadius = r;
+    emit styleChanged();
+}
+
+void ComponentTheme::applyDefaultSizes()
+{
+    // Dark 和 Light 共用同一套尺寸默认值，在此集中维护。
+    // Custom 模式下可通过 setButtonRadius() 等方法逐项覆盖。
+    m_buttonSize   = 34;
+    m_buttonRadius = 6;
+    m_fontSize     = 16;
+    m_trackHeight  = 4;
+    m_handleSize   = 14;
+}
+
+void ComponentTheme::setReducedMotion(bool reduced)
+{
+    if (m_reducedMotion == reduced) return;
+    m_reducedMotion = reduced;
+    // durationFast / durationNormal 的返回值因此改变，通知 QML 侧重新读取
     emit styleChanged();
 }

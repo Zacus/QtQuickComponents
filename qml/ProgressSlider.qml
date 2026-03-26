@@ -10,6 +10,10 @@ Slider {
     to:      1.0
     value:   0.0
 
+    // 缓冲进度（0.0 ~ 1.0），鼠标悬停时在轨道上显示。
+    // 典型用法：bufferPosition: player.bufferedPosition
+    property real bufferPosition: 0.0
+
     implicitHeight: 20
 
     background: Item {
@@ -30,11 +34,11 @@ Slider {
                 Behavior on width { NumberAnimation { duration: 100 } }
             }
 
-            // 鼠标悬停时显示缓冲区
+            // 缓冲区（悬停时显示，宽度由 bufferPosition 驱动）
             Rectangle {
-                visible: trackMouse.containsMouse
+                visible: trackMouse.containsMouse && root.bufferPosition > 0
                 x:      0
-                width:  0.30 * parent.width
+                width:  root.bufferPosition * parent.width
                 height: parent.height
                 radius: parent.radius
                 color:  ComponentTheme.trackBuffer
