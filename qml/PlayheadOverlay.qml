@@ -146,9 +146,6 @@ Item {
             ctx.fill()
         }
 
-        // 颜色变化时重绘
-        onColorChanged: requestPaint()
-
         // ── 游标头拖拽 ────────────────────────────────────────
         // 命中区域比视觉大，方便触屏操作
         property real _hitExpand: 8

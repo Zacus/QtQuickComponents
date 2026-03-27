@@ -99,7 +99,7 @@ Item {
                 ? Math.pow(root.zoomFactor, delta)      // 向上 → 放大
                 : Math.pow(1.0 / root.zoomFactor, -delta) // 向下 → 缩小
 
-            root.viewport.zoomAt(event.position.x, factor)
+            root.viewport.zoomAt(event.x, factor)
             root.zoomChanged()
             event.accepted = true
         }
@@ -193,10 +193,10 @@ Item {
         acceptedDevices: PointerDevice.TouchScreen
 
         // 记录 pinch 开始时的视口状态
-        property real  _startScale: 1.0
-        property qint64 _startViewStart: 0
-        property qint64 _startViewSpan:  0
-        property real  _startCenterX: 0
+        property real _startScale:     1.0
+        property real _startViewStart: 0
+        property real _startViewSpan:  0
+        property real _startCenterX:   0
 
         onActiveChanged: {
             if (active && root.viewport) {
