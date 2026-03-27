@@ -62,6 +62,7 @@ qt_add_qml_module(QtQuickComponents
         qml/TextField.qml
         qml/TimelineTrack.qml
         qml/TimelineRuler.qml
+        qml/TimelineInputHandler.qml
 )
 
 # 动态构建：qt_add_qml_module 创建的插件目标名为 QtQuickComponentsplugin（Qt 约定）
