@@ -149,7 +149,7 @@ Item {
             var newStart = root._dragStartViewStart - deltaMs
             var span = root.viewport.viewEnd - root.viewport.viewStart
             // 直接写 viewStart 触发 applyView → 边界保护自动生效
-            root.viewport.setViewStart(newStart)
+            root.viewport.viewStart = newStart
         }
 
         cursorShape: Qt.OpenHandCursor
