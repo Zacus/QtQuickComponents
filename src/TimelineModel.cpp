@@ -171,27 +171,18 @@ void TimelineModel::mergeOverlapping(qint64 gapMs)
 
 // ── 查询接口 ──────────────────────────────────────────────────────────
 
-QList<TimelineSegment> TimelineModel::segmentsInRange(qint64 viewStart, qint64 viewEnd) const
+QVariantList TimelineModel::segmentsInRange(qint64 viewStart, qint64 viewEnd) const
 {
-    // 二分找第一个可能与视口有交集的区间：
-    // 交集条件：seg.startMs < viewEnd  &&  seg.endMs > viewStart
-    // 即找第一个 endMs > viewStart 的位置开始扫描。
-    // 因为数据按 startMs 排序，用 startMs 做二分，找到 startMs < viewEnd 的上界。
-
     if (m_segments.isEmpty() || viewStart >= viewEnd) return {};
 
-    QList<TimelineSegment> result;
+    QVariantList result;
 
-    // 找第一个 startMs < viewEnd 的最后一个位置之后的下标
-    // 即：第一个 startMs >= viewEnd 的下标，这之前的所有区间都可能有交集
-    const int endIdx = lowerBound(viewEnd);   // 第一个 startMs >= viewEnd
+    const int endIdx = lowerBound(viewEnd);
 
-    // 从 0 向 endIdx 扫，过滤掉 endMs <= viewStart 的（已结束的区间）
-    // 因为列表有序，一旦 startMs >= viewEnd 就可以停止
     for (int i = 0; i < endIdx; ++i) {
         const TimelineSegment& seg = m_segments.at(i);
-        if (seg.endMs() > viewStart)   // 与视口有交集
-            result.append(seg);
+        if (seg.endMs() > viewStart)
+            result.append(QVariant::fromValue(seg));
     }
 
     return result;

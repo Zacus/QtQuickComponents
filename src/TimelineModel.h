@@ -3,6 +3,7 @@
 #include <QAbstractListModel>
 #include <QQmlEngine>
 #include <QList>
+#include <QVariant>
 
 #include "TimelineSegment.h"
 
@@ -96,8 +97,11 @@ public:
      * 返回与视口 [viewStart, viewEnd] 有交集的区间列表。
      * 使用二分查找，时间复杂度 O(log N + K)，K 为结果数量。
      * 渲染层每帧调用此方法获取需要绘制的区间，不遍历全量数据。
+     *
+     * 返回 QVariantList（每项为 QVariant 包装的 TimelineSegment），
+     * QML 侧可直接当 JS 数组使用：segs[i].startMs / segs[i].endMs / segs[i].type
      */
-    QList<TimelineSegment> segmentsInRange(qint64 viewStart, qint64 viewEnd) const;
+    Q_INVOKABLE QVariantList segmentsInRange(qint64 viewStart, qint64 viewEnd) const;
 
     /**
      * 返回包含时间点 t 的第一个区间的索引，不存在返回 -1。
