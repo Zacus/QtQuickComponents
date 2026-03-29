@@ -202,7 +202,6 @@ Item {
         onTotalRangeChanged: {
             if (totalStart < totalEnd && _viewport._firstLoad) {
                 _viewport._firstLoad = false
-                // callLater 确保 viewWidth 已由布局赋值
                 Qt.callLater(_viewport.fitAll)
             }
         }

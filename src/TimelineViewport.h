@@ -50,8 +50,8 @@ class TimelineViewport : public QObject
 
 public:
     // ── 缩放极限常量（ms）────────────────────────────────────
-    // 最小视口宽度：100ms（再小则刻度密到无法辨认）
-    static constexpr qint64 kMinViewSpan =       100LL;
+    // 最小视口宽度：1000ms = 1秒（再小则刻度密到无法辨认，且锚点缩放数学上不稳定）
+    static constexpr qint64 kMinViewSpan =      1000LL;
     // 最大视口宽度：366 天（比一年稍多，覆盖跨年场景）
     static constexpr qint64 kMaxViewSpan = 366LL * 24 * 3600 * 1000;
 

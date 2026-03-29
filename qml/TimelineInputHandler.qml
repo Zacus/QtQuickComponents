@@ -82,15 +82,19 @@ Item {
 
             if (!root.viewport) { event.accepted = false; return }
 
-            // 区分触控板像素增量和鼠标滚轮格增量
+            // angleDelta 优先（鼠标滚轮和触控板都有 angleDelta）。
+            // macOS 上鼠标滚轮同时产生 angleDelta 和 pixelDelta，
+            // 若优先用 pixelDelta 会得到极小的 delta 值导致 span 迅速压缩到最小值。
+            // pixelDelta 仅在 angleDelta 为零时使用（纯像素滚动设备）。
             var delta
-            if (event.pixelDelta.y !== 0) {
-                // 触控板：pixelDelta 单位是像素，通常 ±3~15
-                // 把每 120px 累计等价为一格鼠标滚轮
-                delta = event.pixelDelta.y / 120.0
-            } else {
-                // 鼠标滚轮：angleDelta 单位是 1/8 度，一格 = 120 (= 15°)
+            if (event.angleDelta.y !== 0) {
+                // 鼠标滚轮 / 触控板：angleDelta 单位是 1/8 度，一格 = 120
                 delta = event.angleDelta.y / 120.0
+            } else if (event.pixelDelta.y !== 0) {
+                // 纯像素滚动设备（部分触控板）：pixelDelta，以 60px 为一格
+                delta = event.pixelDelta.y / 60.0
+            } else {
+                return
             }
 
             if (Math.abs(delta) < 0.01) return

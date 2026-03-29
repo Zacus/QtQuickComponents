@@ -8,12 +8,8 @@
 TimelineViewport::TimelineViewport(QObject* parent)
     : QObject(parent)
 {
-    // 初始视口：0 ~ 24h，等宽度加载后 fitAll() 会覆盖
-    const qint64 oneDayMs = 24LL * 3600 * 1000;
-    m_viewStart   = 0;
-    m_viewEnd     = oneDayMs;
-    m_totalStart  = 0;
-    m_totalEnd    = oneDayMs;
+    // 构造时不预设视口，等待 totalStart/totalEnd 设置后由 fitAll() 决定初始视图。
+    // m_viewStart = m_viewEnd = 0 表示"未初始化"，recalcPixelsPerMs 会返回 0。
     recalcPixelsPerMs();
 }
 
@@ -49,10 +45,6 @@ void TimelineViewport::setTotalStart(qint64 v)
     if (m_totalStart == v) return;
     m_totalStart = v;
     emit totalRangeChanged();
-    // 如果当前视口超出新范围，夹一次
-    qint64 s = m_viewStart, e = m_viewEnd;
-    clampToBounds(s, e);
-    if (applyView(s, e)) emit viewChanged();
 }
 
 void TimelineViewport::setTotalEnd(qint64 v)
@@ -60,9 +52,6 @@ void TimelineViewport::setTotalEnd(qint64 v)
     if (m_totalEnd == v) return;
     m_totalEnd = v;
     emit totalRangeChanged();
-    qint64 s = m_viewStart, e = m_viewEnd;
-    clampToBounds(s, e);
-    if (applyView(s, e)) emit viewChanged();
 }
 
 void TimelineViewport::setMinZoomFactor(qreal v)
@@ -85,21 +74,14 @@ void TimelineViewport::zoomAt(qreal anchorPx, qreal factor)
 {
     if (factor <= 0.0 || m_pixelsPerMs <= 0.0) return;
 
-    // 锚点时间（缩放后此时刻在屏幕上的位置不变）
     const qreal anchorTime = static_cast<qreal>(m_viewStart)
                              + anchorPx / m_pixelsPerMs;
-
-    // 新的每毫秒像素数
-    const qreal newPpm = m_pixelsPerMs * factor;
-
-    // 由新 ppm 反推新的 viewStart/viewEnd
-    // anchorPx = (anchorTime - newViewStart) * newPpm
-    // => newViewStart = anchorTime - anchorPx / newPpm
+    const qreal newPpm    = m_pixelsPerMs * factor;
     const qreal newStartF = anchorTime - anchorPx / newPpm;
     const qreal newSpanF  = static_cast<qreal>(m_viewWidth) / newPpm;
 
-    const qint64 newStart = static_cast<qint64>(qRound(newStartF));
-    const qint64 newEnd   = static_cast<qint64>(qRound(newStartF + newSpanF));
+    const qint64 newStart = qRound64(newStartF);
+    const qint64 newEnd   = qRound64(newStartF + newSpanF);
 
     if (applyView(newStart, newEnd))
         emit viewChanged();
@@ -161,10 +143,9 @@ void TimelineViewport::recalcPixelsPerMs()
 
 bool TimelineViewport::applyView(qint64 start, qint64 end)
 {
-    // 1. span 限幅
     qint64 span = end - start;
+
     if (span < kMinViewSpan) {
-        // 保持中心，扩展到最小 span
         const qint64 center = start + span / 2;
         start = center - kMinViewSpan / 2;
         end   = start + kMinViewSpan;
@@ -174,11 +155,11 @@ bool TimelineViewport::applyView(qint64 start, qint64 end)
         end   = start + kMaxViewSpan;
     }
 
-    // 2. 边界夹（仅当 totalStart < totalEnd 时才约束）
     clampToBounds(start, end);
 
-    // 3. 检查是否真的变化了
-    if (start == m_viewStart && end == m_viewEnd) return false;
+    if (start == m_viewStart && end == m_viewEnd) {
+        return false;
+    }
 
     m_viewStart = start;
     m_viewEnd   = end;
@@ -193,15 +174,19 @@ void TimelineViewport::clampToBounds(qint64& start, qint64& end) const
 
     const qint64 span = end - start;
 
-    // 不允许视口完全超出数据范围之外（保留至少 1 像素的可见数据）
-    // 左边界：viewEnd > totalStart
+    // 只阻止视口与数据范围完全分离（即两者必须有交集）。
+    // 不强制把视口锁在 [totalStart, totalEnd] 内——缩放/平移时视口两端
+    // 超出数据范围是正常的（边缘留白），强制夹紧会破坏锚点缩放的数学关系。
+
+    // 视口完全跑到数据左侧：viewEnd <= totalStart → 把 viewEnd 拉回到 totalStart
     if (end <= m_totalStart) {
-        end   = m_totalStart + 1;
+        end   = m_totalStart;
         start = end - span;
     }
-    // 右边界：viewStart < totalEnd
-    if (start >= m_totalEnd) {
-        start = m_totalEnd - 1;
+    // 视口完全跑到数据右侧：viewStart >= totalEnd → 把 viewStart 拉回到 totalEnd
+    else if (start >= m_totalEnd) {
+        start = m_totalEnd;
         end   = start + span;
     }
+    // 其余情况（有交集）：不做任何修改，允许视口两端超出数据范围
 }
