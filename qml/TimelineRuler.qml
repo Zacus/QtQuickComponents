@@ -141,22 +141,29 @@ Item {
 
             // 标签单独绘制（fillText 无法批量进 path）
             ctx.fillStyle = root.labelColor
+            var lastLabelRight = -999  // 上一个标签的右边界，防重叠
+
             for (var k = 0; k < count; k++) {
                 var ltick = ruler.tickAt(k)
                 if (!ltick.isMajor || ltick.label === "") continue
 
                 var lx = vp.timeToPixel(ltick.timeMs)
+                if (lx < -100 || lx > w + 100) continue
 
-                // 标签宽度约估（避免首尾标签截断）
                 var labelW = ctx.measureText(ltick.label).width
                 var halfW  = labelW / 2
 
-                // 标签超出左边界：右移使其起点在 x=2
+                // 边界夹紧
                 var drawX = lx
-                if (lx - halfW < 2)      drawX = halfW + 2
-                if (lx + halfW > w - 2)  drawX = w - halfW - 2
+                if (lx - halfW < 2)     drawX = halfW + 2
+                if (lx + halfW > w - 2) drawX = w - halfW - 2
+
+                // 与上一个标签重叠则跳过（留 4px 间隙）
+                var thisLeft = drawX - halfW
+                if (thisLeft < lastLabelRight + 4) continue
 
                 ctx.fillText(ltick.label, drawX, labelY)
+                lastLabelRight = drawX + halfW
             }
 
             // ── 底部分隔线 ────────────────────────────────────

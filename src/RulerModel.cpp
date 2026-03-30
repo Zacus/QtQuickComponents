@@ -122,8 +122,9 @@ void RulerModel::rebuild()
 
     if (viewSpan <= 0) return;
 
-    // 1. 选择刻度级别
-    const Level& lv = selectLevel(viewSpan);
+    // 1. 选择刻度级别（同时考虑时间跨度和像素密度）
+    const qreal viewWidth = m_viewport->viewWidth();
+    const Level& lv = selectLevel(viewSpan, viewWidth);
 
     // 2. 更新派生属性（不需要发信号，ticksChanged 会整体通知）
     m_majorInterval = lv.majorMs;
@@ -173,15 +174,33 @@ void RulerModel::rebuild()
 
 // ── 私有工具 ──────────────────────────────────────────────────────────
 
-const RulerModel::Level& RulerModel::selectLevel(qint64 viewSpan) const
+const RulerModel::Level& RulerModel::selectLevel(qint64 viewSpan, qreal viewWidth,
+                                                   qreal minPixelsPerMajor) const
 {
-    // s_levels 按 spanThreshold 降序排列，找第一个 viewSpan > threshold
+    // 选择策略：从最粗粒度（天）向最细粒度（50ms）扫描，
+    // 记录最后一个"主刻度像素间距 >= minPixelsPerMajor"的级别。
+    //
+    // 主刻度像素间距 = viewWidth * majorMs / viewSpan
+    //
+    // 从粗到细扫，取最后一个满足阈值的级别：
+    //   → 视口很宽（缩小）时：只有粗级别满足，取粗级别
+    //   → 视口适中时：粗、中级别都满足，取最细的那个满足的
+    //   → 视口很窄（放大）时：细级别间距大，取细级别
+    // 这样在任何缩放下都选"最细但不重叠"的级别。
+
+    if (viewWidth <= 0.0 || viewSpan <= 0) return s_levels.last();
+
+    const Level* best = &s_levels.first();  // 兜底：最粗级别
     for (const Level& lv : s_levels) {
-        if (viewSpan > lv.spanThreshold)
-            return lv;
+        const qreal pixelsPerMajor =
+            static_cast<qreal>(lv.majorMs) * viewWidth / static_cast<qreal>(viewSpan);
+        if (pixelsPerMajor >= minPixelsPerMajor)
+            best = &lv;   // 满足就记录，继续往细走
+        else
+            break;        // 一旦不满足，后面更细的也不会满足，提前退出
     }
-    // 理论上 spanThreshold=0 的兜底条目一定能匹配，这里只防御性返回最后一个
-    return s_levels.last();
+
+    return *best;
 }
 
 qint64 RulerModel::alignDown(qint64 timeMs, qint64 intervalMs)

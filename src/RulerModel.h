@@ -127,8 +127,10 @@ private:
         qint64  spanThreshold; // 当 viewSpan > threshold 时使用此级别
     };
 
-    // 返回当前视口跨度对应的刻度级别
-    const Level& selectLevel(qint64 viewSpan) const;
+    // minPixelsPerMajor: 主刻度最小像素间距，默认 100px
+    // 100px 足够放下最长标签"MM-dd HH:mm"（约 80px at 11px font）加左右各 10px 边距
+    const Level& selectLevel(qint64 viewSpan, qreal viewWidth,
+                             qreal minPixelsPerMajor = 100.0) const;
 
     // 将时间 t 向下对齐到 interval 的整数倍（以 UTC epoch 为基准）
     static qint64 alignDown(qint64 timeMs, qint64 intervalMs);
