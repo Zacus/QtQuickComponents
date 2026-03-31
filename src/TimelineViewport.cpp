@@ -117,10 +117,27 @@ void TimelineViewport::centerOnTime(qint64 timeMs)
 void TimelineViewport::fitRange(qint64 startMs, qint64 endMs)
 {
     if (startMs >= endMs) return;
-    // 加 5% 边距，让两侧区间不紧贴屏幕边缘
+
+    // 加 5% 边距
     const qint64 margin = (endMs - startMs) / 20;
-    if (applyView(startMs - margin, endMs + margin))
-        emit viewChanged();
+    qint64 start = startMs - margin;
+    qint64 end   = endMs   + margin;
+
+    // fitRange 是用户/初始化主动操作，不受 kMaxViewSpan 限制，
+    // 但 span 需要至少 kMinViewSpan
+    if (end - start < kMinViewSpan) {
+        const qint64 center = start + (end - start) / 2;
+        start = center - kMinViewSpan / 2;
+        end   = start + kMinViewSpan;
+    }
+
+    clampToBounds(start, end);
+
+    if (start == m_viewStart && end == m_viewEnd) return;
+    m_viewStart = start;
+    m_viewEnd   = end;
+    recalcPixelsPerMs();
+    emit viewChanged();
 }
 
 void TimelineViewport::fitAll()
@@ -145,21 +162,15 @@ bool TimelineViewport::applyView(qint64 start, qint64 end)
 {
     qint64 span = end - start;
 
-    if (span < kMinViewSpan) {
-        const qint64 center = start + span / 2;
-        start = center - kMinViewSpan / 2;
-        end   = start + kMinViewSpan;
-    } else if (span > kMaxViewSpan) {
-        const qint64 center = start + span / 2;
-        start = center - kMaxViewSpan / 2;
-        end   = start + kMaxViewSpan;
-    }
+    // span 超出极限时直接拒绝，不修改视口也不平移
+    // （而不是"保持中心展开/收缩"——那会导致极限处的漂移）
+    if (span < kMinViewSpan || span > kMaxViewSpan)
+        return false;
 
     clampToBounds(start, end);
 
-    if (start == m_viewStart && end == m_viewEnd) {
+    if (start == m_viewStart && end == m_viewEnd)
         return false;
-    }
 
     m_viewStart = start;
     m_viewEnd   = end;
