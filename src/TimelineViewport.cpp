@@ -74,12 +74,32 @@ void TimelineViewport::zoomAt(qreal anchorPx, qreal factor)
 {
     if (factor <= 0.0 || m_pixelsPerMs <= 0.0) return;
 
+    // 锚点对应的时间（缩放后此时刻在屏幕上的位置不变）
     const qreal anchorTime = static_cast<qreal>(m_viewStart)
                              + anchorPx / m_pixelsPerMs;
-    const qreal newPpm    = m_pixelsPerMs * factor;
-    const qreal newStartF = anchorTime - anchorPx / newPpm;
-    const qreal newSpanF  = static_cast<qreal>(m_viewWidth) / newPpm;
 
+    // 目标 span
+    qreal newSpanF = static_cast<qreal>(m_viewEnd - m_viewStart) / factor;
+
+    // span 下限：kMinViewSpan（放大极限）
+    const qreal minSpan = static_cast<qreal>(kMinViewSpan);
+
+    // span 上限：数据总范围（缩小不超过数据跨度，保证数据始终铺满屏幕）。
+    // 若数据范围超过 kMaxViewSpan（如超5年），则以 kMaxViewSpan 为上限，
+    // 此时用 fitAll() 查看全貌。
+    const qreal dataRange = static_cast<qreal>(m_totalEnd - m_totalStart);
+    const qreal maxSpan   = (dataRange > 0.0)
+                            ? qMin(static_cast<qreal>(kMaxViewSpan), dataRange)
+                            : static_cast<qreal>(kMaxViewSpan);
+
+    if (newSpanF < minSpan) newSpanF = minSpan;
+    if (newSpanF > maxSpan) newSpanF = maxSpan;
+
+    // 以锚点时间为中心重新推算 viewStart：
+    // anchorPx = (anchorTime - newStart) * viewWidth / newSpan
+    // => newStart = anchorTime - anchorPx * newSpan / viewWidth
+    const qreal newStartF = anchorTime
+                            - anchorPx * newSpanF / static_cast<qreal>(m_viewWidth);
     const qint64 newStart = qRound64(newStartF);
     const qint64 newEnd   = qRound64(newStartF + newSpanF);
 
@@ -160,11 +180,11 @@ void TimelineViewport::recalcPixelsPerMs()
 
 bool TimelineViewport::applyView(qint64 start, qint64 end)
 {
-    qint64 span = end - start;
+    const qint64 span = end - start;
 
-    // span 超出极限时直接拒绝，不修改视口也不平移
-    // （而不是"保持中心展开/收缩"——那会导致极限处的漂移）
-    if (span < kMinViewSpan || span > kMaxViewSpan)
+    // 拒绝无效 span（负数或零）
+    // span 的合理上下限由各调用方（zoomAt/fitRange/panBy）在传入前保证
+    if (span <= 0)
         return false;
 
     clampToBounds(start, end);
@@ -180,24 +200,32 @@ bool TimelineViewport::applyView(qint64 start, qint64 end)
 
 void TimelineViewport::clampToBounds(qint64& start, qint64& end) const
 {
-    // 只有在数据范围有效时才约束
     if (m_totalStart >= m_totalEnd) return;
 
-    const qint64 span = end - start;
+    const qint64 span      = end - start;
+    const qint64 dataRange = m_totalEnd - m_totalStart;
 
-    // 只阻止视口与数据范围完全分离（即两者必须有交集）。
-    // 不强制把视口锁在 [totalStart, totalEnd] 内——缩放/平移时视口两端
-    // 超出数据范围是正常的（边缘留白），强制夹紧会破坏锚点缩放的数学关系。
+    // margin 随 span 接近 dataRange 而收缩，但保留最小值 minMargin。
+    // minMargin 保证即使缩到极限，用户仍可左右拖拽/键盘平移看到边缘区域。
+    // 设为 dataRange 的 5%，不会让数据挤出太多，但足够平移响应。
+    const qint64 minMargin = dataRange / 20;
 
-    // 视口完全跑到数据左侧：viewEnd <= totalStart → 把 viewEnd 拉回到 totalStart
-    if (end <= m_totalStart) {
-        end   = m_totalStart;
-        start = end - span;
-    }
-    // 视口完全跑到数据右侧：viewStart >= totalEnd → 把 viewStart 拉回到 totalEnd
-    else if (start >= m_totalEnd) {
-        start = m_totalEnd;
+    const qreal ratio  = (dataRange > 0)
+                         ? qBound(0.0, 1.0 - static_cast<qreal>(span)
+                                            / static_cast<qreal>(dataRange), 1.0)
+                         : 0.0;
+    const qint64 margin = qMax(minMargin,
+                               static_cast<qint64>(ratio * static_cast<qreal>(span) * 0.5));
+
+    const qint64 minStart = m_totalStart - margin;
+    const qint64 maxEnd   = m_totalEnd   + margin;
+
+    if (start < minStart) {
+        start = minStart;
         end   = start + span;
     }
-    // 其余情况（有交集）：不做任何修改，允许视口两端超出数据范围
+    if (end > maxEnd) {
+        end   = maxEnd;
+        start = end - span;
+    }
 }
