@@ -135,8 +135,12 @@ private:
     // 将时间 t 向下对齐到 interval 的整数倍（以 UTC epoch 为基准）
     static qint64 alignDown(qint64 timeMs, qint64 intervalMs);
 
-    // 根据级别和视口范围重建 m_ticks
+    // 根据级别和视口范围完整重建 m_ticks（级别切换或缩放时使用）
     void rebuild();
+
+    // 增量更新：纯平移时只追加/删除首尾刻度（不发 beginResetModel）
+    // 返回 true 表示增量成功，false 表示需要 rebuild()
+    bool updateIncremental(qint64 viewStart, qint64 viewEnd, const Level& lv);
 
     // 格式化主刻度标签
     QString formatLabel(qint64 timeMs, const QString& fmt) const;
@@ -146,6 +150,11 @@ private:
     QString             m_majorFormat;
     qint64              m_majorInterval = 0;
     qint64              m_minorInterval = 0;
+
+    // 增量更新缓存：上一次 rebuild/update 时的状态
+    qint64  m_lastMinorMs   = 0;   // 上次的 minorMs，变化说明级别切换
+    qint64  m_lastViewSpan  = 0;   // 上次的 viewSpan，变化说明缩放
+    qint64  m_lastMajorMs   = 0;   // 上次的 majorMs
 
     // 刻度级别表（按 spanThreshold 降序排列，selectLevel 从头扫描）
     static const QList<Level> s_levels;

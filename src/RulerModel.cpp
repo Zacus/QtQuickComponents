@@ -108,6 +108,29 @@ RulerTick RulerModel::tickAt(int index) const
 
 void RulerModel::onViewChanged()
 {
+    if (!m_viewport) return;
+
+    const qint64 viewStart = m_viewport->viewStart();
+    const qint64 viewEnd   = m_viewport->viewEnd();
+    const qint64 viewSpan  = viewEnd - viewStart;
+    if (viewSpan <= 0) return;
+
+    const qreal viewWidth = m_viewport->viewWidth();
+    const Level& lv = selectLevel(viewSpan, viewWidth);
+
+    // 判断能否增量更新：
+    //   1. 级别（minorMs）没有变化
+    //   2. span 没有变化（纯平移，刻度间距不变）
+    const bool canIncremental = (lv.minorMs  == m_lastMinorMs)
+                             && (viewSpan    == m_lastViewSpan)
+                             && (!m_ticks.isEmpty());
+
+    if (canIncremental) {
+        if (updateIncremental(viewStart, viewEnd, lv))
+            return;
+        // 增量失败（极端情况）→ 降级为 rebuild
+    }
+
     rebuild();
 }
 
@@ -122,63 +145,116 @@ void RulerModel::rebuild()
             endResetModel();
             emit ticksChanged();
         }
+        m_lastMinorMs = m_lastViewSpan = m_lastMajorMs = 0;
         return;
     }
 
     const qint64 viewStart = m_viewport->viewStart();
     const qint64 viewEnd   = m_viewport->viewEnd();
     const qint64 viewSpan  = viewEnd - viewStart;
-
     if (viewSpan <= 0) return;
 
-    // 1. 选择刻度级别（同时考虑时间跨度和像素密度）
     const qreal viewWidth = m_viewport->viewWidth();
     const Level& lv = selectLevel(viewSpan, viewWidth);
 
-    // 2. 更新派生属性（不需要发信号，ticksChanged 会整体通知）
     m_majorInterval = lv.majorMs;
     m_minorInterval = lv.minorMs;
     m_majorFormat   = lv.format;
+    m_lastMinorMs   = lv.minorMs;
+    m_lastViewSpan  = viewSpan;
+    m_lastMajorMs   = lv.majorMs;
 
-    // 3. 生成副刻度列表
-    //    从 alignDown(viewStart, minorMs) 开始，步进 minorMs，到 viewEnd 结束
     QList<RulerTick> newTicks;
     newTicks.reserve(qMin(
-        static_cast<int>((viewSpan / lv.minorMs) + 2),
+        static_cast<int>(viewSpan / lv.minorMs) + 2,
         kMaxTicks
     ));
 
     const qint64 firstMinor = alignDown(viewStart, lv.minorMs);
-
     for (qint64 t = firstMinor; t <= viewEnd; t += lv.minorMs) {
-        if (newTicks.size() >= kMaxTicks) {
-            qWarning() << "RulerModel: tick count exceeded kMaxTicks ("
-                       << kMaxTicks << "), truncating. viewSpan=" << viewSpan
-                       << "minorMs=" << lv.minorMs;
-            break;
-        }
-
-        // 判断是否是主刻度（时间点是主刻度间隔的整数倍）
+        if (newTicks.size() >= kMaxTicks) break;
         const bool major = (t % lv.majorMs == 0);
-        const QString label = major ? formatLabel(t, lv.format) : QString{};
-
-        newTicks.append(RulerTick(t, major, label));
+        newTicks.append(RulerTick(t, major,
+                                  major ? formatLabel(t, lv.format) : QString{}));
     }
-
-    // 4. 只在实际变化时发 reset（避免视口平移但级别不变时无谓重绘）
-    //    轻量比较：数量或首尾时间有变化就认为变化了
-    const bool changed = (newTicks.size() != m_ticks.size())
-        || (!newTicks.isEmpty() && !m_ticks.isEmpty()
-            && (newTicks.first().timeMs() != m_ticks.first().timeMs()
-                || newTicks.last().timeMs()  != m_ticks.last().timeMs()));
-
-    if (!changed) return;
 
     beginResetModel();
     m_ticks = std::move(newTicks);
     endResetModel();
+    emit ticksChanged();
+}
+
+bool RulerModel::updateIncremental(qint64 viewStart, qint64 viewEnd, const Level& lv)
+{
+    // 当前刻度列表的首尾时间
+    const qint64 curFirst = m_ticks.first().timeMs();
+    const qint64 curLast  = m_ticks.last().timeMs();
+
+    // 新视口需要的首尾刻度（对齐到 minorMs 边界）
+    const qint64 newFirst = alignDown(viewStart, lv.minorMs);
+    const qint64 newLast  = alignDown(viewEnd,   lv.minorMs);
+
+    // 安全性检查：偏移量必须是 minorMs 的整数倍
+    if ((newFirst - curFirst) % lv.minorMs != 0) return false;
+    if ((newLast  - curLast ) % lv.minorMs != 0) return false;
+
+    // ── Step 1：处理尾部 ─────────────────────────────────────
+    if (newLast > curLast) {
+        // 尾部有新刻度进入：从 curLast + minorMs 追加到 newLast
+        QList<RulerTick> toAppend;
+        for (qint64 t = curLast + lv.minorMs; t <= newLast; t += lv.minorMs) {
+            if (m_ticks.size() + toAppend.size() >= kMaxTicks) break;
+            const bool major = (t % lv.majorMs == 0);
+            toAppend.append(RulerTick(t, major,
+                                      major ? formatLabel(t, lv.format) : QString{}));
+        }
+        if (!toAppend.isEmpty()) {
+            const int first = m_ticks.size();
+            const int last  = first + toAppend.size() - 1;
+            beginInsertRows({}, first, last);
+            for (const RulerTick& tk : toAppend)
+                m_ticks.append(tk);
+            endInsertRows();
+        }
+    } else if (newLast < curLast) {
+        // 尾部有旧刻度离开：移除 newLast+minorMs ~ curLast
+        const int removeFrom = m_ticks.size()
+            - static_cast<int>((curLast - newLast) / lv.minorMs);
+        if (removeFrom >= 0 && removeFrom < m_ticks.size()) {
+            beginRemoveRows({}, removeFrom, m_ticks.size() - 1);
+            m_ticks.erase(m_ticks.begin() + removeFrom, m_ticks.end());
+            endRemoveRows();
+        }
+    }
+
+    // ── Step 2：处理头部 ─────────────────────────────────────
+    if (newFirst < curFirst) {
+        // 头部有新刻度进入：从 newFirst 到 curFirst - minorMs 前插
+        QList<RulerTick> toPrepend;
+        for (qint64 t = newFirst; t < curFirst; t += lv.minorMs) {
+            const bool major = (t % lv.majorMs == 0);
+            toPrepend.append(RulerTick(t, major,
+                                       major ? formatLabel(t, lv.format) : QString{}));
+        }
+        if (!toPrepend.isEmpty()) {
+            beginInsertRows({}, 0, toPrepend.size() - 1);
+            // 前插：把 toPrepend 插到头部
+            for (int i = toPrepend.size() - 1; i >= 0; --i)
+                m_ticks.prepend(toPrepend.at(i));
+            endInsertRows();
+        }
+    } else if (newFirst > curFirst) {
+        // 头部有旧刻度离开：移除 curFirst ~ newFirst - minorMs
+        const int removeCount = static_cast<int>((newFirst - curFirst) / lv.minorMs);
+        if (removeCount > 0 && removeCount <= m_ticks.size()) {
+            beginRemoveRows({}, 0, removeCount - 1);
+            m_ticks.erase(m_ticks.begin(), m_ticks.begin() + removeCount);
+            endRemoveRows();
+        }
+    }
 
     emit ticksChanged();
+    return true;
 }
 
 // ── 私有工具 ──────────────────────────────────────────────────────────
