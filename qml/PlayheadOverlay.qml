@@ -42,7 +42,7 @@ Item {
         ? (_x >= 0 && _x <= width)
         : false
 
-    readonly property bool _headAtTop: headPosition === "top"
+    readonly property bool _headAtTop: headPosition === TimelineEnums.HeadTop
 
     // ── 竖线 ─────────────────────────────────────────────────
     Rectangle {

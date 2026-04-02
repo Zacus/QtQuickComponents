@@ -82,11 +82,11 @@ Item {
 
     /**
      * 游标跟随模式：
-     *   "none"   — 不自动滚动
-     *   "edge"   — 游标到达视口边缘时平移（推荐默认）
-     *   "center" — 视口始终居中于游标
+     *   TimelineEnums.FollowNone   — 不自动滚动
+     *   TimelineEnums.FollowEdge   — 游标到达视口边缘时平移（推荐默认）
+     *   TimelineEnums.FollowCenter — 视口始终居中于游标
      */
-    property string followMode:   "edge"
+    property int followMode: TimelineEnums.FollowEdge
 
     /**
      * edge 模式下，触发平移的边缘宽度（px）。
@@ -160,18 +160,18 @@ Item {
 
     // currentTime 变化时执行跟随
     onCurrentTimeChanged: {
-        if (root.followMode === "none") return
+        if (root.followMode === TimelineEnums.FollowNone) return
         if (root._userPanning) return
         if (!_viewport || _viewport.viewWidth <= 0) return
 
         var px = _viewport.timeToPixel(root.currentTime)
         var vw = _viewport.viewWidth
 
-        if (root.followMode === "center") {
+        if (root.followMode === TimelineEnums.FollowCenter) {
             // 居中模式：视口始终以游标为中心
             _viewport.centerOnTime(root.currentTime)
 
-        } else if (root.followMode === "edge") {
+        } else if (root.followMode === TimelineEnums.FollowEdge) {
             // 边缘模式：游标超出右边缘触发推进，超出左边缘触发回退
             // 右边缘：游标 > vw - followMargin → 把游标推到 followMargin 处
             if (px > vw - root.followMargin) {

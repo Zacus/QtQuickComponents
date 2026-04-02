@@ -104,6 +104,12 @@ public:
     Q_INVOKABLE QVariantList segmentsInRange(qint64 viewStart, qint64 viewEnd) const;
 
     /**
+     * C++ 专用版本，返回原始 QList<TimelineSegment>，避免 QVariant 装箱开销。
+     * 供 TimelineTrackModel 等 C++ 渲染优化层调用。
+     */
+    QList<TimelineSegment> segmentsInRawRange(qint64 viewStart, qint64 viewEnd) const;
+
+    /**
      * 返回包含时间点 t 的第一个区间的索引，不存在返回 -1。
      * 用于点击命中检测。
      */

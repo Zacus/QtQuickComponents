@@ -176,15 +176,26 @@ QVariantList TimelineModel::segmentsInRange(qint64 viewStart, qint64 viewEnd) co
     if (m_segments.isEmpty() || viewStart >= viewEnd) return {};
 
     QVariantList result;
-
     const int endIdx = lowerBound(viewEnd);
-
     for (int i = 0; i < endIdx; ++i) {
         const TimelineSegment& seg = m_segments.at(i);
         if (seg.endMs() > viewStart)
             result.append(QVariant::fromValue(seg));
     }
+    return result;
+}
 
+QList<TimelineSegment> TimelineModel::segmentsInRawRange(qint64 viewStart, qint64 viewEnd) const
+{
+    if (m_segments.isEmpty() || viewStart >= viewEnd) return {};
+
+    QList<TimelineSegment> result;
+    const int endIdx = lowerBound(viewEnd);
+    for (int i = 0; i < endIdx; ++i) {
+        const TimelineSegment& seg = m_segments.at(i);
+        if (seg.endMs() > viewStart)
+            result.append(seg);
+    }
     return result;
 }
 
