@@ -52,6 +52,7 @@ Item {
     // ── 信号 ─────────────────────────────────────────────────
     signal seeked(real timeMs)
     signal zoomChanged()
+    signal playRequested(real timeMs)   // 双击：请求从指定时间开始播放
 
     // ── 只读状态（供父组件显示状态指示器）──────────────────
     readonly property bool isDragging: _drag.active
@@ -160,20 +161,14 @@ Item {
     }
 
     // ══════════════════════════════════════════════════════════
-    // 单击设置游标 / 双击 fitAll
+    // 单击设置游标 / 双击在该位置播放
     // ══════════════════════════════════════════════════════════
     TapHandler {
         id: _tap
         acceptedButtons: Qt.LeftButton
-        // 与 DragHandler 共存：DragHandler 负责超阈值后的平移，
-        // TapHandler 只在没有发生拖拽时才应该触发。
-        // Qt 6 的 gesturePolicy: TapHandler.WithinBounds 可以做到：
-        // 如果手指/鼠标移出了组件边界，tap 被取消。
         gesturePolicy: TapHandler.WithinBounds
 
         onSingleTapped: function(eventPoint, button) {
-            // DragHandler 已经在 onActiveChanged(false) 里处理了无拖拽的点击，
-            // 这里只处理 DragHandler 没有激活的情况（极短点击）
             if (root._didDrag) return
             if (!root.viewport) return
             var t = root.viewport.pixelToTime(eventPoint.position.x)
@@ -183,8 +178,11 @@ Item {
 
         onDoubleTapped: function(eventPoint, button) {
             if (!root.viewport) return
-            root.viewport.fitAll()
-            root.zoomChanged()
+            // 双击：跳转到双击位置并开始播放（发 seeked 信号，由外部启动播放）
+            var t = root.viewport.pixelToTime(eventPoint.position.x)
+            root.currentTime = t
+            root.seeked(t)
+            root.playRequested(t)
         }
     }
 

@@ -116,6 +116,12 @@ Item {
 
     signal seeked(real timeMs)
     signal zoomChanged()
+    /**
+     * 用户双击时间轴发出，携带双击位置对应的时间（ms）。
+     * 外部在此处理器中启动播放：
+     *   onPlayRequested: function(t) { player.seek(t); player.play() }
+     */
+    signal playRequested(real timeMs)
 
     // ══════════════════════════════════════════════════════
     // 对外接口 — 方法
@@ -262,8 +268,9 @@ Item {
             currentTime: root.currentTime
             zoomFactor:  root.zoomFactor
             requireCtrl: root.requireCtrl
-            onSeeked:      function(t) { root.seeked(t) }
-            onZoomChanged: root.zoomChanged()
+            onSeeked:         function(t) { root.seeked(t) }
+            onZoomChanged:    root.zoomChanged()
+            onPlayRequested:  function(t) { root.playRequested(t) }
         }
     }
 }
