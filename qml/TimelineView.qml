@@ -98,9 +98,14 @@ Item {
     // 对外接口 — 交互行为
     // ══════════════════════════════════════════════════════
 
-    property real zoomFactor:      1.12
-    property bool requireCtrl:     false
+    property real zoomFactor:       1.12
+    property bool requireCtrl:      false
     property real autoScrollMargin: 40
+    /**
+     * 拖拽灵敏度（0.1 ~ 1.0）。
+     * 磁带模型（FollowCenter）推荐 0.3，视频编辑模型推荐 1.0。
+     */
+    property real dragSensitivity:  0.3
 
     // ══════════════════════════════════════════════════════
     // 对外接口 — 只读状态
@@ -266,11 +271,12 @@ Item {
             id: _input
             anchors.fill: parent
             z: 2
-            viewport:    _viewport
-            currentTime: root.currentTime
-            followMode:  root.followMode
-            zoomFactor:  root.zoomFactor
-            requireCtrl: root.requireCtrl
+            viewport:         _viewport
+            currentTime:      root.currentTime
+            followMode:       root.followMode
+            zoomFactor:       root.zoomFactor
+            requireCtrl:      root.requireCtrl
+            dragSensitivity:  root.dragSensitivity
             onSeeked:         function(t) { root.seeked(t) }
             onZoomChanged:    root.zoomChanged()
             onPlayRequested:  function(t) { root.playRequested(t) }

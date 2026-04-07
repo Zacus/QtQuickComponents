@@ -45,9 +45,17 @@ Item {
     property real currentTime: 0      // ms，用 real 而不是 int 保留亚毫秒精度
 
     // ── 行为调节 ─────────────────────────────────────────────
-    property real zoomFactor:   1.12   // 每格滚轮放大倍率
-    property bool requireCtrl:  false  // 是否要求按 Ctrl 才触发滚轮缩放
-    property real dragThreshold: 4     // 像素：超过此距离才算拖拽（不触发点击）
+    property real zoomFactor:     1.12  // 每格滚轮放大倍率
+    property bool requireCtrl:    false // 是否要求按 Ctrl 才触发滚轮缩放
+    property real dragThreshold:  4     // 像素：超过此距离才算拖拽（不触发点击）
+
+    /**
+     * 拖拽灵敏度（0.1 ~ 1.0）。
+     * 1.0 = 1px 对应当前视口密度下的完整时间偏移（原始速度，视口越宽越快）
+     * 0.3 = 拖拽速度降低到原始的 30%，精细操控更容易
+     * 推荐：磁带模型下设 0.3，视频编辑模型下设 1.0
+     */
+    property real dragSensitivity: 0.3
 
     /**
      * 跟随模式（与 TimelineView.followMode 保持同步）：
@@ -64,15 +72,11 @@ Item {
     // ── 只读状态（供父组件显示状态指示器）──────────────────
     readonly property bool isDragging: _drag.active
 
-    // ══════════════════════════════════════════════════════════
-    // 内部状态
-    // ══════════════════════════════════════════════════════════
-    // 拖拽开始时记录的视口起点，用于计算平移增量
-    property real _dragStartViewStart: 0
-    // 拖拽起始像素位置
-    property real _dragStartX: 0
-    // 是否已经超过拖拽阈值（区分点击和拖拽）
-    property bool _didDrag: false
+    // ── 内部状态 ──────────────────────────────────────────────
+    property real _dragStartViewStart: 0   // 视口编辑模型：拖拽起点的 viewStart
+    property real _dragStartX:         0   // 拖拽起点像素（用于阈值判断和点击检测）
+    property real _lastDragX:          0   // 磁带模型：上一帧的像素位置（逐帧增量用）
+    property bool _didDrag:            false
 
     // ══════════════════════════════════════════════════════════
     // 滚轮缩放
@@ -128,7 +132,8 @@ Item {
 
         onActiveChanged: {
             if (active) {
-                root._dragStartX = centroid.position.x
+                root._dragStartX         = centroid.position.x
+                root._lastDragX          = centroid.position.x
                 root._dragStartViewStart = root.viewport ? root.viewport.viewStart : 0
                 root._didDrag = false
                 cursorShape = Qt.ClosedHandCursor
@@ -146,28 +151,36 @@ Item {
         onCentroidChanged: {
             if (!active || !root.viewport) return
 
-            var dx = centroid.position.x - root._dragStartX
+            var curX = centroid.position.x
+            var dx   = curX - root._dragStartX   // 相对起点的总偏移（阈值判断用）
 
             if (!root._didDrag) {
                 if (Math.abs(dx) < root.dragThreshold) return
-                root._didDrag = true
+                root._didDrag   = true
+                root._lastDragX = curX   // 阈值刚过时重置增量起点，避免起步跳动
             }
 
             if (root.followMode === TimelineEnums.FollowCenter) {
-                // ── 磁带模型：拖拽 = 连续 seek ───────────────
-                // 鼠标当前位置对应的时间 → 设为游标位置
-                // 向右拖 → px 增大 → 对应更早的时间（往过去拖）
-                // 这里用"拖拽起点时间 - 像素偏移换算出的时间偏移"来保持锚点稳定
-                var deltaMs = root.viewport.pixelsToDuration(dx)
-                var seekTime = root.viewport.pixelToTime(root._dragStartX) - deltaMs
-                // 夹在数据范围内
+                // ── 磁带模型：逐帧增量 seek ───────────────────
+                // 用"这一帧相对上一帧的偏移"而不是"相对拖拽起点的偏移"：
+                //   - 方向正确：向左 frameDx<0 → 时间前进，向右 frameDx>0 → 时间后退
+                //   - 速度一致：视口移动不影响换算，pixelsPerMs 保持一帧内稳定
+                //   - 可换向：松开再往另一个方向拖，frameDx 立即变号
+                var frameDx  = curX - root._lastDragX
+                root._lastDragX = curX
+
+                // 向左拖（frameDx < 0）→ 时间增大（往未来走）
+                // 向右拖（frameDx > 0）→ 时间减小（往过去走）
+                var deltaMs = root.viewport.pixelsToDuration(-frameDx * root.dragSensitivity)
+                var seekTime = root.currentTime + deltaMs
                 seekTime = Math.max(root.viewport.totalStart,
                            Math.min(root.viewport.totalEnd, seekTime))
                 root.currentTime = seekTime
                 root.seeked(seekTime)
             } else {
-                // ── 视频编辑模型：拖拽 = 平移视口 ────────────
-                var deltaMs2 = root.viewport.pixelsToDuration(dx)
+                // ── 视频编辑模型：锚定起点的总偏移平移视口 ───
+                var scaledDx = dx * root.dragSensitivity
+                var deltaMs2 = root.viewport.pixelsToDuration(scaledDx)
                 root.viewport.viewStart = root._dragStartViewStart - deltaMs2
             }
         }
