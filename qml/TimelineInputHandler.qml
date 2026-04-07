@@ -49,6 +49,13 @@ Item {
     property bool requireCtrl:  false  // 是否要求按 Ctrl 才触发滚轮缩放
     property real dragThreshold: 4     // 像素：超过此距离才算拖拽（不触发点击）
 
+    /**
+     * 跟随模式（与 TimelineView.followMode 保持同步）：
+     *   TimelineEnums.FollowCenter → 磁带模型：拖拽 = 连续 seek，游标跟着走
+     *   其他                       → 视频编辑模型：拖拽 = 平移视口
+     */
+    property int followMode: TimelineEnums.FollowEdge
+
     // ── 信号 ─────────────────────────────────────────────────
     signal seeked(real timeMs)
     signal zoomChanged()
@@ -111,24 +118,23 @@ Item {
     }
 
     // ══════════════════════════════════════════════════════════
-    // 拖拽平移
+    // 拖拽：磁带模型 = 连续 seek，视频编辑模型 = 平移视口
     // ══════════════════════════════════════════════════════════
     DragHandler {
         id: _drag
-        target: null                    // 不移动 Item
+        target: null
         acceptedButtons: Qt.LeftButton
-        dragThreshold: 0                // 我们自己判断阈值
+        dragThreshold: 0   // 阈值由内部 _didDrag 自己管
 
         onActiveChanged: {
             if (active) {
-                // 拖拽开始：记录快照
                 root._dragStartX = centroid.position.x
                 root._dragStartViewStart = root.viewport ? root.viewport.viewStart : 0
                 root._didDrag = false
                 cursorShape = Qt.ClosedHandCursor
             } else {
                 cursorShape = Qt.ArrowCursor
-                // 如果没有真正拖拽（delta < threshold），当作点击处理
+                // 没有超过阈值 → 当作单击处理
                 if (!root._didDrag && root.viewport) {
                     var t = root.viewport.pixelToTime(centroid.position.x)
                     root.currentTime = t
@@ -142,19 +148,28 @@ Item {
 
             var dx = centroid.position.x - root._dragStartX
 
-            // 超过阈值才真正开始平移
             if (!root._didDrag) {
                 if (Math.abs(dx) < root.dragThreshold) return
                 root._didDrag = true
             }
 
-            // 平移：锚定起始 viewStart，用像素差推算时间差
-            // 向右拖 → dx > 0 → 时间向过去方向移动 → viewStart 减小
-            var deltaMs = root.viewport.pixelsToDuration(dx)
-            var newStart = root._dragStartViewStart - deltaMs
-            var span = root.viewport.viewEnd - root.viewport.viewStart
-            // 直接写 viewStart 触发 applyView → 边界保护自动生效
-            root.viewport.viewStart = newStart
+            if (root.followMode === TimelineEnums.FollowCenter) {
+                // ── 磁带模型：拖拽 = 连续 seek ───────────────
+                // 鼠标当前位置对应的时间 → 设为游标位置
+                // 向右拖 → px 增大 → 对应更早的时间（往过去拖）
+                // 这里用"拖拽起点时间 - 像素偏移换算出的时间偏移"来保持锚点稳定
+                var deltaMs = root.viewport.pixelsToDuration(dx)
+                var seekTime = root.viewport.pixelToTime(root._dragStartX) - deltaMs
+                // 夹在数据范围内
+                seekTime = Math.max(root.viewport.totalStart,
+                           Math.min(root.viewport.totalEnd, seekTime))
+                root.currentTime = seekTime
+                root.seeked(seekTime)
+            } else {
+                // ── 视频编辑模型：拖拽 = 平移视口 ────────────
+                var deltaMs2 = root.viewport.pixelsToDuration(dx)
+                root.viewport.viewStart = root._dragStartViewStart - deltaMs2
+            }
         }
 
         cursorShape: Qt.OpenHandCursor

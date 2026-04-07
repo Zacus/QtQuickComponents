@@ -161,8 +161,10 @@ Item {
     // 跟随逻辑
     // ══════════════════════════════════════════════════════
 
-    // 用户正在手动拖拽时暂停跟随，避免两个逻辑打架
-    readonly property bool _userPanning: _input.isDragging || _playhead.isDragging
+    // 用户正在手动拖拽视口时暂停跟随（磁带模型下拖拽是 seek，不暂停跟随）
+    readonly property bool _userPanning:
+        (followMode !== TimelineEnums.FollowCenter && _input.isDragging)
+        || _playhead.isDragging
 
     // currentTime 变化时执行跟随
     onCurrentTimeChanged: {
@@ -266,6 +268,7 @@ Item {
             z: 2
             viewport:    _viewport
             currentTime: root.currentTime
+            followMode:  root.followMode
             zoomFactor:  root.zoomFactor
             requireCtrl: root.requireCtrl
             onSeeked:         function(t) { root.seeked(t) }
