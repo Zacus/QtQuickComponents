@@ -142,6 +142,22 @@ font.weight: ComponentTheme.fontWeightBold     // 700
 - CMake 3.21+
 - C++17
 
+## Demo App
+
+仓库包含一个最小 demo app，用于人工验证 `import QuickUI.Components 1.0`、控件视觉状态和 `TimelineView` 基础交互。
+
+```sh
+cmake -S . -B build -DQTC_BUILD_EXAMPLES=ON
+cmake --build build --target qtc_demo
+./build/examples/demo/qtc_demo
+```
+
+Headless import smoke test:
+
+```sh
+./build/examples/demo/qtc_demo -platform offscreen --quit-after-ms 100
+```
+
 ## 版本规则
 
 库版本遵循 SemVer，并以仓库根目录 `VERSION.txt` 文件作为唯一来源。CMake package 使用完整 `MAJOR.MINOR.PATCH`，QML 模块版本使用 `MAJOR.MINOR`。

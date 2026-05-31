@@ -16,6 +16,7 @@ import QuickUI.Components 1.0
 //       placeholder: "you@example.com"
 //       errorText: root.emailError
 //       onAccepted: root.submit()
+//       onTextChanged: validate(text)
 //   }
 
 Item {
@@ -30,7 +31,6 @@ Item {
     property bool   clearable:   false
 
     signal accepted()
-    signal textChanged(string text)
 
     // 只读状态
     readonly property bool hasError: errorText.length > 0
@@ -131,7 +131,6 @@ Item {
 
             onTextChanged: {
                 root.text = text;
-                root.textChanged(text);
             }
             onAccepted: root.accepted()
         }

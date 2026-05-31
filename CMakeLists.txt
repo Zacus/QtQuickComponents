@@ -20,6 +20,7 @@ find_package(Qt6 REQUIRED COMPONENTS Quick QuickControls2)
 qt_standard_project_setup()
 
 option(QTC_BUILD_TESTS "Build QtQuickComponents tests" ${PROJECT_IS_TOP_LEVEL})
+option(QTC_BUILD_EXAMPLES "Build QtQuickComponents example applications" OFF)
 
 # ── 检测 Qt 构建类型 ──────────────────────────────────────────
 # Qt 静态构建时 QT6_IS_SHARED_LIBS_BUILD 为 FALSE
@@ -194,4 +195,8 @@ if(QTC_BUILD_TESTS)
     include(CTest)
     enable_testing()
     add_subdirectory(tests)
+endif()
+
+if(QTC_BUILD_EXAMPLES)
+    add_subdirectory(examples/demo)
 endif()

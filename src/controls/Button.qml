@@ -1,134 +1,121 @@
 import QtQuick
-import QtQuick.Controls.Basic
+import QtQuick.Controls.Basic as QQC2
 import QuickUI.Components 1.0
 
-// 通用按钮，支持三种外观变体：
+// 通用按钮，基于 Qt Quick Controls Button 提供键盘、焦点和状态语义。
+//
+// 外观变体：
 //   variant: "filled"  — 强调色实底（默认）
 //   variant: "outline" — 透明底 + 强调色描边
 //   variant: "ghost"   — 纯透明，仅显示文字，适合次要操作
 //
 // 状态：
 //   enabled: false — 禁用，阻断交互并降低透明度
-//   loading: true  — 显示旋转指示器，按钮宽度保持稳定避免布局抖动
-//
-// 用法示例：
-//   Button { text: "确认"; onClicked: doSomething() }
-//   Button { text: "取消"; variant: "ghost" }
-//   Button { text: "提交"; loading: true }
+//   loading: true  — 显示旋转指示器，默认禁用交互并保持按钮宽度稳定
 
-Item {
+QQC2.Button {
     id: root
 
-    property string text:    ""
     property string variant: "filled"   // "filled" | "outline" | "ghost"
-    property bool   enabled: true
-    property bool   loading: false
+    property bool loading: false
 
-    signal clicked()
-
-    implicitWidth:  Math.max(80, label.implicitWidth + 32)
+    enabled: !loading
+    implicitWidth: Math.max(80, contentItem.implicitWidth + leftPadding + rightPadding)
     implicitHeight: ComponentTheme.buttonSize
+    leftPadding: 16
+    rightPadding: 16
+    topPadding: 0
+    bottomPadding: 0
+    hoverEnabled: true
 
-    // ── 背景 ─────────────────────────────────────────────────
-    Rectangle {
-        id: bg
-        anchors.fill: parent
+    background: Rectangle {
         radius: ComponentTheme.buttonRadius
-
         color: {
-            if (!root.enabled || root.loading) return _bgBase();
-            if (mouse.pressed)         return _bgPressed();
-            if (mouse.containsMouse)   return _bgHover();
-            return _bgBase();
+            if (!root.enabled) return root._bgBase()
+            if (root.down) return root._bgPressed()
+            if (root.hovered) return root._bgHover()
+            return root._bgBase()
         }
-
         border.color: root.variant === "outline"
-                      ? (root.enabled ? ComponentTheme.accent : ComponentTheme.accentDisabled)
-                      : "transparent"
+            ? (root.enabled ? ComponentTheme.accent : ComponentTheme.accentDisabled)
+            : "transparent"
         border.width: root.variant === "outline" ? 1.5 : 0
+        opacity: root.enabled ? 1.0 : 0.5
 
-        opacity: (!root.enabled || root.loading) ? 0.5 : 1.0
-
-        Behavior on color   { ColorAnimation  { duration: ComponentTheme.durationFast } }
+        Behavior on color { ColorAnimation { duration: ComponentTheme.durationFast } }
         Behavior on opacity { NumberAnimation { duration: ComponentTheme.durationFast } }
     }
 
-    // ── 文字 ─────────────────────────────────────────────────
-    Text {
-        id: label
-        anchors.centerIn: parent
-        visible: !root.loading
+    contentItem: Item {
+        implicitWidth: Math.max(label.implicitWidth, spinner.implicitWidth)
+        implicitHeight: Math.max(label.implicitHeight, spinner.implicitHeight)
 
-        text:           root.text
-        font.family:    ComponentTheme.fontFamily
-        font.pixelSize: ComponentTheme.fontSize
-        font.weight:    ComponentTheme.fontWeightMedium
-        color:          root.variant === "filled"
-                        ? ComponentTheme.textOnAccent
-                        : (root.enabled ? ComponentTheme.accent : ComponentTheme.accentDisabled)
-    }
-
-    // ── 加载旋转器（简单 arc 动画）───────────────────────────
-    Item {
-        id: spinner
-        anchors.centerIn: parent
-        width: 16; height: 16
-        visible: root.loading
-
-        Rectangle {
+        Text {
+            id: label
             anchors.centerIn: parent
-            width: 14; height: 14
-            radius: 7
-            color: "transparent"
-            border.width: 2
-            border.color: root.variant === "filled"
-                          ? ComponentTheme.textOnAccent
-                          : ComponentTheme.accent
-            opacity: 0.3
+            visible: !root.loading
+            text: root.text
+            font.family: ComponentTheme.fontFamily
+            font.pixelSize: ComponentTheme.fontSize
+            font.weight: ComponentTheme.fontWeightMedium
+            color: root.variant === "filled"
+                ? ComponentTheme.textOnAccent
+                : (root.enabled ? ComponentTheme.accent : ComponentTheme.accentDisabled)
         }
 
-        Rectangle {
-            id: arc
+        Item {
+            id: spinner
             anchors.centerIn: parent
-            width: 14; height: 14
-            radius: 7
-            color: "transparent"
-            border.width: 2
-            border.color: root.variant === "filled"
-                          ? ComponentTheme.textOnAccent
-                          : ComponentTheme.accent
+            implicitWidth: 16
+            implicitHeight: 16
+            width: 16
+            height: 16
+            visible: root.loading
 
-            // 用旋转遮罩模拟 arc：覆盖 3/4 圆
-            layer.enabled: true
-            layer.effect: null   // 仅触发 layer 隔离，避免与父级混合
+            Rectangle {
+                anchors.centerIn: parent
+                width: 14
+                height: 14
+                radius: 7
+                color: "transparent"
+                border.width: 2
+                border.color: root.variant === "filled"
+                    ? ComponentTheme.textOnAccent
+                    : ComponentTheme.accent
+                opacity: 0.3
+            }
 
-            RotationAnimator on rotation {
-                from: 0; to: 360
-                duration: 900
-                loops: Animation.Infinite
-                running: root.loading
+            Rectangle {
+                anchors.centerIn: parent
+                width: 14
+                height: 14
+                radius: 7
+                color: "transparent"
+                border.width: 2
+                border.color: root.variant === "filled"
+                    ? ComponentTheme.textOnAccent
+                    : ComponentTheme.accent
+
+                RotationAnimator on rotation {
+                    from: 0
+                    to: 360
+                    duration: 900
+                    loops: Animation.Infinite
+                    running: root.loading
+                }
             }
         }
     }
 
-    // ── 鼠标 ─────────────────────────────────────────────────
-    MouseArea {
-        id: mouse
-        anchors.fill: parent
-        hoverEnabled: true
-        enabled:      root.enabled && !root.loading
-        cursorShape:  (root.enabled && !root.loading) ? Qt.PointingHandCursor : Qt.ArrowCursor
-        onClicked:    root.clicked()
+    function _bgBase() {
+        return root.variant === "filled" ? ComponentTheme.accent : "transparent"
     }
 
-    // ── 内部辅助：按变体返回各状态背景色 ────────────────────
-    function _bgBase() {
-        return root.variant === "filled" ? ComponentTheme.accent : "transparent";
-    }
     function _bgHover() {
-        return root.variant === "filled" ? ComponentTheme.accentHover : ComponentTheme.buttonHover;
+        return root.variant === "filled" ? ComponentTheme.accentHover : ComponentTheme.buttonHover
     }
+
     function _bgPressed() {
-        return root.variant === "filled" ? ComponentTheme.accentPressed : ComponentTheme.buttonPressed;
+        return root.variant === "filled" ? ComponentTheme.accentPressed : ComponentTheme.buttonPressed
     }
 }
