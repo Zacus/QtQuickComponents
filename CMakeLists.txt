@@ -41,35 +41,44 @@ endif()
 # QML 模块路径（在 OUTPUT_DIRECTORY 和 install 规则中使用）
 set(QTC_QML_MODULE_PATH "${QTC_QML_OUTPUT_BASE}/QuickUI/Components")
 
+set(QTC_PUBLIC_HEADERS
+    src/ComponentTheme.h
+    src/TimelineEnums.h
+    src/TimelineSegment.h
+    src/TimelineModel.h
+    src/TimelineViewport.h
+    src/RulerTick.h
+    src/RulerModel.h
+    src/TimelineTrackModel.h
+)
+
+set(QTC_CPP_SOURCES
+    src/ComponentTheme.cpp
+    src/TimelineModel.cpp
+    src/TimelineViewport.cpp
+    src/RulerModel.cpp
+    src/TimelineTrackModel.cpp
+)
+
+set(QTC_QML_FILES
+    qml/IconButton.qml
+    qml/ProgressSlider.qml
+    qml/Button.qml
+    qml/Label.qml
+    qml/TextField.qml
+    qml/TimelineTrack.qml
+    qml/TimelineRuler.qml
+    qml/TimelineInputHandler.qml
+    qml/PlayheadOverlay.qml
+    qml/TimelineView.qml
+)
+
 qt_add_qml_module(QtQuickComponents
     URI     "QuickUI.Components"
     VERSION 1.0
     OUTPUT_DIRECTORY "${QTC_QML_MODULE_PATH}"
-    SOURCES
-        src/ComponentTheme.h
-        src/ComponentTheme.cpp
-        src/TimelineEnums.h
-        src/TimelineSegment.h
-        src/TimelineModel.h
-        src/TimelineModel.cpp
-        src/TimelineViewport.h
-        src/TimelineViewport.cpp
-        src/RulerTick.h
-        src/RulerModel.h
-        src/RulerModel.cpp
-        src/TimelineTrackModel.h
-        src/TimelineTrackModel.cpp
-    QML_FILES
-        qml/IconButton.qml
-        qml/ProgressSlider.qml
-        qml/Button.qml
-        qml/Label.qml
-        qml/TextField.qml
-        qml/TimelineTrack.qml
-        qml/TimelineRuler.qml
-        qml/TimelineInputHandler.qml
-        qml/PlayheadOverlay.qml
-        qml/TimelineView.qml
+    SOURCES ${QTC_PUBLIC_HEADERS} ${QTC_CPP_SOURCES}
+    QML_FILES ${QTC_QML_FILES}
 )
 
 # 动态构建：qt_add_qml_module 创建的插件目标名为 QtQuickComponentsplugin（Qt 约定）
@@ -108,14 +117,7 @@ if(NOT _QTC_STATIC_QT)
     )
 endif()
 install(FILES
-    src/ComponentTheme.h
-    src/TimelineEnums.h
-    src/TimelineSegment.h
-    src/TimelineModel.h
-    src/TimelineViewport.h
-    src/RulerTick.h
-    src/RulerModel.h
-    src/TimelineTrackModel.h
+    ${QTC_PUBLIC_HEADERS}
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/QtQuickComponents
 )
 install(DIRECTORY qml/
