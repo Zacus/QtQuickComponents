@@ -1,4 +1,5 @@
 import QtQuick
+import QtQuick.Controls.Basic as QQC2
 import QuickUI.Components 1.0
 
 // 语义化文本标签，根据 role 自动应用字号、字重、颜色。
@@ -17,7 +18,7 @@ import QuickUI.Components 1.0
 //   Label { role: "heading"; text: "设置" }
 //   Label { role: "caption"; text: "最后修改于 3 分钟前" }
 
-Text {
+QQC2.Label {
     id: root
 
     property string role: "body"   // "body" | "label" | "caption" | "heading"

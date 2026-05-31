@@ -15,6 +15,8 @@ tests/
 
 所有组件仍导出到同一个 QML 模块：`QuickUI.Components 1.0`。
 
+基础控件基于 `QtQuick.Controls.Basic` 扩展，保留 Qt Quick Controls 的焦点、键盘、hover/pressed 等状态语义，同时使用 `ComponentTheme` 定制视觉样式。
+
 ## 组件列表
 
 | 组件 | 说明 |

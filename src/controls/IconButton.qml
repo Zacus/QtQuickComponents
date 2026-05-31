@@ -1,52 +1,41 @@
 import QtQuick
-import QtQuick.Controls.Basic
+import QtQuick.Controls.Basic as QQC2
 import QuickUI.Components 1.0
 
-// 通用图标按钮：纯文本/Emoji 图标 + tooltip + hover 效果
-Item {
+// 通用图标按钮：基于 Qt Quick Controls Button，保留纯文本/Emoji 图标用法。
+QQC2.Button {
     id: root
 
     property string iconText: "?"
-    property string tooltip:  ""
-    property int    fontSize: ComponentTheme.fontSize
-    property bool   enabled:  true
+    property string tooltip: ""
+    property int fontSize: ComponentTheme.fontSize
 
-    signal clicked()
+    implicitWidth: ComponentTheme.buttonSize
+    implicitHeight: ComponentTheme.buttonSize
+    hoverEnabled: true
 
-    width:  ComponentTheme.buttonSize
-    height: ComponentTheme.buttonSize
-
-    Rectangle {
-        anchors.fill: parent
+    background: Rectangle {
         radius: ComponentTheme.buttonRadius
-        color:  mouseArea.pressed
-                ? ComponentTheme.buttonPressed
-                : mouseArea.containsMouse ? ComponentTheme.buttonHover : "transparent"
+        color: root.down
+            ? ComponentTheme.buttonPressed
+            : root.hovered ? ComponentTheme.buttonHover : "transparent"
         opacity: root.enabled ? 1.0 : 0.4
 
-        Behavior on color   { ColorAnimation { duration: ComponentTheme.durationFast } }
+        Behavior on color { ColorAnimation { duration: ComponentTheme.durationFast } }
         Behavior on opacity { NumberAnimation { duration: ComponentTheme.durationFast } }
-
-        Text {
-            anchors.centerIn: parent
-            text:        root.iconText
-            font.pixelSize: root.fontSize
-            color: mouseArea.pressed
-                   ? ComponentTheme.iconColorPressed
-                   : ComponentTheme.iconColor
-        }
     }
 
-    ToolTip.visible: mouseArea.containsMouse && root.tooltip.length > 0 && root.enabled
-    ToolTip.text:    root.tooltip
-    ToolTip.delay:   600
-
-    MouseArea {
-        id: mouseArea
-        anchors.fill: parent
-        hoverEnabled: true
-        enabled:      root.enabled          // enabled=false 时不接收任何鼠标事件
-        cursorShape:  root.enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
-        onClicked:    root.clicked()
+    contentItem: Text {
+        horizontalAlignment: Text.AlignHCenter
+        verticalAlignment: Text.AlignVCenter
+        text: root.iconText
+        font.pixelSize: root.fontSize
+        color: root.down
+            ? ComponentTheme.iconColorPressed
+            : ComponentTheme.iconColor
     }
+
+    QQC2.ToolTip.visible: root.hovered && root.tooltip.length > 0 && root.enabled
+    QQC2.ToolTip.text: root.tooltip
+    QQC2.ToolTip.delay: 600
 }

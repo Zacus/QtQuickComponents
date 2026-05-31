@@ -1,9 +1,9 @@
 import QtQuick
-import QtQuick.Controls.Basic
+import QtQuick.Controls.Basic as QQC2
 import QuickUI.Components 1.0
 
 // 进度/Seek 滑块：自定义外观，支持点击任意位置跳转
-Slider {
+QQC2.Slider {
     id: root
 
     from:    0.0
