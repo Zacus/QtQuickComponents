@@ -13,6 +13,8 @@ set(CMAKE_AUTOMOC ON)
 find_package(Qt6 REQUIRED COMPONENTS Quick QuickControls2)
 qt_standard_project_setup()
 
+option(QTC_BUILD_TESTS "Build QtQuickComponents tests" ${PROJECT_IS_TOP_LEVEL})
+
 # ── 检测 Qt 构建类型 ──────────────────────────────────────────
 # Qt 静态构建时 QT6_IS_SHARED_LIBS_BUILD 为 FALSE
 get_target_property(_qt_core_type Qt6::Core TYPE)
@@ -120,3 +122,9 @@ install(DIRECTORY qml/
 install(DIRECTORY "${QTC_QML_OUTPUT_BASE}/QuickUI/"
     DESTINATION ${CMAKE_INSTALL_DATADIR}/QtQuickComponents/QuickUI
 )
+
+if(QTC_BUILD_TESTS)
+    include(CTest)
+    enable_testing()
+    add_subdirectory(tests)
+endif()

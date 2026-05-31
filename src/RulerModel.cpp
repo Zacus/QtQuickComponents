@@ -2,6 +2,7 @@
 
 #include <QtCore/qdebug.h>
 #include <QtCore/qdatetime.h>
+#include <QtCore/qtimezone.h>
 
 // ── 刻度级别表（静态，进程生命周期内只初始化一次）────────────────────
 //
@@ -312,6 +313,6 @@ QString RulerModel::formatLabel(qint64 timeMs, const QString& fmt) const
 {
     // 用 UTC 时间格式化（和 alignDown 保持一致）。
     // 如果业务需要本地时间，在这里替换为 QDateTime::fromMSecsSinceEpoch(t, Qt::LocalTime)。
-    const QDateTime dt = QDateTime::fromMSecsSinceEpoch(timeMs, Qt::UTC);
+    const QDateTime dt = QDateTime::fromMSecsSinceEpoch(timeMs, QTimeZone::UTC);
     return dt.toString(fmt);
 }

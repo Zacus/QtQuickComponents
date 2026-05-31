@@ -202,13 +202,13 @@ QList<TimelineSegment> TimelineModel::segmentsInRawRange(qint64 viewStart, qint6
 int TimelineModel::segmentIndexAt(qint64 timeMs) const
 {
     // 找第一个 startMs > timeMs 的位置，向前找覆盖 timeMs 的区间
+    // 注意：允许存在重叠/包含关系，endMs 对 startMs 排序并不单调，
+    // 因此不能在遇到一个 endMs <= timeMs 的区间时提前停止。
     const int pos = lowerBound(timeMs + 1);  // 第一个 startMs > timeMs
     for (int i = pos - 1; i >= 0; --i) {
         const TimelineSegment& seg = m_segments.at(i);
         if (seg.startMs() <= timeMs && seg.endMs() > timeMs)
             return i;
-        if (seg.endMs() <= timeMs)
-            break;  // 更早的区间不可能覆盖 timeMs
     }
     return -1;
 }
