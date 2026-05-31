@@ -11,6 +11,28 @@ target_link_libraries(tst_timeline_model PRIVATE
 
 add_test(NAME TimelineModel COMMAND tst_timeline_model)
 
+qt_add_executable(tst_timeline_viewport
+    tst_timeline_viewport.cpp
+)
+
+target_link_libraries(tst_timeline_viewport PRIVATE
+    QtQuickComponents
+    Qt6::Test
+)
+
+add_test(NAME TimelineViewport COMMAND tst_timeline_viewport)
+
+qt_add_executable(tst_ruler_model
+    tst_ruler_model.cpp
+)
+
+target_link_libraries(tst_ruler_model PRIVATE
+    QtQuickComponents
+    Qt6::Test
+)
+
+add_test(NAME RulerModel COMMAND tst_ruler_model)
+
 qt_add_executable(tst_qml_components
     tst_qml_components.cpp
 )

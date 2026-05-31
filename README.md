@@ -34,7 +34,7 @@ tests/
 include(FetchContent)
 FetchContent_Declare(
     QtQuickComponents
-    GIT_REPOSITORY https://github.com/yourname/QtQuickComponents.git
+    GIT_REPOSITORY https://github.com/Zacus/QtQuickComponents.git
     GIT_TAG        v1.0.0
 )
 FetchContent_MakeAvailable(QtQuickComponents)
@@ -144,7 +144,7 @@ font.weight: ComponentTheme.fontWeightBold     // 700
 
 ## 版本规则
 
-库版本遵循 SemVer，并以仓库根目录 `VERSION` 文件作为唯一来源。CMake package 使用完整 `MAJOR.MINOR.PATCH`，QML 模块版本使用 `MAJOR.MINOR`。
+库版本遵循 SemVer，并以仓库根目录 `VERSION.txt` 文件作为唯一来源。CMake package 使用完整 `MAJOR.MINOR.PATCH`，QML 模块版本使用 `MAJOR.MINOR`。
 
 - `MAJOR`：破坏公开 C++ API、QML 类型、属性语义或 import 兼容性。
 - `MINOR`：向后兼容的新组件、新属性或新能力。

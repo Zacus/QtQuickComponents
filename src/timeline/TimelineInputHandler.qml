@@ -20,7 +20,7 @@ import QuickUI.Components 1.0
  *   滚轮          — 以鼠标位置为锚点缩放（Ctrl 可选，默认不需要）
  *   左键拖拽      — 平移（光标变抓手）
  *   左键单击      — 设置 currentTime（游标跳转）
- *   左键双击      — fitAll()（回到全局视图）
+ *   左键双击      — 设置 currentTime 并请求从该位置播放
  *   Pinch（触屏） — 以手势中心为锚点缩放
  *   右键 / 中键   — 不处理，透传给父组件
  *
@@ -32,8 +32,9 @@ import QuickUI.Components 1.0
  *   dragThreshold   — 区分点击/拖拽的像素阈值（默认 4px）
  *
  * 信号：
- *   seeked(timeMs)  — 用户点击/拖拽游标后发出，携带目标时间（ms）
- *   zoomChanged()   — 缩放发生后发出（用于通知外部 UI 更新缩放显示）
+ *   seeked(timeMs)         — 用户点击/拖拽游标后发出，携带目标时间（ms）
+ *   zoomChanged()          — 缩放发生后发出（用于通知外部 UI 更新缩放显示）
+ *   playRequested(timeMs)  — 用户双击时间轴后发出，携带播放起点（ms）
  */
 Item {
     id: root

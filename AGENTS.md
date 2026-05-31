@@ -36,7 +36,7 @@ Automated tests are wired through CTest. `tests/tst_timeline_model.cpp` covers C
 
 ## Versioning Guidelines
 
-`VERSION` is the single SemVer source. Bump `MAJOR` for breaking public C++ or QML API changes, `MINOR` for backward-compatible components or properties, and `PATCH` for fixes, docs, performance work, and internal refactors. QML module versions expose `MAJOR.MINOR`; CMake packages use `MAJOR.MINOR.PATCH`.
+`VERSION.txt` is the single SemVer source. Bump `MAJOR` for breaking public C++ or QML API changes, `MINOR` for backward-compatible components or properties, and `PATCH` for fixes, docs, performance work, and internal refactors. QML module versions expose `MAJOR.MINOR`; CMake packages use `MAJOR.MINOR.PATCH`.
 
 ## Commit & Pull Request Guidelines
 

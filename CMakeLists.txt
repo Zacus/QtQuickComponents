@@ -1,9 +1,9 @@
 cmake_minimum_required(VERSION 3.21)
 
-file(READ "${CMAKE_CURRENT_SOURCE_DIR}/VERSION" QTC_VERSION)
+file(READ "${CMAKE_CURRENT_SOURCE_DIR}/VERSION.txt" QTC_VERSION)
 string(STRIP "${QTC_VERSION}" QTC_VERSION)
 if(NOT QTC_VERSION MATCHES "^[0-9]+\\.[0-9]+\\.[0-9]+$")
-    message(FATAL_ERROR "VERSION must use MAJOR.MINOR.PATCH format, got: ${QTC_VERSION}")
+    message(FATAL_ERROR "VERSION.txt must use MAJOR.MINOR.PATCH format, got: ${QTC_VERSION}")
 endif()
 
 project(QtQuickComponents

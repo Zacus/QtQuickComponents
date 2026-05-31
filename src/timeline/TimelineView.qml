@@ -20,10 +20,10 @@ import QuickUI.Components 1.0
  * followMode 跟随模式：
  * ═══════════════════════════════════════════════════════
  *
- *   "none"   — 不自动滚动（默认），用户手动平移
- *   "edge"   — 游标到达视口边缘 followMargin 内时，视口平移
- *              使游标保持在 followMargin 处（类似视频编辑软件）
- *   "center" — 视口始终以游标为中心滚动（类似音频软件）
+ *   TimelineEnums.FollowNone   — 不自动滚动，用户手动平移
+ *   TimelineEnums.FollowEdge   — 游标到达视口边缘 followMargin 内时，视口平移
+ *                                使游标保持在 followMargin 处（类似视频编辑软件）
+ *   TimelineEnums.FollowCenter — 视口始终以游标为中心滚动（类似音频软件）
  *
  *   用户手动拖拽轨道时自动暂停跟随，松手后恢复。
  *
