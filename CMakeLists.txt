@@ -43,21 +43,21 @@ set(QTC_QML_MODULE_PATH "${QTC_QML_OUTPUT_BASE}/QuickUI/Components")
 
 set(QTC_PUBLIC_HEADERS
     src/theme/ComponentTheme.h
-    src/TimelineEnums.h
-    src/TimelineSegment.h
-    src/TimelineModel.h
-    src/TimelineViewport.h
-    src/RulerTick.h
-    src/RulerModel.h
-    src/TimelineTrackModel.h
+    src/timeline/TimelineEnums.h
+    src/timeline/TimelineSegment.h
+    src/timeline/TimelineModel.h
+    src/timeline/TimelineViewport.h
+    src/timeline/RulerTick.h
+    src/timeline/RulerModel.h
+    src/timeline/TimelineTrackModel.h
 )
 
 set(QTC_CPP_SOURCES
     src/theme/ComponentTheme.cpp
-    src/TimelineModel.cpp
-    src/TimelineViewport.cpp
-    src/RulerModel.cpp
-    src/TimelineTrackModel.cpp
+    src/timeline/TimelineModel.cpp
+    src/timeline/TimelineViewport.cpp
+    src/timeline/RulerModel.cpp
+    src/timeline/TimelineTrackModel.cpp
 )
 
 set(QTC_QML_FILES
@@ -124,6 +124,7 @@ endif()
 target_include_directories(QtQuickComponents PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/theme>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/timeline>
     $<INSTALL_INTERFACE:include/QtQuickComponents>
 )
 
