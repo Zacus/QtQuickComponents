@@ -61,16 +61,32 @@ set(QTC_CPP_SOURCES
 )
 
 set(QTC_QML_FILES
-    qml/IconButton.qml
-    qml/ProgressSlider.qml
-    qml/Button.qml
-    qml/Label.qml
-    qml/TextField.qml
+    src/controls/IconButton.qml
+    src/controls/ProgressSlider.qml
+    src/controls/Button.qml
+    src/controls/Label.qml
+    src/controls/TextField.qml
     qml/TimelineTrack.qml
     qml/TimelineRuler.qml
     qml/TimelineInputHandler.qml
     qml/PlayheadOverlay.qml
     qml/TimelineView.qml
+)
+
+set_source_files_properties(
+    src/controls/IconButton.qml PROPERTIES QT_RESOURCE_ALIAS IconButton.qml
+)
+set_source_files_properties(
+    src/controls/ProgressSlider.qml PROPERTIES QT_RESOURCE_ALIAS ProgressSlider.qml
+)
+set_source_files_properties(
+    src/controls/Button.qml PROPERTIES QT_RESOURCE_ALIAS Button.qml
+)
+set_source_files_properties(
+    src/controls/Label.qml PROPERTIES QT_RESOURCE_ALIAS Label.qml
+)
+set_source_files_properties(
+    src/controls/TextField.qml PROPERTIES QT_RESOURCE_ALIAS TextField.qml
 )
 
 qt_add_qml_module(QtQuickComponents
@@ -121,7 +137,8 @@ install(FILES
     ${QTC_PUBLIC_HEADERS}
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/QtQuickComponents
 )
-install(DIRECTORY qml/
+install(FILES
+    ${QTC_QML_FILES}
     DESTINATION ${CMAKE_INSTALL_DATADIR}/QtQuickComponents/qml
 )
 install(DIRECTORY "${QTC_QML_OUTPUT_BASE}/QuickUI/"
