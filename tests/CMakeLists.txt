@@ -1,4 +1,4 @@
-find_package(Qt6 REQUIRED COMPONENTS Test)
+find_package(Qt6 REQUIRED COMPONENTS QuickTest Test)
 
 qt_add_executable(tst_timeline_model
     tst_timeline_model.cpp
@@ -10,3 +10,20 @@ target_link_libraries(tst_timeline_model PRIVATE
 )
 
 add_test(NAME TimelineModel COMMAND tst_timeline_model)
+
+qt_add_executable(tst_qml_components
+    tst_qml_components.cpp
+)
+
+target_link_libraries(tst_qml_components PRIVATE
+    QtQuickComponents
+    Qt6::QuickTest
+)
+
+add_test(
+    NAME QmlComponents
+    COMMAND tst_qml_components -input "${CMAKE_CURRENT_SOURCE_DIR}/qml"
+)
+set_tests_properties(QmlComponents PROPERTIES
+    ENVIRONMENT "QML2_IMPORT_PATH=${CMAKE_BINARY_DIR};QML_IMPORT_PATH=${CMAKE_BINARY_DIR};QT_QPA_PLATFORM=offscreen"
+)

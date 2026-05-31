@@ -93,8 +93,10 @@ target_link_libraries(QtQuickComponents PUBLIC
 
 # ── 安装规则 ──────────────────────────────────────────────────
 include(GNUInstallDirs)
+include(CMakePackageConfigHelpers)
 
 install(TARGETS QtQuickComponents
+    EXPORT QtQuickComponentsTargets
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
@@ -121,6 +123,29 @@ install(DIRECTORY qml/
 )
 install(DIRECTORY "${QTC_QML_OUTPUT_BASE}/QuickUI/"
     DESTINATION ${CMAKE_INSTALL_DATADIR}/QtQuickComponents/QuickUI
+)
+
+install(EXPORT QtQuickComponentsTargets
+    FILE QtQuickComponentsTargets.cmake
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/QtQuickComponents
+)
+
+configure_package_config_file(
+    ${CMAKE_CURRENT_SOURCE_DIR}/cmake/QtQuickComponentsConfig.cmake.in
+    ${CMAKE_CURRENT_BINARY_DIR}/QtQuickComponentsConfig.cmake
+    INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/QtQuickComponents
+)
+
+write_basic_package_version_file(
+    ${CMAKE_CURRENT_BINARY_DIR}/QtQuickComponentsConfigVersion.cmake
+    VERSION ${PROJECT_VERSION}
+    COMPATIBILITY SameMajorVersion
+)
+
+install(FILES
+    ${CMAKE_CURRENT_BINARY_DIR}/QtQuickComponentsConfig.cmake
+    ${CMAKE_CURRENT_BINARY_DIR}/QtQuickComponentsConfigVersion.cmake
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/QtQuickComponents
 )
 
 if(QTC_BUILD_TESTS)

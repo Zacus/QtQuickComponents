@@ -18,7 +18,7 @@ Item {
     required property var viewport
 
     property real   currentTime:   0
-    property string headPosition:  "top"
+    property int    headPosition:  TimelineEnums.HeadTop
     property color  lineColor:     "#ffffff"
     property real   lineWidth:     1.5
     property color  headColor:     "#ffffff"

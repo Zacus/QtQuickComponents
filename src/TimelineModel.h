@@ -129,10 +129,17 @@ private:
     // 找升序插入位置（返回第一个 startMs >= seg.startMs 的下标）
     int lowerBound(qint64 startMs) const;
 
+    // 找 [0, endIdx) 内第一个可能与 viewStart 之后相交的区间。
+    int firstPotentialOverlap(qint64 viewStart, int endIdx) const;
+
+    // 重建前缀最大 endMs 索引，用于跳过不可能与视口相交的旧区间。
+    void rebuildPrefixMaxEnd();
+
     // 重新计算并在变化时发射 boundsChanged
     void updateBounds();
 
     QList<TimelineSegment> m_segments;
+    QList<qint64> m_prefixMaxEnd;
     qint64 m_totalStart = 0;
     qint64 m_totalEnd   = 0;
 };

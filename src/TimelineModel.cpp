@@ -1,6 +1,7 @@
 #include "TimelineModel.h"
 
 #include <algorithm>
+#include <limits>
 #include <QtCore/qdebug.h>
 
 // ── 构造 ──────────────────────────────────────────────────────────────
@@ -65,6 +66,7 @@ void TimelineModel::addSegment(qint64 startMs, qint64 endMs, int type)
     m_segments.insert(pos, seg);
     endInsertRows();
 
+    rebuildPrefixMaxEnd();
     updateBounds();
     emit countChanged();
 }
@@ -107,6 +109,7 @@ void TimelineModel::addSegments(const QList<TimelineSegment>& segments)
     m_segments = std::move(merged);
     endResetModel();
 
+    rebuildPrefixMaxEnd();
     updateBounds();
     emit countChanged();
 }
@@ -119,6 +122,7 @@ void TimelineModel::removeSegment(int index)
     m_segments.removeAt(index);
     endRemoveRows();
 
+    rebuildPrefixMaxEnd();
     updateBounds();
     emit countChanged();
 }
@@ -129,6 +133,7 @@ void TimelineModel::clear()
 
     beginResetModel();
     m_segments.clear();
+    m_prefixMaxEnd.clear();
     endResetModel();
 
     m_totalStart = 0;
@@ -165,6 +170,7 @@ void TimelineModel::mergeOverlapping(qint64 gapMs)
     m_segments = std::move(result);
     endResetModel();
 
+    rebuildPrefixMaxEnd();
     // bounds 不变（首尾没变），但 count 变了
     emit countChanged();
 }
@@ -177,7 +183,8 @@ QVariantList TimelineModel::segmentsInRange(qint64 viewStart, qint64 viewEnd) co
 
     QVariantList result;
     const int endIdx = lowerBound(viewEnd);
-    for (int i = 0; i < endIdx; ++i) {
+    const int startIdx = firstPotentialOverlap(viewStart, endIdx);
+    for (int i = startIdx; i < endIdx; ++i) {
         const TimelineSegment& seg = m_segments.at(i);
         if (seg.endMs() > viewStart)
             result.append(QVariant::fromValue(seg));
@@ -191,7 +198,8 @@ QList<TimelineSegment> TimelineModel::segmentsInRawRange(qint64 viewStart, qint6
 
     QList<TimelineSegment> result;
     const int endIdx = lowerBound(viewEnd);
-    for (int i = 0; i < endIdx; ++i) {
+    const int startIdx = firstPotentialOverlap(viewStart, endIdx);
+    for (int i = startIdx; i < endIdx; ++i) {
         const TimelineSegment& seg = m_segments.at(i);
         if (seg.endMs() > viewStart)
             result.append(seg);
@@ -237,6 +245,32 @@ int TimelineModel::lowerBound(qint64 startMs) const
     return lo;
 }
 
+int TimelineModel::firstPotentialOverlap(qint64 viewStart, int endIdx) const
+{
+    int lo = 0;
+    int hi = qMin(endIdx, m_prefixMaxEnd.size());
+    while (lo < hi) {
+        const int mid = lo + (hi - lo) / 2;
+        if (m_prefixMaxEnd.at(mid) <= viewStart)
+            lo = mid + 1;
+        else
+            hi = mid;
+    }
+    return lo;
+}
+
+void TimelineModel::rebuildPrefixMaxEnd()
+{
+    m_prefixMaxEnd.clear();
+    m_prefixMaxEnd.reserve(m_segments.size());
+
+    qint64 maxEnd = std::numeric_limits<qint64>::lowest();
+    for (const TimelineSegment& seg : m_segments) {
+        maxEnd = qMax(maxEnd, seg.endMs());
+        m_prefixMaxEnd.append(maxEnd);
+    }
+}
+
 void TimelineModel::updateBounds()
 {
     if (m_segments.isEmpty()) {
@@ -248,12 +282,9 @@ void TimelineModel::updateBounds()
         return;
     }
 
-    // 列表有序，首元素 startMs 最小，但 endMs 最大值需要扫一遍
-    // （允许存在包含关系的区间，endMs 不一定单调）
+    // 列表有序，首元素 startMs 最小；最大 endMs 由前缀索引维护。
     const qint64 newStart = m_segments.first().startMs();
-    qint64 newEnd = 0;
-    for (const auto& seg : m_segments)
-        newEnd = qMax(newEnd, seg.endMs());
+    const qint64 newEnd = m_prefixMaxEnd.isEmpty() ? 0 : m_prefixMaxEnd.last();
 
     if (newStart != m_totalStart || newEnd != m_totalEnd) {
         m_totalStart = newStart;
