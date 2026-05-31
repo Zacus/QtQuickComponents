@@ -42,7 +42,7 @@ endif()
 set(QTC_QML_MODULE_PATH "${QTC_QML_OUTPUT_BASE}/QuickUI/Components")
 
 set(QTC_PUBLIC_HEADERS
-    src/ComponentTheme.h
+    src/theme/ComponentTheme.h
     src/TimelineEnums.h
     src/TimelineSegment.h
     src/TimelineModel.h
@@ -53,7 +53,7 @@ set(QTC_PUBLIC_HEADERS
 )
 
 set(QTC_CPP_SOURCES
-    src/ComponentTheme.cpp
+    src/theme/ComponentTheme.cpp
     src/TimelineModel.cpp
     src/TimelineViewport.cpp
     src/RulerModel.cpp
@@ -92,6 +92,7 @@ endif()
 
 target_include_directories(QtQuickComponents PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/theme>
     $<INSTALL_INTERFACE:include/QtQuickComponents>
 )
 
