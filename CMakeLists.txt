@@ -66,11 +66,11 @@ set(QTC_QML_FILES
     src/controls/Button.qml
     src/controls/Label.qml
     src/controls/TextField.qml
-    qml/TimelineTrack.qml
-    qml/TimelineRuler.qml
-    qml/TimelineInputHandler.qml
-    qml/PlayheadOverlay.qml
-    qml/TimelineView.qml
+    src/timeline/TimelineTrack.qml
+    src/timeline/TimelineRuler.qml
+    src/timeline/TimelineInputHandler.qml
+    src/timeline/PlayheadOverlay.qml
+    src/timeline/TimelineView.qml
 )
 
 set_source_files_properties(
@@ -87,6 +87,21 @@ set_source_files_properties(
 )
 set_source_files_properties(
     src/controls/TextField.qml PROPERTIES QT_RESOURCE_ALIAS TextField.qml
+)
+set_source_files_properties(
+    src/timeline/TimelineTrack.qml PROPERTIES QT_RESOURCE_ALIAS TimelineTrack.qml
+)
+set_source_files_properties(
+    src/timeline/TimelineRuler.qml PROPERTIES QT_RESOURCE_ALIAS TimelineRuler.qml
+)
+set_source_files_properties(
+    src/timeline/TimelineInputHandler.qml PROPERTIES QT_RESOURCE_ALIAS TimelineInputHandler.qml
+)
+set_source_files_properties(
+    src/timeline/PlayheadOverlay.qml PROPERTIES QT_RESOURCE_ALIAS PlayheadOverlay.qml
+)
+set_source_files_properties(
+    src/timeline/TimelineView.qml PROPERTIES QT_RESOURCE_ALIAS TimelineView.qml
 )
 
 qt_add_qml_module(QtQuickComponents
