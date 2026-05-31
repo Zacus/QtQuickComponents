@@ -2,7 +2,7 @@
 
 ## Project Structure & Module Organization
 
-This repository is a reusable Qt Quick component library. C++ backing types live in `src/`, including theme support, timeline models, ruler models, and viewport logic. QML controls live in `qml/`, with files such as `Button.qml`, `TextField.qml`, `TimelineView.qml`, and related timeline subcomponents. CMake package support is under `cmake/`. Generated files and local build output belong in `build/` and should not be edited directly.
+This repository is a reusable Qt Quick component library. Source files are grouped by feature under `src/`: `theme/` contains `ComponentTheme`, `controls/` contains generic QML controls, and `timeline/` contains `TimelineView` plus its C++ models, viewport, ruler, and track helpers. Tests live under `tests/`, with QML QuickTest cases in `tests/qml/`. CMake package support is under `cmake/`. Generated files and local build output belong in `build/` and should not be edited directly.
 
 ## Build, Test, and Development Commands
 
@@ -32,7 +32,7 @@ Use C++17 and Qt idioms. Keep public C++ types in `PascalCase` files matching th
 
 ## Testing Guidelines
 
-There is currently no dedicated automated test suite in the repository. Before submitting changes, at minimum run a clean CMake configure and build. For QML changes, validate the affected component in a consuming Qt Quick app and check both light and dark theme behavior when relevant. If tests are added later, place them under a top-level `tests/` directory and wire them into CTest so contributors can run `ctest --test-dir build`.
+Automated tests are wired through CTest. `tests/tst_timeline_model.cpp` covers C++ timeline model behavior, and `tests/qml/` contains QML QuickTest cases. Before submitting changes, run a clean CMake configure, build, and `ctest --test-dir build --output-on-failure`. For visible QML changes, add or update QuickTest coverage when practical and still validate the affected component in a consuming Qt Quick app.
 
 ## Commit & Pull Request Guidelines
 
@@ -42,4 +42,4 @@ Pull requests should include a concise summary, affected components, validation 
 
 ## Agent-Specific Instructions
 
-Do not modify files in `build/` unless explicitly asked. Prefer updating source lists in `CMakeLists.txt` whenever adding C++ or QML files so the module remains consumable through `QuickUI.Components 1.0`.
+Do not modify files in `build/` unless explicitly asked. When adding C++ or QML files, update the source lists and `QT_RESOURCE_ALIAS` entries in `CMakeLists.txt` so the module remains consumable through `QuickUI.Components 1.0`.

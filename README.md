@@ -2,6 +2,19 @@
 
 通用 Qt Quick UI 组件库，完全独立于业务项目，通过 `FetchContent` 引入。
 
+## 项目结构
+
+```text
+src/
+  theme/      # ComponentTheme 主题单例与设计 token
+  controls/   # Button、TextField、Label 等通用 QML 控件
+  timeline/   # TimelineView 及其 C++ 模型、视口、刻度和轨道渲染辅助类型
+tests/
+  qml/        # QML QuickTest 用例
+```
+
+所有组件仍导出到同一个 QML 模块：`QuickUI.Components 1.0`。
+
 ## 组件列表
 
 | 组件 | 说明 |
