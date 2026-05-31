@@ -2,7 +2,7 @@
 
 ## Project Structure & Module Organization
 
-This repository is a reusable Qt Quick component library. Source files are grouped by feature under `src/`: `theme/` contains `ComponentTheme`, `controls/` contains generic QML controls, and `timeline/` contains `TimelineView` plus its C++ models, viewport, ruler, and track helpers. Tests live under `tests/`, with QML QuickTest cases in `tests/qml/`. CMake package support is under `cmake/`. Generated files and local build output belong in `build/` and should not be edited directly.
+This repository is a reusable Qt Quick component library. Source files are grouped under `src/`: `theme/` contains `ComponentTheme`, `controls/` contains generic QML controls, and `timeline/` contains `TimelineView` plus its C++ models, viewport, ruler, and track helpers. Tests live under `tests/`; CMake package support is under `cmake/`. Generated files and local build output belong in `build/`.
 
 ## Build, Test, and Development Commands
 
@@ -32,7 +32,11 @@ Use C++17 and Qt idioms. Keep public C++ types in `PascalCase` files matching th
 
 ## Testing Guidelines
 
-Automated tests are wired through CTest. `tests/tst_timeline_model.cpp` covers C++ timeline model behavior, and `tests/qml/` contains QML QuickTest cases. Before submitting changes, run a clean CMake configure, build, and `ctest --test-dir build --output-on-failure`. For visible QML changes, add or update QuickTest coverage when practical and still validate the affected component in a consuming Qt Quick app.
+Automated tests are wired through CTest. `tests/tst_timeline_model.cpp` covers C++ timeline behavior, and `tests/qml/` contains QML QuickTest cases. Before submitting changes, run a clean configure, build, and `ctest --test-dir build --output-on-failure`.
+
+## Versioning Guidelines
+
+`VERSION` is the single SemVer source. Bump `MAJOR` for breaking public C++ or QML API changes, `MINOR` for backward-compatible components or properties, and `PATCH` for fixes, docs, performance work, and internal refactors. QML module versions expose `MAJOR.MINOR`; CMake packages use `MAJOR.MINOR.PATCH`.
 
 ## Commit & Pull Request Guidelines
 
@@ -42,4 +46,4 @@ Pull requests should include a concise summary, affected components, validation 
 
 ## Agent-Specific Instructions
 
-Do not modify files in `build/` unless explicitly asked. When adding C++ or QML files, update the source lists and `QT_RESOURCE_ALIAS` entries in `CMakeLists.txt` so the module remains consumable through `QuickUI.Components 1.0`.
+Do not modify `build/` unless asked. When adding C++ or QML files, update `CMakeLists.txt` source lists and `QT_RESOURCE_ALIAS` entries so imports remain `QuickUI.Components 1.0`.

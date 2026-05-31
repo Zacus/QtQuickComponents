@@ -141,3 +141,13 @@ font.weight: ComponentTheme.fontWeightBold     // 700
 - Qt 6.4+
 - CMake 3.21+
 - C++17
+
+## 版本规则
+
+库版本遵循 SemVer，并以仓库根目录 `VERSION` 文件作为唯一来源。CMake package 使用完整 `MAJOR.MINOR.PATCH`，QML 模块版本使用 `MAJOR.MINOR`。
+
+- `MAJOR`：破坏公开 C++ API、QML 类型、属性语义或 import 兼容性。
+- `MINOR`：向后兼容的新组件、新属性或新能力。
+- `PATCH`：bugfix、性能优化、文档修正或不改变公开 API 的内部重构。
+
+发布 tag 使用 `vMAJOR.MINOR.PATCH`，例如 `v1.0.0`。
