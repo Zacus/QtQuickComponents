@@ -1,7 +1,13 @@
 cmake_minimum_required(VERSION 3.21)
 
+file(READ "${CMAKE_CURRENT_SOURCE_DIR}/VERSION" QTC_VERSION)
+string(STRIP "${QTC_VERSION}" QTC_VERSION)
+if(NOT QTC_VERSION MATCHES "^[0-9]+\\.[0-9]+\\.[0-9]+$")
+    message(FATAL_ERROR "VERSION must use MAJOR.MINOR.PATCH format, got: ${QTC_VERSION}")
+endif()
+
 project(QtQuickComponents
-    VERSION     1.0.0
+    VERSION     ${QTC_VERSION}
     DESCRIPTION "Reusable Qt Quick UI component library"
     LANGUAGES   CXX
 )
@@ -106,7 +112,7 @@ set_source_files_properties(
 
 qt_add_qml_module(QtQuickComponents
     URI     "QuickUI.Components"
-    VERSION 1.0
+    VERSION ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
     OUTPUT_DIRECTORY "${QTC_QML_MODULE_PATH}"
     SOURCES ${QTC_PUBLIC_HEADERS} ${QTC_CPP_SOURCES}
     QML_FILES ${QTC_QML_FILES}
