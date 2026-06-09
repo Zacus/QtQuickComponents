@@ -2,11 +2,11 @@
 
 #include <QObject>
 #include <QColor>
-#include <QFileSystemWatcher>
 #include <QString>
 #include <QStringList>
-#include <QTimer>
 #include <QQmlEngine>
+
+#include "ThemeFileWatcher.h"
 
 struct ThemeTokens;
 
@@ -228,9 +228,6 @@ private:
     bool applyBuiltInTheme(const QString& themeId, Style style);
     void applyTokens(const ThemeTokens& tokens, Style style, const QString& currentThemeFile);
     void setLastError(const QString& error);
-    void clearThemeWatcher();
-    void configureThemeWatcher();
-    void scheduleThemeReload();
 
     Style  m_style = Dark;
     QString m_themeId = QStringLiteral("dark");
@@ -239,10 +236,7 @@ private:
     QString m_currentThemeFile;
     bool m_hotReloadEnabled = false;
     QString m_lastError;
-    QFileSystemWatcher m_themeWatcher;
-    QTimer m_reloadDebounceTimer;
-    QTimer m_themePollTimer;
-    qint64 m_currentThemeFileLastModifiedMs = 0;
+    ThemeFileWatcher m_themeWatcher;
 
     // 强调色
     QColor m_accent;

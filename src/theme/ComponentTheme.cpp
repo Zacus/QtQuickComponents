@@ -2,44 +2,14 @@
 #include "ThemeJsonLoader.h"
 #include "ThemeTokens.h"
 
-#include <QDateTime>
 #include <QDir>
 #include <QFileInfo>
 
 ComponentTheme::ComponentTheme(QObject* parent)
     : QObject(parent)
 {
-    m_reloadDebounceTimer.setSingleShot(true);
-    m_reloadDebounceTimer.setInterval(80);
-    m_themePollTimer.setInterval(100);
-
-    connect(&m_themeWatcher, &QFileSystemWatcher::fileChanged,
-            this, [this](const QString&) { scheduleThemeReload(); });
-    connect(&m_themeWatcher, &QFileSystemWatcher::directoryChanged,
-            this, [this](const QString&) { scheduleThemeReload(); });
-    connect(&m_reloadDebounceTimer, &QTimer::timeout,
+    connect(&m_themeWatcher, &ThemeFileWatcher::reloadRequested,
             this, [this]() { reloadCurrentTheme(); });
-    connect(&m_themePollTimer, &QTimer::timeout,
-            this, [this]() {
-                if (m_currentThemeFile.isEmpty()) {
-                    return;
-                }
-
-                const QFileInfo info(m_currentThemeFile);
-                if (!info.exists()) {
-                    return;
-                }
-
-                const qint64 lastModifiedMs = info.lastModified().toMSecsSinceEpoch();
-                if (m_currentThemeFileLastModifiedMs == 0) {
-                    m_currentThemeFileLastModifiedMs = lastModifiedMs;
-                    return;
-                }
-                if (lastModifiedMs != m_currentThemeFileLastModifiedMs) {
-                    m_currentThemeFileLastModifiedMs = lastModifiedMs;
-                    scheduleThemeReload();
-                }
-            });
 
     applyDark();
 }
@@ -62,7 +32,7 @@ void ComponentTheme::setStyle(Style s)
         m_themeId = QStringLiteral("custom");
         m_themeName = QStringLiteral("Custom");
         m_currentThemeFile.clear();
-        clearThemeWatcher();
+        m_themeWatcher.clear();
         break;   // 保留当前值，由外部逐项覆盖
     }
     setLastError(QString());
@@ -140,7 +110,7 @@ bool ComponentTheme::reloadCurrentTheme()
     const ThemeLoadResult result = ThemeJsonLoader::loadFile(m_currentThemeFile);
     if (!result.ok) {
         setLastError(result.error);
-        configureThemeWatcher();
+        m_themeWatcher.setWatchedFile(m_currentThemeFile);
         return false;
     }
 
@@ -173,10 +143,11 @@ void ComponentTheme::setHotReloadEnabled(bool enabled)
 
     m_hotReloadEnabled = enabled;
     if (m_hotReloadEnabled) {
-        configureThemeWatcher();
+        m_themeWatcher.setEnabled(true);
+        m_themeWatcher.setWatchedFile(m_currentThemeFile);
     } else {
-        clearThemeWatcher();
-        m_reloadDebounceTimer.stop();
+        m_themeWatcher.setEnabled(false);
+        m_themeWatcher.clear();
     }
     emit hotReloadEnabledChanged();
 }
@@ -186,7 +157,7 @@ void ComponentTheme::applyDark()
     m_themeId = QStringLiteral("dark");
     m_themeName = QStringLiteral("Dark");
     m_currentThemeFile.clear();
-    clearThemeWatcher();
+    m_themeWatcher.clear();
 
     // ── 强调色 ────────────────────────────────────────────────
     m_accent         = QColor("#7c6fff");
@@ -233,7 +204,7 @@ void ComponentTheme::applyLight()
     m_themeId = QStringLiteral("light");
     m_themeName = QStringLiteral("Light");
     m_currentThemeFile.clear();
-    clearThemeWatcher();
+    m_themeWatcher.clear();
 
     // ── 强调色 ────────────────────────────────────────────────
     m_accent         = QColor("#5b4de8");
@@ -281,7 +252,7 @@ void ComponentTheme::setAccent(const QColor& c)
     m_themeId        = QStringLiteral("custom");
     m_themeName      = QStringLiteral("Custom");
     m_currentThemeFile.clear();
-    clearThemeWatcher();
+    m_themeWatcher.clear();
     setLastError(QString());
     m_accent         = c;
     m_accentHover    = c.lighter(115);
@@ -298,7 +269,7 @@ void ComponentTheme::setButtonRadius(int r)
     m_themeId      = QStringLiteral("custom");
     m_themeName    = QStringLiteral("Custom");
     m_currentThemeFile.clear();
-    clearThemeWatcher();
+    m_themeWatcher.clear();
     setLastError(QString());
     m_buttonRadius = r;
     // 输入框圆角与按钮保持一致
@@ -312,7 +283,7 @@ void ComponentTheme::setFontFamily(const QString& family)
     m_themeId    = QStringLiteral("custom");
     m_themeName  = QStringLiteral("Custom");
     m_currentThemeFile.clear();
-    clearThemeWatcher();
+    m_themeWatcher.clear();
     setLastError(QString());
     m_fontFamily = family;
     emit styleChanged();
@@ -407,7 +378,8 @@ void ComponentTheme::applyTokens(const ThemeTokens& tokens, Style style, const Q
     m_reducedMotion = tokens.reducedMotion;
 
     setLastError(QString());
-    configureThemeWatcher();
+    m_themeWatcher.setEnabled(m_hotReloadEnabled);
+    m_themeWatcher.setWatchedFile(m_currentThemeFile);
 }
 
 void ComponentTheme::setLastError(const QString& error)
@@ -415,46 +387,4 @@ void ComponentTheme::setLastError(const QString& error)
     if (m_lastError == error) return;
     m_lastError = error;
     emit lastErrorChanged();
-}
-
-void ComponentTheme::clearThemeWatcher()
-{
-    m_reloadDebounceTimer.stop();
-    const QStringList files = m_themeWatcher.files();
-    if (!files.isEmpty()) {
-        m_themeWatcher.removePaths(files);
-    }
-    const QStringList directories = m_themeWatcher.directories();
-    if (!directories.isEmpty()) {
-        m_themeWatcher.removePaths(directories);
-    }
-    m_themePollTimer.stop();
-    m_currentThemeFileLastModifiedMs = 0;
-}
-
-void ComponentTheme::configureThemeWatcher()
-{
-    clearThemeWatcher();
-    if (!m_hotReloadEnabled || m_currentThemeFile.isEmpty()) {
-        return;
-    }
-
-    const QFileInfo info(m_currentThemeFile);
-    if (info.exists()) {
-        m_currentThemeFileLastModifiedMs = info.lastModified().toMSecsSinceEpoch();
-        const bool watchesFile = m_themeWatcher.addPath(info.absoluteFilePath());
-        const bool watchesDirectory = m_themeWatcher.addPath(info.absolutePath());
-        if (!watchesFile && !watchesDirectory) {
-            m_themePollTimer.start();
-        }
-    }
-}
-
-void ComponentTheme::scheduleThemeReload()
-{
-    if (!m_hotReloadEnabled) {
-        return;
-    }
-
-    m_reloadDebounceTimer.start();
 }

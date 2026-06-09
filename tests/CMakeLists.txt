@@ -55,6 +55,17 @@ target_link_libraries(tst_theme_json_loader PRIVATE
 
 add_test(NAME ThemeJsonLoader COMMAND tst_theme_json_loader)
 
+qt_add_executable(tst_theme_file_watcher
+    tst_theme_file_watcher.cpp
+)
+
+target_link_libraries(tst_theme_file_watcher PRIVATE
+    QtQuickComponents
+    Qt6::Test
+)
+
+add_test(NAME ThemeFileWatcher COMMAND tst_theme_file_watcher)
+
 qt_add_executable(tst_qml_components
     tst_qml_components.cpp
 )

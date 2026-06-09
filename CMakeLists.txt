@@ -51,6 +51,7 @@ set(QTC_QML_MODULE_PATH "${QTC_QML_OUTPUT_BASE}/QuickUI/Components")
 
 set(QTC_PUBLIC_HEADERS
     src/theme/ComponentTheme.h
+    src/theme/ThemeFileWatcher.h
     src/theme/ThemeJsonLoader.h
     src/theme/ThemeTokens.h
     src/timeline/TimelineEnums.h
@@ -64,6 +65,7 @@ set(QTC_PUBLIC_HEADERS
 
 set(QTC_CPP_SOURCES
     src/theme/ComponentTheme.cpp
+    src/theme/ThemeFileWatcher.cpp
     src/theme/ThemeJsonLoader.cpp
     src/timeline/TimelineModel.cpp
     src/timeline/TimelineViewport.cpp
