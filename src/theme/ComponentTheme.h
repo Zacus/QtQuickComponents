@@ -8,6 +8,8 @@
 #include <QTimer>
 #include <QQmlEngine>
 
+struct ThemeTokens;
+
 /**
  * @brief 组件库全局主题单例
  *
@@ -219,63 +221,16 @@ signals:
     void lastErrorChanged();
 
 private:
-    struct ThemeTokens
-    {
-        QString id;
-        QString name;
-
-        QColor accent;
-        QColor accentHover;
-        QColor accentPressed;
-        QColor accentDisabled;
-        QColor iconColor;
-        QColor iconColorPressed;
-        QColor buttonHover;
-        QColor buttonPressed;
-        QColor trackBg;
-        QColor trackBuffer;
-        QColor handleBorder;
-        QColor textPrimary;
-        QColor textSecondary;
-        QColor textDisabled;
-        QColor textOnAccent;
-        QColor surface;
-        QColor surfaceHover;
-        QColor separator;
-        QColor inputBg;
-        QColor inputBorder;
-        QColor inputFocus;
-        QColor inputText;
-        QColor inputPlaceholder;
-
-        int buttonSize = 34;
-        int buttonRadius = 6;
-        int inputHeight = 36;
-        int inputRadius = 6;
-        int trackHeight = 4;
-        int handleSize = 14;
-
-        QString fontFamily;
-        int fontSize = 16;
-        int fontSizeLabel = 13;
-        int fontSizeCaption = 11;
-
-        int durationFast = 80;
-        int durationNormal = 120;
-        bool reducedMotion = false;
-    };
-
     explicit ComponentTheme(QObject* parent = nullptr);
     void applyDark();
     void applyLight();
     void applyDefaultSizes();   // Dark/Light 共用尺寸/字体，避免重复
+    bool applyBuiltInTheme(const QString& themeId, Style style);
     void applyTokens(const ThemeTokens& tokens, Style style, const QString& currentThemeFile);
-    bool parseThemeFile(const QString& path, ThemeTokens& tokens, QString& error) const;
     void setLastError(const QString& error);
     void clearThemeWatcher();
     void configureThemeWatcher();
     void scheduleThemeReload();
-    static bool isValidThemeId(const QString& themeId);
 
     Style  m_style = Dark;
     QString m_themeId = QStringLiteral("dark");

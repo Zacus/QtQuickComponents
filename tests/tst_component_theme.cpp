@@ -21,6 +21,7 @@ private slots:
     void oversizedIntegerDoesNotPolluteExistingTokens();
     void zeroRadiusIsValidThemeToken();
     void loadThemeUsesThemeDirectoryJson();
+    void loadThemeUsesBuiltInJson();
     void availableThemesListsJsonFileIds();
     void hotReloadUpdatesCurrentTheme();
     void hotReloadSurvivesRepeatedAtomicRewrites();
@@ -317,6 +318,54 @@ void ComponentThemeTest::loadThemeUsesThemeDirectoryJson()
     QCOMPARE(theme.themeName(), QStringLiteral("Directory Dark"));
     QCOMPARE(theme.accent(), QColor(QStringLiteral("#123456")));
     QCOMPARE(theme.buttonSize(), 50);
+}
+
+void ComponentThemeTest::loadThemeUsesBuiltInJson()
+{
+    struct EnvironmentRestorer
+    {
+        explicit EnvironmentRestorer(const char* name)
+            : variableName(name)
+            , existed(qEnvironmentVariableIsSet(name))
+            , originalValue(qgetenv(name))
+        {
+        }
+
+        ~EnvironmentRestorer()
+        {
+            if (existed) {
+                qputenv(variableName, originalValue);
+            } else {
+                qunsetenv(variableName);
+            }
+        }
+
+        const char* variableName = nullptr;
+        bool existed = false;
+        QByteArray originalValue;
+    };
+
+    EnvironmentRestorer restorer("QTC_THEME_TEST_RUNTIME_DIR");
+    QTemporaryDir dir;
+    QVERIFY(dir.isValid());
+    qputenv("QTC_THEME_TEST_RUNTIME_DIR", dir.path().toUtf8());
+    QVERIFY(!writeThemeFile(dir.path(),
+                            QStringLiteral("dark.json"),
+                            themeJson(QStringLiteral("dark"),
+                                      QStringLiteral("Runtime Dark"),
+                                      QStringLiteral("#010203"),
+                                      34,
+                                      QString(),
+                                      6,
+                                      6)).isEmpty());
+
+    ComponentTheme& theme = ComponentTheme::instance();
+
+    QVERIFY(theme.loadTheme(QStringLiteral("dark")));
+    QCOMPARE(theme.themeId(), QStringLiteral("dark"));
+    QCOMPARE(theme.themeName(), QStringLiteral("Runtime Dark"));
+    QCOMPARE(theme.style(), ComponentTheme::Dark);
+    QCOMPARE(theme.accent(), QColor(QStringLiteral("#010203")));
 }
 
 void ComponentThemeTest::availableThemesListsJsonFileIds()

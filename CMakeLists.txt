@@ -18,6 +18,7 @@ set(CMAKE_AUTOMOC ON)
 
 find_package(Qt6 REQUIRED COMPONENTS Quick QuickControls2)
 qt_standard_project_setup()
+include(GNUInstallDirs)
 
 option(QTC_BUILD_TESTS "Build QtQuickComponents tests" ${PROJECT_IS_TOP_LEVEL})
 option(QTC_BUILD_EXAMPLES "Build QtQuickComponents example applications" OFF)
@@ -50,6 +51,8 @@ set(QTC_QML_MODULE_PATH "${QTC_QML_OUTPUT_BASE}/QuickUI/Components")
 
 set(QTC_PUBLIC_HEADERS
     src/theme/ComponentTheme.h
+    src/theme/ThemeJsonLoader.h
+    src/theme/ThemeTokens.h
     src/timeline/TimelineEnums.h
     src/timeline/TimelineSegment.h
     src/timeline/TimelineModel.h
@@ -61,6 +64,7 @@ set(QTC_PUBLIC_HEADERS
 
 set(QTC_CPP_SOURCES
     src/theme/ComponentTheme.cpp
+    src/theme/ThemeJsonLoader.cpp
     src/timeline/TimelineModel.cpp
     src/timeline/TimelineViewport.cpp
     src/timeline/RulerModel.cpp
@@ -153,8 +157,16 @@ target_link_libraries(QtQuickComponents PUBLIC
     Qt6::QuickControls2
 )
 
+target_compile_definitions(QtQuickComponents PRIVATE
+    QTC_THEME_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}/themes"
+    QTC_THEME_BUILD_DIR="${QTC_THEME_OUTPUT_DIR}"
+    QTC_THEME_INSTALL_DIR="${CMAKE_INSTALL_FULL_DATADIR}/QtQuickComponents/themes"
+)
+if(QTC_BUILD_TESTS)
+    target_compile_definitions(QtQuickComponents PRIVATE QTC_ENABLE_THEME_TEST_OVERRIDES)
+endif()
+
 # ── 安装规则 ──────────────────────────────────────────────────
-include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
 
 install(TARGETS QtQuickComponents
