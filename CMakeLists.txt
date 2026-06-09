@@ -90,6 +90,12 @@ file(GLOB QTC_THEME_FILES CONFIGURE_DEPENDS
     "${CMAKE_CURRENT_SOURCE_DIR}/themes/*.json"
 )
 set(QTC_THEME_OUTPUT_DIR "${QTC_QML_OUTPUT_BASE}/themes")
+foreach(_qtc_theme_file IN LISTS QTC_THEME_FILES)
+    get_filename_component(_qtc_theme_name "${_qtc_theme_file}" NAME)
+    set_source_files_properties("${_qtc_theme_file}" PROPERTIES
+        QT_RESOURCE_ALIAS "themes/${_qtc_theme_name}"
+    )
+endforeach()
 
 set_source_files_properties(
     src/controls/IconButton.qml PROPERTIES QT_RESOURCE_ALIAS IconButton.qml
@@ -128,6 +134,7 @@ qt_add_qml_module(QtQuickComponents
     OUTPUT_DIRECTORY "${QTC_QML_MODULE_PATH}"
     SOURCES ${QTC_PUBLIC_HEADERS} ${QTC_CPP_SOURCES}
     QML_FILES ${QTC_QML_FILES}
+    RESOURCES ${QTC_THEME_FILES}
 )
 
 add_custom_target(QtQuickComponents_copy_themes ALL

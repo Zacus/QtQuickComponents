@@ -222,9 +222,6 @@ signals:
 
 private:
     explicit ComponentTheme(QObject* parent = nullptr);
-    void applyDark();
-    void applyLight();
-    void applyDefaultSizes();   // Dark/Light 共用尺寸/字体，避免重复
     bool applyBuiltInTheme(const QString& themeId, Style style);
     void applyTokens(const ThemeTokens& tokens, Style style, const QString& currentThemeFile);
     void setLastError(const QString& error);

@@ -16,6 +16,7 @@ private slots:
     void rejectsOversizedInteger();
     void acceptsZeroRadius();
     void rejectsInvalidColor();
+    void builtInThemeJsonResourcesAreAvailable();
     void loadsBuiltInDarkTheme();
     void loadsBuiltInLightTheme();
     void ignoresCurrentWorkingDirectoryThemes();
@@ -147,13 +148,19 @@ void ThemeJsonLoaderTest::rejectsInvalidColor()
     QVERIFY(result.error.contains(QStringLiteral("accent")));
 }
 
+void ThemeJsonLoaderTest::builtInThemeJsonResourcesAreAvailable()
+{
+    QVERIFY(QFile::exists(QStringLiteral(":/QuickUI/Components/themes/dark.json")));
+    QVERIFY(QFile::exists(QStringLiteral(":/QuickUI/Components/themes/light.json")));
+}
+
 void ThemeJsonLoaderTest::loadsBuiltInDarkTheme()
 {
     ThemeLoadResult result = ThemeJsonLoader::loadBuiltInTheme(QStringLiteral("dark"));
 
     QVERIFY(result.ok);
     QCOMPARE(result.tokens.id, QStringLiteral("dark"));
-    QVERIFY(result.tokens.accent.isValid());
+    QCOMPARE(result.tokens.accent, QColor(QStringLiteral("#7c6fff")));
     QCOMPARE(result.error, QString());
 }
 

@@ -52,6 +52,7 @@ QStringList builtInThemeCandidatePaths(const QString& themeId)
     appendThemePath(QDir(applicationDir).filePath(QStringLiteral("../share/QtQuickComponents/themes")));
     appendThemePath(QDir(applicationDir).filePath(QStringLiteral("../../share/QtQuickComponents/themes")));
     appendThemePath(QString::fromUtf8(QTC_THEME_INSTALL_DIR));
+    appendThemePath(QStringLiteral(":/QuickUI/Components/themes"));
     appendThemePath(QString::fromUtf8(QTC_THEME_BUILD_DIR));
     appendThemePath(QString::fromUtf8(QTC_THEME_SOURCE_DIR));
 
