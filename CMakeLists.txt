@@ -80,6 +80,11 @@ set(QTC_QML_FILES
     src/timeline/TimelineView.qml
 )
 
+file(GLOB QTC_THEME_FILES CONFIGURE_DEPENDS
+    "${CMAKE_CURRENT_SOURCE_DIR}/themes/*.json"
+)
+set(QTC_THEME_OUTPUT_DIR "${QTC_QML_OUTPUT_BASE}/themes")
+
 set_source_files_properties(
     src/controls/IconButton.qml PROPERTIES QT_RESOURCE_ALIAS IconButton.qml
 )
@@ -118,6 +123,14 @@ qt_add_qml_module(QtQuickComponents
     SOURCES ${QTC_PUBLIC_HEADERS} ${QTC_CPP_SOURCES}
     QML_FILES ${QTC_QML_FILES}
 )
+
+add_custom_target(QtQuickComponents_copy_themes ALL
+    COMMAND ${CMAKE_COMMAND} -E make_directory "${QTC_THEME_OUTPUT_DIR}"
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${QTC_THEME_FILES} "${QTC_THEME_OUTPUT_DIR}"
+    DEPENDS ${QTC_THEME_FILES}
+    COMMENT "Copying QtQuickComponents theme JSON files"
+)
+add_dependencies(QtQuickComponents QtQuickComponents_copy_themes)
 
 # 动态构建：qt_add_qml_module 创建的插件目标名为 QtQuickComponentsplugin（Qt 约定）
 # 需要确保插件 .dylib/.so 与 qmldir 输出到同一目录，QML 运行时才能找到
@@ -166,6 +179,10 @@ install(FILES
 )
 install(DIRECTORY "${QTC_QML_OUTPUT_BASE}/QuickUI/"
     DESTINATION ${CMAKE_INSTALL_DATADIR}/QtQuickComponents/QuickUI
+)
+install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/themes/"
+    DESTINATION ${CMAKE_INSTALL_DATADIR}/QtQuickComponents/themes
+    FILES_MATCHING PATTERN "*.json"
 )
 
 install(EXPORT QtQuickComponentsTargets

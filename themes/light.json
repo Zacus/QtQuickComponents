@@ -1,0 +1,48 @@
+{
+  "id": "light",
+  "name": "Light",
+  "colors": {
+    "accent": "#5b4de8",
+    "accentHover": "#7b6fff",
+    "accentPressed": "#4a3dd4",
+    "accentDisabled": "#b0acd8",
+    "iconColor": "#00000099",
+    "iconColorPressed": "#000000cc",
+    "buttonHover": "#0000000e",
+    "buttonPressed": "#00000018",
+    "trackBg": "#d0d0e0",
+    "trackBuffer": "#00000012",
+    "handleBorder": "#00000030",
+    "textPrimary": "#18181f",
+    "textSecondary": "#60607a",
+    "textDisabled": "#a8a8be",
+    "textOnAccent": "#ffffff",
+    "surface": "#f4f4f8",
+    "surfaceHover": "#ebebf2",
+    "separator": "#00000014",
+    "inputBg": "#ffffff",
+    "inputBorder": "#00000020",
+    "inputFocus": "#5b4de8",
+    "inputText": "#18181f",
+    "inputPlaceholder": "#a8a8be"
+  },
+  "sizes": {
+    "buttonSize": 34,
+    "buttonRadius": 6,
+    "inputHeight": 36,
+    "inputRadius": 6,
+    "trackHeight": 4,
+    "handleSize": 14
+  },
+  "fonts": {
+    "fontFamily": "",
+    "fontSize": 16,
+    "fontSizeLabel": 13,
+    "fontSizeCaption": 11
+  },
+  "motion": {
+    "durationFast": 80,
+    "durationNormal": 120,
+    "reducedMotion": false
+  }
+}

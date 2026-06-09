@@ -1,0 +1,48 @@
+{
+  "id": "dark",
+  "name": "Dark",
+  "colors": {
+    "accent": "#7c6fff",
+    "accentHover": "#9d90ff",
+    "accentPressed": "#9d90ff",
+    "accentDisabled": "#44445a",
+    "iconColor": "#ffffff99",
+    "iconColorPressed": "#ffffffcc",
+    "buttonHover": "#ffffff0e",
+    "buttonPressed": "#ffffff18",
+    "trackBg": "#2a2a3a",
+    "trackBuffer": "#ffffff12",
+    "handleBorder": "#ffffff30",
+    "textPrimary": "#f0f0f5",
+    "textSecondary": "#9090a8",
+    "textDisabled": "#50505f",
+    "textOnAccent": "#ffffff",
+    "surface": "#1e1e2a",
+    "surfaceHover": "#26263a",
+    "separator": "#ffffff14",
+    "inputBg": "#14141e",
+    "inputBorder": "#ffffff20",
+    "inputFocus": "#7c6fff",
+    "inputText": "#f0f0f5",
+    "inputPlaceholder": "#50505f"
+  },
+  "sizes": {
+    "buttonSize": 34,
+    "buttonRadius": 6,
+    "inputHeight": 36,
+    "inputRadius": 6,
+    "trackHeight": 4,
+    "handleSize": 14
+  },
+  "fonts": {
+    "fontFamily": "",
+    "fontSize": 16,
+    "fontSizeLabel": 13,
+    "fontSizeCaption": 11
+  },
+  "motion": {
+    "durationFast": 80,
+    "durationNormal": 120,
+    "reducedMotion": false
+  }
+}

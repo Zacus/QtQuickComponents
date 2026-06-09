@@ -2,7 +2,10 @@
 
 #include <QObject>
 #include <QColor>
+#include <QFileSystemWatcher>
 #include <QString>
+#include <QStringList>
+#include <QTimer>
 #include <QQmlEngine>
 
 /**
@@ -68,6 +71,28 @@ public:
     Q_PROPERTY(Style style READ style WRITE setStyle NOTIFY styleChanged)
     Style style() const { return m_style; }
     void  setStyle(Style s);
+
+    // ── JSON 主题元信息与加载 ─────────────────────────────────
+    Q_PROPERTY(QString themeId READ themeId NOTIFY styleChanged)
+    Q_PROPERTY(QString themeName READ themeName NOTIFY styleChanged)
+    Q_PROPERTY(QString themeDirectory READ themeDirectory WRITE setThemeDirectory NOTIFY themeDirectoryChanged)
+    Q_PROPERTY(bool hotReloadEnabled READ hotReloadEnabled WRITE setHotReloadEnabled NOTIFY hotReloadEnabledChanged)
+    Q_PROPERTY(QString lastError READ lastError NOTIFY lastErrorChanged)
+
+    QString themeId() const { return m_themeId; }
+    QString themeName() const { return m_themeName; }
+    QString themeDirectory() const { return m_themeDirectory; }
+    void setThemeDirectory(const QString& directory);
+
+    bool hotReloadEnabled() const { return m_hotReloadEnabled; }
+    void setHotReloadEnabled(bool enabled);
+
+    QString lastError() const { return m_lastError; }
+
+    Q_INVOKABLE bool loadTheme(const QString& themeId);
+    Q_INVOKABLE bool loadThemeFile(const QString& path);
+    Q_INVOKABLE bool reloadCurrentTheme();
+    Q_INVOKABLE QStringList availableThemes() const;
 
     // ── 核心色彩 Token ────────────────────────────────────────
     Q_PROPERTY(QColor accent          READ accent          NOTIFY styleChanged)
@@ -189,14 +214,80 @@ public:
 
 signals:
     void styleChanged();
+    void themeDirectoryChanged();
+    void hotReloadEnabledChanged();
+    void lastErrorChanged();
 
 private:
+    struct ThemeTokens
+    {
+        QString id;
+        QString name;
+
+        QColor accent;
+        QColor accentHover;
+        QColor accentPressed;
+        QColor accentDisabled;
+        QColor iconColor;
+        QColor iconColorPressed;
+        QColor buttonHover;
+        QColor buttonPressed;
+        QColor trackBg;
+        QColor trackBuffer;
+        QColor handleBorder;
+        QColor textPrimary;
+        QColor textSecondary;
+        QColor textDisabled;
+        QColor textOnAccent;
+        QColor surface;
+        QColor surfaceHover;
+        QColor separator;
+        QColor inputBg;
+        QColor inputBorder;
+        QColor inputFocus;
+        QColor inputText;
+        QColor inputPlaceholder;
+
+        int buttonSize = 34;
+        int buttonRadius = 6;
+        int inputHeight = 36;
+        int inputRadius = 6;
+        int trackHeight = 4;
+        int handleSize = 14;
+
+        QString fontFamily;
+        int fontSize = 16;
+        int fontSizeLabel = 13;
+        int fontSizeCaption = 11;
+
+        int durationFast = 80;
+        int durationNormal = 120;
+        bool reducedMotion = false;
+    };
+
     explicit ComponentTheme(QObject* parent = nullptr);
     void applyDark();
     void applyLight();
     void applyDefaultSizes();   // Dark/Light 共用尺寸/字体，避免重复
+    void applyTokens(const ThemeTokens& tokens, Style style, const QString& currentThemeFile);
+    bool parseThemeFile(const QString& path, ThemeTokens& tokens, QString& error) const;
+    void setLastError(const QString& error);
+    void clearThemeWatcher();
+    void configureThemeWatcher();
+    void scheduleThemeReload();
+    static bool isValidThemeId(const QString& themeId);
 
     Style  m_style = Dark;
+    QString m_themeId = QStringLiteral("dark");
+    QString m_themeName = QStringLiteral("Dark");
+    QString m_themeDirectory;
+    QString m_currentThemeFile;
+    bool m_hotReloadEnabled = false;
+    QString m_lastError;
+    QFileSystemWatcher m_themeWatcher;
+    QTimer m_reloadDebounceTimer;
+    QTimer m_themePollTimer;
+    qint64 m_currentThemeFileLastModifiedMs = 0;
 
     // 强调色
     QColor m_accent;

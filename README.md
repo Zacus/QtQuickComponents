@@ -9,6 +9,7 @@ src/
   theme/      # ComponentTheme 主题单例与设计 token
   controls/   # Button、TextField、Label 等通用 QML 控件
   timeline/   # TimelineView 及其 C++ 模型、视口、刻度和轨道渲染辅助类型
+themes/       # JSON 主题文件，默认包含 dark / light
 tests/
   qml/        # QML QuickTest 用例
 ```
@@ -72,6 +73,11 @@ import QuickUI.Components 1.0
 Component.onCompleted: {
     ComponentTheme.style = ComponentTheme.Light
 
+    // JSON 主题：从 themes/<id>.json 加载，文件修改后可热加载
+    ComponentTheme.themeDirectory = "/path/to/themes"
+    ComponentTheme.hotReloadEnabled = true
+    ComponentTheme.loadTheme("dark")
+
     // Custom 模式：逐项覆盖
     ComponentTheme.setAccent("#ff6b6b")
     ComponentTheme.setFontFamily("Inter")
@@ -120,6 +126,39 @@ ProgressSlider {
     onMoved:        player.seek(value)
 }
 ```
+
+## JSON 主题
+
+`ComponentTheme` 支持从 JSON 文件加载完整主题 token。默认主题文件位于仓库 `themes/` 目录，构建时会复制到 `${QTC_QML_OUTPUT_BASE}/themes`，安装时会复制到 QtQuickComponents 的 share 目录。
+
+节选示例：
+
+```json
+{
+  "id": "dark",
+  "name": "Dark",
+  "colors": {
+    "accent": "#7c6fff",
+    "textPrimary": "#f0f0f5",
+    "surface": "#1e1e2a"
+  },
+  "sizes": {
+    "buttonSize": 34,
+    "buttonRadius": 6
+  },
+  "fonts": {
+    "fontFamily": "",
+    "fontSize": 16
+  },
+  "motion": {
+    "durationFast": 80,
+    "durationNormal": 120,
+    "reducedMotion": false
+  }
+}
+```
+
+实际主题文件必须包含所有 `ComponentTheme` token，完整格式可参考 `themes/dark.json` 和 `themes/light.json`。加载时会先完整校验 JSON，只有全部字段合法才会应用；坏 JSON 或非法颜色不会污染当前主题。启用 `hotReloadEnabled` 后，当前主题文件变化会通过 `QFileSystemWatcher` 自动重新加载并触发 `styleChanged()`。
 
 ## 字体 Token
 

@@ -33,6 +33,17 @@ target_link_libraries(tst_ruler_model PRIVATE
 
 add_test(NAME RulerModel COMMAND tst_ruler_model)
 
+qt_add_executable(tst_component_theme
+    tst_component_theme.cpp
+)
+
+target_link_libraries(tst_component_theme PRIVATE
+    QtQuickComponents
+    Qt6::Test
+)
+
+add_test(NAME ComponentTheme COMMAND tst_component_theme)
+
 qt_add_executable(tst_qml_components
     tst_qml_components.cpp
 )
