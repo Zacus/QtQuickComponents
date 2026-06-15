@@ -74,6 +74,7 @@ set(QTC_CPP_SOURCES
 )
 
 set(QTC_QML_FILES
+    src/controls/ComboBox.qml
     src/controls/IconButton.qml
     src/controls/ProgressSlider.qml
     src/controls/Button.qml
@@ -97,6 +98,9 @@ foreach(_qtc_theme_file IN LISTS QTC_THEME_FILES)
     )
 endforeach()
 
+set_source_files_properties(
+    src/controls/ComboBox.qml PROPERTIES QT_RESOURCE_ALIAS ComboBox.qml
+)
 set_source_files_properties(
     src/controls/IconButton.qml PROPERTIES QT_RESOURCE_ALIAS IconButton.qml
 )

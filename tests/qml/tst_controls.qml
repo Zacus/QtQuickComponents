@@ -55,6 +55,21 @@ TestCase {
     }
 
     Component {
+        id: comboBoxComponent
+
+        ComboBox {
+            model: ListModel {
+                ListElement { code: "en_US"; label: "EN" }
+                ListElement { code: "zh_CN"; label: "中文" }
+            }
+            textRole: "label"
+            valueRole: "code"
+            currentIndex: 1
+            popupMaxVisibleItems: 4
+        }
+    }
+
+    Component {
         id: labelComponent
 
         Label {
@@ -116,6 +131,36 @@ TestCase {
         compare(slider.pressed, false)
         compare(slider.hovered, false)
         compare(slider.enabled, true)
+    }
+
+    function test_comboBoxUsesControlStateApi() {
+        var combo = createTemporaryObject(comboBoxComponent, this)
+
+        verify(combo !== null)
+        compare(combo.currentIndex, 1)
+        compare(combo.currentText, "中文")
+        compare(combo.currentValue, "zh_CN")
+        compare(combo.popupMaxVisibleItems, 4)
+        compare(combo.pressedBackgroundColor, ComponentTheme.buttonHover)
+        compare(combo.selectedBackgroundColor, ComponentTheme.surfaceHover)
+        compare(combo.selectedTextColor, ComponentTheme.textPrimary)
+        compare(combo.hovered, false)
+        compare(combo.down, false)
+    }
+
+    function test_comboBoxDelegateUsesTextRole() {
+        var combo = createTemporaryObject(comboBoxComponent, this)
+        verify(combo !== null)
+
+        var first = combo.delegate.createObject(combo, { "index": 0 })
+        verify(first !== null)
+        compare(first.contentItem.text, "EN")
+        first.destroy()
+
+        var second = combo.delegate.createObject(combo, { "index": 1 })
+        verify(second !== null)
+        compare(second.contentItem.text, "中文")
+        second.destroy()
     }
 
     function test_labelUsesControlLabelApiAndRole() {

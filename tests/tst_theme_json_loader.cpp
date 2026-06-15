@@ -13,6 +13,7 @@ class ThemeJsonLoaderTest : public QObject
 
 private slots:
     void loadsCompleteJson();
+    void parsesCssRgbaHexColors();
     void rejectsOversizedInteger();
     void acceptsZeroRadius();
     void rejectsInvalidColor();
@@ -102,6 +103,24 @@ void ThemeJsonLoaderTest::loadsCompleteJson()
     QCOMPARE(result.tokens.accent, QColor(QStringLiteral("#102030")));
     QCOMPARE(result.tokens.buttonRadius, 6);
     QCOMPARE(result.error, QString());
+}
+
+void ThemeJsonLoaderTest::parsesCssRgbaHexColors()
+{
+    QTemporaryDir dir;
+    QVERIFY(dir.isValid());
+    QString json = validThemeJson();
+    json.replace(QStringLiteral("\"buttonHover\": \"#778899\""), QStringLiteral("\"buttonHover\": \"#11223344\""));
+    const QString path = writeFile(dir.path(), QStringLiteral("rgba.json"), json);
+    QVERIFY(!path.isEmpty());
+
+    ThemeLoadResult result = ThemeJsonLoader::loadFile(path);
+
+    QVERIFY(result.ok);
+    QCOMPARE(result.tokens.buttonHover.red(), 0x11);
+    QCOMPARE(result.tokens.buttonHover.green(), 0x22);
+    QCOMPARE(result.tokens.buttonHover.blue(), 0x33);
+    QCOMPARE(result.tokens.buttonHover.alpha(), 0x44);
 }
 
 void ThemeJsonLoaderTest::rejectsOversizedInteger()

@@ -59,6 +59,26 @@ QStringList builtInThemeCandidatePaths(const QString& themeId)
     return paths;
 }
 
+QColor parseThemeColor(const QString& colorText)
+{
+    static const QRegularExpression cssRgbaHexPattern(QStringLiteral("^#[0-9a-fA-F]{8}$"));
+    if (!cssRgbaHexPattern.match(colorText).hasMatch()) {
+        return QColor(colorText);
+    }
+
+    bool ok = false;
+    const int red = colorText.mid(1, 2).toInt(&ok, 16);
+    if (!ok) return {};
+    const int green = colorText.mid(3, 2).toInt(&ok, 16);
+    if (!ok) return {};
+    const int blue = colorText.mid(5, 2).toInt(&ok, 16);
+    if (!ok) return {};
+    const int alpha = colorText.mid(7, 2).toInt(&ok, 16);
+    if (!ok) return {};
+
+    return QColor(red, green, blue, alpha);
+}
+
 } // namespace
 
 ThemeLoadResult ThemeJsonLoader::loadFile(const QString& path)
@@ -128,7 +148,7 @@ ThemeLoadResult ThemeJsonLoader::loadData(const QByteArray& data, const QString&
         if (!requiredString(object, key, colorText)) {
             return false;
         }
-        const QColor color(colorText);
+        const QColor color = parseThemeColor(colorText);
         if (!color.isValid()) {
             result.error = QStringLiteral("Theme file '%1' has invalid color '%2' for '%3'")
                                .arg(sourceName, colorText, key);

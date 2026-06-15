@@ -23,6 +23,7 @@ tests/
 | 组件 | 说明 |
 |---|---|
 | `IconButton` | 纯文本/Emoji 图标按钮，支持 hover 效果和 tooltip |
+| `ComboBox` | 通用下拉选择框，支持 textRole/valueRole、键盘焦点和主题化弹出菜单 |
 | `ProgressSlider` | 自定义外观滑块，支持点击任意位置跳转、bufferPosition |
 | `Button` | 通用按钮，filled / outline / ghost 三种变体，支持 loading 状态 |
 | `Label` | 语义化文本标签，body / label / caption / heading 四种角色 |
@@ -115,6 +116,20 @@ IconButton {
     iconText: "▶"
     tooltip:  "Play"
     onClicked: player.play()
+}
+
+// ── ComboBox ─────────────────────────────────────────────────
+ComboBox {
+    model: ListModel {
+        ListElement { code: "en_US"; label: "EN" }
+        ListElement { code: "zh_CN"; label: "中文" }
+    }
+    textRole: "label"
+    valueRole: "code"
+    popupMaxVisibleItems: 4
+    onActivated: function(index) {
+        console.log(model.get(index).code)
+    }
 }
 
 // ── ProgressSlider ────────────────────────────────────────────
