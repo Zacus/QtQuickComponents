@@ -23,6 +23,16 @@ QQC2.Slider {
             height: ComponentTheme.trackHeight
             radius: ComponentTheme.trackHeight / 2
             color:  ComponentTheme.trackBg
+            border.width: 1
+            border.color: Qt.rgba(0, 0, 0, 0.22)
+
+            Rectangle {
+                anchors { left: parent.left; right: parent.right; top: parent.top; margins: 1 }
+                height: 1
+                radius: parent.radius
+                color: Qt.rgba(1, 1, 1, 0.12)
+                visible: parent.height >= 4
+            }
 
             // 已播放部分
             Rectangle {
@@ -30,6 +40,14 @@ QQC2.Slider {
                 height: parent.height
                 radius: parent.radius
                 color:  root.enabled ? ComponentTheme.accent : ComponentTheme.accentDisabled
+
+                Rectangle {
+                    anchors { left: parent.left; right: parent.right; top: parent.top; margins: 1 }
+                    height: 1
+                    radius: parent.radius
+                    color: Qt.rgba(1, 1, 1, 0.18)
+                    visible: parent.width > 2
+                }
 
                 Behavior on width { NumberAnimation { duration: 100 } }
             }
@@ -62,11 +80,20 @@ QQC2.Slider {
         radius: ComponentTheme.handleSize / 2
         color:  root.pressed ? ComponentTheme.accentPressed : ComponentTheme.accent
         border.color: ComponentTheme.handleBorder
+        border.width: 1
         visible: root.enabled
+
+        Rectangle {
+            anchors.centerIn: parent
+            width: parent.width - 5
+            height: parent.height - 5
+            radius: width / 2
+            color: Qt.rgba(1, 1, 1, root.pressed ? 0.08 : 0.18)
+        }
 
         Behavior on color { ColorAnimation { duration: ComponentTheme.durationFast } }
 
-        scale: root.hovered ? 1.25 : 1.0
+        scale: root.hovered ? 1.18 : 1.0
         Behavior on scale { NumberAnimation { duration: ComponentTheme.durationNormal } }
     }
 }

@@ -76,6 +76,20 @@ QQC2.TextField {
                 return ComponentTheme.inputBorder
             }
 
+            Rectangle {
+                anchors { left: parent.left; right: parent.right; top: parent.top; margins: 1 }
+                height: 1
+                radius: parent.radius
+                color: Qt.rgba(1, 1, 1, root.focused ? 0.18 : 0.10)
+            }
+
+            Rectangle {
+                anchors { left: parent.left; right: parent.right; bottom: parent.bottom; margins: 1 }
+                height: 1
+                radius: parent.radius
+                color: Qt.rgba(0, 0, 0, root.focused ? 0.18 : 0.12)
+            }
+
             Behavior on border.color { ColorAnimation { duration: ComponentTheme.durationFast } }
             Behavior on opacity { NumberAnimation { duration: ComponentTheme.durationFast } }
         }

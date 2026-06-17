@@ -19,9 +19,20 @@ QQC2.Button {
         color: root.down
             ? ComponentTheme.buttonPressed
             : root.hovered ? ComponentTheme.buttonHover : "transparent"
+        border.width: root.hovered || root.down ? 1 : 0
+        border.color: root.down ? Qt.rgba(0, 0, 0, 0.22) : ComponentTheme.separator
         opacity: root.enabled ? 1.0 : 0.4
 
+        Rectangle {
+            anchors { left: parent.left; right: parent.right; top: parent.top; margins: 1 }
+            height: 1
+            radius: parent.radius
+            visible: root.hovered || root.down
+            color: Qt.rgba(1, 1, 1, root.down ? 0.04 : 0.16)
+        }
+
         Behavior on color { ColorAnimation { duration: ComponentTheme.durationFast } }
+        Behavior on border.color { ColorAnimation { duration: ComponentTheme.durationFast } }
         Behavior on opacity { NumberAnimation { duration: ComponentTheme.durationFast } }
     }
 

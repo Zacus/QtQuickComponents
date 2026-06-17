@@ -179,7 +179,7 @@ void ThemeJsonLoaderTest::loadsBuiltInDarkTheme()
 
     QVERIFY(result.ok);
     QCOMPARE(result.tokens.id, QStringLiteral("dark"));
-    QCOMPARE(result.tokens.accent, QColor(QStringLiteral("#7c6fff")));
+    QCOMPARE(result.tokens.accent, QColor(QStringLiteral("#2fb8a2")));
     QCOMPARE(result.error, QString());
 }
 
@@ -231,7 +231,7 @@ void ThemeJsonLoaderTest::ignoresCurrentWorkingDirectoryThemes()
 
     QVERIFY(result.ok);
     QCOMPARE(result.tokens.id, QStringLiteral("dark"));
-    QCOMPARE(result.tokens.accent, QColor(QStringLiteral("#7c6fff")));
+    QCOMPARE(result.tokens.accent, QColor(QStringLiteral("#2fb8a2")));
 }
 
 void ThemeJsonLoaderTest::rejectsMismatchedRuntimeBuiltInTheme()

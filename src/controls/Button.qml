@@ -38,9 +38,23 @@ QQC2.Button {
         }
         border.color: root.variant === "outline"
             ? (root.enabled ? ComponentTheme.accent : ComponentTheme.accentDisabled)
-            : "transparent"
-        border.width: root.variant === "outline" ? 1.5 : 0
+            : (root.variant === "ghost" ? "transparent" : Qt.rgba(1, 1, 1, 0.18))
+        border.width: root.variant === "ghost" ? 0 : 1
         opacity: root.enabled ? 1.0 : 0.5
+
+        Rectangle {
+            anchors { left: parent.left; right: parent.right; top: parent.top; margins: 1 }
+            height: 1
+            radius: parent.radius
+            color: root.variant === "ghost" ? "transparent" : Qt.rgba(1, 1, 1, root.down ? 0.04 : 0.22)
+        }
+
+        Rectangle {
+            anchors { left: parent.left; right: parent.right; bottom: parent.bottom; margins: 1 }
+            height: 1
+            radius: parent.radius
+            color: root.variant === "ghost" ? "transparent" : Qt.rgba(0, 0, 0, root.down ? 0.28 : 0.14)
+        }
 
         Behavior on color { ColorAnimation { duration: ComponentTheme.durationFast } }
         Behavior on opacity { NumberAnimation { duration: ComponentTheme.durationFast } }

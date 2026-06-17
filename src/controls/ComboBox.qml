@@ -105,10 +105,10 @@ QQC2.ComboBox {
     background: Rectangle {
         radius: ComponentTheme.buttonRadius
         color: {
-            if (!root.enabled) return ComponentTheme.surface
+            if (!root.enabled) return ComponentTheme.inputBg
             if (root.down) return root.pressedBackgroundColor
             if (root.hovered || root.activeFocus) return ComponentTheme.buttonHover
-            return "transparent"
+            return ComponentTheme.inputBg
         }
         border.width: root.down || root.activeFocus ? 1.5 : 1
         border.color: {
@@ -118,6 +118,20 @@ QQC2.ComboBox {
             return ComponentTheme.separator
         }
         opacity: root.enabled ? 1.0 : 0.5
+
+        Rectangle {
+            anchors { left: parent.left; right: parent.right; top: parent.top; margins: 1 }
+            height: 1
+            radius: parent.radius
+            color: Qt.rgba(1, 1, 1, root.down ? 0.05 : 0.14)
+        }
+
+        Rectangle {
+            anchors { left: parent.left; right: parent.right; bottom: parent.bottom; margins: 1 }
+            height: 1
+            radius: parent.radius
+            color: Qt.rgba(0, 0, 0, root.down ? 0.22 : 0.12)
+        }
 
         Behavior on color { ColorAnimation { duration: ComponentTheme.durationFast } }
         Behavior on border.color { ColorAnimation { duration: ComponentTheme.durationFast } }
@@ -147,6 +161,13 @@ QQC2.ComboBox {
             color: ComponentTheme.surface
             border.width: 1
             border.color: ComponentTheme.separator
+
+            Rectangle {
+                anchors { left: parent.left; right: parent.right; top: parent.top; margins: 1 }
+                height: 1
+                radius: parent.radius
+                color: Qt.rgba(1, 1, 1, 0.12)
+            }
         }
     }
 
