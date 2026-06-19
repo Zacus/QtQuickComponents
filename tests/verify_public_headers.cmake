@@ -33,6 +33,8 @@ set(_qtc_private_headers
     src/timeline/RulerTick.h
     src/timeline/RulerModel.h
     src/timeline/TimelineTrackModel.h
+    src/monitor/GlobalVideoRenderer.h
+    src/monitor/VideoSurface.h
 )
 
 foreach(_qtc_private_header IN LISTS _qtc_private_headers)

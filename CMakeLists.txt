@@ -57,6 +57,7 @@ set(QTC_PUBLIC_HEADERS
     include/QtQuickComponents/TimelineEnums.h
     include/QtQuickComponents/TimelineSegment.h
     include/QtQuickComponents/TimelineModel.h
+    include/QtQuickComponents/WndViewModel.h
 )
 
 set(QTC_PRIVATE_HEADERS
@@ -70,6 +71,8 @@ set(QTC_IMPL_HEADERS
     src/timeline/RulerTick.h
     src/timeline/RulerModel.h
     src/timeline/TimelineTrackModel.h
+    src/monitor/GlobalVideoRenderer.h
+    src/monitor/VideoSurface.h
 )
 
 set(QTC_CPP_SOURCES
@@ -77,12 +80,15 @@ set(QTC_CPP_SOURCES
     src/theme/ThemeFileWatcher.cpp
     src/theme/ThemeJsonLoader.cpp
     src/timeline/TimelineModel.cpp
+    src/monitor/WndViewModel.cpp
 )
 
 set(QTC_IMPL_CPP_SOURCES
     src/timeline/TimelineViewport.cpp
     src/timeline/RulerModel.cpp
     src/timeline/TimelineTrackModel.cpp
+    src/monitor/GlobalVideoRenderer.cpp
+    src/monitor/VideoSurface.cpp
 )
 
 set(QTC_PUBLIC_QML_FILES
@@ -92,10 +98,15 @@ set(QTC_PUBLIC_QML_FILES
     src/controls/Button.qml
     src/controls/Label.qml
     src/controls/TextField.qml
+    src/monitor/SingleWnd.qml
     src/timeline/TimelineView.qml
 )
 
 set(QTC_INTERNAL_QML_FILES
+    src/monitor/NoSignalLayer.qml
+    src/monitor/OSDLayer.qml
+    src/monitor/BorderLayer.qml
+    src/monitor/TitleBar.qml
     src/timeline/TimelineTrack.qml
     src/timeline/TimelineRuler.qml
     src/timeline/TimelineInputHandler.qml
@@ -135,6 +146,21 @@ set_source_files_properties(
 )
 set_source_files_properties(
     src/controls/TextField.qml PROPERTIES QT_RESOURCE_ALIAS TextField.qml
+)
+set_source_files_properties(
+    src/monitor/SingleWnd.qml PROPERTIES QT_RESOURCE_ALIAS SingleWnd.qml
+)
+set_source_files_properties(
+    src/monitor/NoSignalLayer.qml PROPERTIES QT_RESOURCE_ALIAS NoSignalLayer.qml
+)
+set_source_files_properties(
+    src/monitor/OSDLayer.qml PROPERTIES QT_RESOURCE_ALIAS OSDLayer.qml
+)
+set_source_files_properties(
+    src/monitor/BorderLayer.qml PROPERTIES QT_RESOURCE_ALIAS BorderLayer.qml
+)
+set_source_files_properties(
+    src/monitor/TitleBar.qml PROPERTIES QT_RESOURCE_ALIAS TitleBar.qml
 )
 set_source_files_properties(
     src/timeline/TimelineTrack.qml PROPERTIES QT_RESOURCE_ALIAS TimelineTrack.qml
@@ -197,11 +223,13 @@ target_include_directories(QtQuickComponents PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/src
     ${CMAKE_CURRENT_SOURCE_DIR}/src/theme
     ${CMAKE_CURRENT_SOURCE_DIR}/src/timeline
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/monitor
 )
 
 target_include_directories(QtQuickComponentsImpl PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/include/QtQuickComponents
     ${CMAKE_CURRENT_SOURCE_DIR}/src/timeline
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/monitor
 )
 
 target_link_libraries(QtQuickComponents PUBLIC

@@ -3,6 +3,7 @@ find_package(Qt6 REQUIRED COMPONENTS Quick QuickTest Test)
 set(QTC_TEST_PRIVATE_INCLUDE_DIRS
     "${PROJECT_SOURCE_DIR}/src/theme"
     "${PROJECT_SOURCE_DIR}/src/timeline"
+    "${PROJECT_SOURCE_DIR}/src/monitor"
 )
 
 qt_add_executable(tst_timeline_model
@@ -15,6 +16,50 @@ target_link_libraries(tst_timeline_model PRIVATE
 )
 
 add_test(NAME TimelineModel COMMAND tst_timeline_model)
+
+qt_add_executable(tst_wnd_view_model
+    tst_wnd_view_model.cpp
+)
+
+target_link_libraries(tst_wnd_view_model PRIVATE
+    QtQuickComponents
+    Qt6::Test
+)
+
+add_test(NAME WndViewModel COMMAND tst_wnd_view_model)
+
+qt_add_executable(tst_global_video_renderer
+    tst_global_video_renderer.cpp
+)
+target_include_directories(tst_global_video_renderer PRIVATE
+    ${QTC_TEST_PRIVATE_INCLUDE_DIRS}
+)
+
+target_link_libraries(tst_global_video_renderer PRIVATE
+    QtQuickComponentsImpl
+    Qt6::Quick
+    Qt6::Test
+)
+
+add_test(NAME GlobalVideoRenderer COMMAND tst_global_video_renderer)
+
+qt_add_executable(tst_video_surface
+    tst_video_surface.cpp
+)
+target_include_directories(tst_video_surface PRIVATE
+    ${QTC_TEST_PRIVATE_INCLUDE_DIRS}
+)
+
+target_link_libraries(tst_video_surface PRIVATE
+    QtQuickComponentsImpl
+    Qt6::Quick
+    Qt6::Test
+)
+
+add_test(NAME VideoSurface COMMAND tst_video_surface)
+set_tests_properties(VideoSurface PROPERTIES
+    ENVIRONMENT "QT_QPA_PLATFORM=offscreen"
+)
 
 qt_add_executable(tst_timeline_viewport
     tst_timeline_viewport.cpp
@@ -109,6 +154,7 @@ qt_add_executable(tst_qml_components
 
 target_link_libraries(tst_qml_components PRIVATE
     QtQuickComponents
+    QtQuickComponentsImpl
     Qt6::QuickTest
 )
 

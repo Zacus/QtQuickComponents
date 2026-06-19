@@ -35,10 +35,15 @@ set(_qtc_public_qml_files
     src/controls/Button.qml
     src/controls/Label.qml
     src/controls/TextField.qml
+    src/monitor/SingleWnd.qml
     src/timeline/TimelineView.qml
 )
 
 set(_qtc_internal_qml_files
+    src/monitor/NoSignalLayer.qml
+    src/monitor/OSDLayer.qml
+    src/monitor/BorderLayer.qml
+    src/monitor/TitleBar.qml
     src/timeline/TimelineTrack.qml
     src/timeline/TimelineRuler.qml
     src/timeline/TimelineInputHandler.qml
@@ -74,9 +79,11 @@ foreach(_qtc_internal_qml_file IN LISTS _qtc_internal_qml_files)
 endforeach()
 
 set(_qtc_impl_cpp_types
+    GlobalVideoRenderer
     RulerModel
     TimelineTrackModel
     TimelineViewport
+    VideoSurface
 )
 
 file(READ "${QTC_QMLTYPES_FILE}" _qtc_qmltypes)
