@@ -1,5 +1,6 @@
 import QtQuick
 import QuickUI.Components 1.0
+import QuickUI.Components.impl 1.0
 
 /**
  * 时间轴完整组件（根组件）

@@ -37,8 +37,10 @@ endif()
 # 静态 Qt：STATIC，插件静态链入可执行文件，Qt 自动生成 Q_IMPORT_PLUGIN
 if(_QTC_STATIC_QT)
     qt_add_library(QtQuickComponents STATIC)
+    qt_add_library(QtQuickComponentsImpl STATIC)
 else()
     qt_add_library(QtQuickComponents SHARED)
+    qt_add_library(QtQuickComponentsImpl SHARED)
 endif()
 
 # OUTPUT_DIRECTORY 由调用方通过 QTC_QML_OUTPUT_BASE 传入
@@ -48,6 +50,7 @@ endif()
 
 # QML 模块路径（在 OUTPUT_DIRECTORY 和 install 规则中使用）
 set(QTC_QML_MODULE_PATH "${QTC_QML_OUTPUT_BASE}/QuickUI/Components")
+set(QTC_QML_IMPL_MODULE_PATH "${QTC_QML_MODULE_PATH}/impl")
 
 set(QTC_PUBLIC_HEADERS
     include/QtQuickComponents/ComponentTheme.h
@@ -60,6 +63,9 @@ set(QTC_PRIVATE_HEADERS
     src/theme/ThemeFileWatcher.h
     src/theme/ThemeJsonLoader.h
     src/theme/ThemeTokens.h
+)
+
+set(QTC_IMPL_HEADERS
     src/timeline/TimelineViewport.h
     src/timeline/RulerTick.h
     src/timeline/RulerModel.h
@@ -71,6 +77,9 @@ set(QTC_CPP_SOURCES
     src/theme/ThemeFileWatcher.cpp
     src/theme/ThemeJsonLoader.cpp
     src/timeline/TimelineModel.cpp
+)
+
+set(QTC_IMPL_CPP_SOURCES
     src/timeline/TimelineViewport.cpp
     src/timeline/RulerModel.cpp
     src/timeline/TimelineTrackModel.cpp
@@ -142,18 +151,21 @@ set_source_files_properties(
 set_source_files_properties(
     src/timeline/TimelineView.qml PROPERTIES QT_RESOURCE_ALIAS TimelineView.qml
 )
-foreach(_qtc_internal_qml_file IN LISTS QTC_INTERNAL_QML_FILES)
-    set_source_files_properties("${_qtc_internal_qml_file}" PROPERTIES
-        QT_QML_INTERNAL_TYPE TRUE
-    )
-endforeach()
+
+qt_add_qml_module(QtQuickComponentsImpl
+    URI     "QuickUI.Components.impl"
+    VERSION ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
+    OUTPUT_DIRECTORY "${QTC_QML_IMPL_MODULE_PATH}"
+    SOURCES ${QTC_IMPL_HEADERS} ${QTC_IMPL_CPP_SOURCES}
+    QML_FILES ${QTC_INTERNAL_QML_FILES}
+)
 
 qt_add_qml_module(QtQuickComponents
     URI     "QuickUI.Components"
     VERSION ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
     OUTPUT_DIRECTORY "${QTC_QML_MODULE_PATH}"
     SOURCES ${QTC_PUBLIC_HEADERS} ${QTC_PRIVATE_HEADERS} ${QTC_CPP_SOURCES}
-    QML_FILES ${QTC_QML_FILES}
+    QML_FILES ${QTC_PUBLIC_QML_FILES}
     RESOURCES ${QTC_THEME_FILES}
 )
 
@@ -168,6 +180,10 @@ add_dependencies(QtQuickComponents QtQuickComponents_copy_themes)
 # 动态构建：qt_add_qml_module 创建的插件目标名为 QtQuickComponentsplugin（Qt 约定）
 # 需要确保插件 .dylib/.so 与 qmldir 输出到同一目录，QML 运行时才能找到
 if(NOT _QTC_STATIC_QT)
+    set_target_properties(QtQuickComponentsImplplugin PROPERTIES
+        LIBRARY_OUTPUT_DIRECTORY "${QTC_QML_IMPL_MODULE_PATH}"
+        RUNTIME_OUTPUT_DIRECTORY "${QTC_QML_IMPL_MODULE_PATH}"
+    )
     set_target_properties(QtQuickComponentsplugin PROPERTIES
         LIBRARY_OUTPUT_DIRECTORY "${QTC_QML_MODULE_PATH}"
         RUNTIME_OUTPUT_DIRECTORY "${QTC_QML_MODULE_PATH}"
@@ -183,7 +199,18 @@ target_include_directories(QtQuickComponents PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/src/timeline
 )
 
+target_include_directories(QtQuickComponentsImpl PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/QtQuickComponents
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/timeline
+)
+
 target_link_libraries(QtQuickComponents PUBLIC
+    Qt6::Quick
+    Qt6::QuickControls2
+)
+
+target_link_libraries(QtQuickComponentsImpl PRIVATE
+    QtQuickComponents
     Qt6::Quick
     Qt6::QuickControls2
 )
@@ -206,7 +233,16 @@ install(TARGETS QtQuickComponents
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
+install(TARGETS QtQuickComponentsImpl
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+)
 if(NOT _QTC_STATIC_QT)
+    install(TARGETS QtQuickComponentsImplplugin
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+    )
     install(TARGETS QtQuickComponentsplugin
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
         RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}

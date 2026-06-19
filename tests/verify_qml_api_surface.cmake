@@ -6,8 +6,26 @@ endif()
 if(NOT DEFINED QTC_QMLDIR_FILE)
     message(FATAL_ERROR "QTC_QMLDIR_FILE is required")
 endif()
+if(NOT DEFINED QTC_IMPL_QMLDIR_FILE)
+    message(FATAL_ERROR "QTC_IMPL_QMLDIR_FILE is required")
+endif()
+if(NOT DEFINED QTC_QMLTYPES_FILE)
+    message(FATAL_ERROR "QTC_QMLTYPES_FILE is required")
+endif()
+if(NOT DEFINED QTC_IMPL_QMLTYPES_FILE)
+    message(FATAL_ERROR "QTC_IMPL_QMLTYPES_FILE is required")
+endif()
 if(NOT EXISTS "${QTC_QMLDIR_FILE}")
     message(FATAL_ERROR "QML module qmldir not found: ${QTC_QMLDIR_FILE}")
+endif()
+if(NOT EXISTS "${QTC_IMPL_QMLDIR_FILE}")
+    message(FATAL_ERROR "Internal QML module qmldir not found: ${QTC_IMPL_QMLDIR_FILE}")
+endif()
+if(NOT EXISTS "${QTC_QMLTYPES_FILE}")
+    message(FATAL_ERROR "QML module qmltypes not found: ${QTC_QMLTYPES_FILE}")
+endif()
+if(NOT EXISTS "${QTC_IMPL_QMLTYPES_FILE}")
+    message(FATAL_ERROR "Internal QML module qmltypes not found: ${QTC_IMPL_QMLTYPES_FILE}")
 endif()
 
 set(_qtc_public_qml_files
@@ -49,9 +67,43 @@ foreach(_qtc_internal_qml_file IN LISTS _qtc_internal_qml_files)
         message(FATAL_ERROR
             "Internal QML type '${_qtc_type}' must not have a public versioned qmldir entry")
     endif()
-    if(NOT _qtc_qmldir MATCHES "(^|\n)internal ${_qtc_type} ${_qtc_file}(\n|$)")
+    if(_qtc_qmldir MATCHES "(^|\n)internal ${_qtc_type} ${_qtc_file}(\n|$)")
         message(FATAL_ERROR
-            "Internal QML type '${_qtc_type}' must have an internal qmldir entry")
+            "Internal QML type '${_qtc_type}' must live in QuickUI.Components.impl, not in the public qmldir")
+    endif()
+endforeach()
+
+set(_qtc_impl_cpp_types
+    RulerModel
+    TimelineTrackModel
+    TimelineViewport
+)
+
+file(READ "${QTC_QMLTYPES_FILE}" _qtc_qmltypes)
+file(READ "${QTC_IMPL_QMLTYPES_FILE}" _qtc_impl_qmltypes)
+
+foreach(_qtc_impl_cpp_type IN LISTS _qtc_impl_cpp_types)
+    if(_qtc_qmltypes MATCHES "exports: \\[\"QuickUI\\.Components/${_qtc_impl_cpp_type} ")
+        message(FATAL_ERROR
+            "Internal C++ helper '${_qtc_impl_cpp_type}' must not be exported by QuickUI.Components")
+    endif()
+    if(NOT _qtc_impl_qmltypes MATCHES "exports: \\[\"QuickUI\\.Components\\.impl/${_qtc_impl_cpp_type} ")
+        message(FATAL_ERROR
+            "Internal C++ helper '${_qtc_impl_cpp_type}' must be exported by QuickUI.Components.impl")
+    endif()
+endforeach()
+
+file(READ "${QTC_IMPL_QMLDIR_FILE}" _qtc_impl_qmldir)
+if(NOT _qtc_impl_qmldir MATCHES "(^|\n)module QuickUI\\.Components\\.impl(\n|$)")
+    message(FATAL_ERROR "Internal QML module qmldir must declare QuickUI.Components.impl")
+endif()
+
+foreach(_qtc_internal_qml_file IN LISTS _qtc_internal_qml_files)
+    get_filename_component(_qtc_type "${_qtc_internal_qml_file}" NAME_WE)
+    get_filename_component(_qtc_file "${_qtc_internal_qml_file}" NAME)
+    if(NOT _qtc_impl_qmldir MATCHES "(^|\n)${_qtc_type} [0-9]+\\.[0-9]+ ${_qtc_file}(\n|$)")
+        message(FATAL_ERROR
+            "Internal QML type '${_qtc_type}' must have a versioned entry in QuickUI.Components.impl")
     endif()
 endforeach()
 

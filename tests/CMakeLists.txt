@@ -1,4 +1,4 @@
-find_package(Qt6 REQUIRED COMPONENTS QuickTest Test)
+find_package(Qt6 REQUIRED COMPONENTS Quick QuickTest Test)
 
 set(QTC_TEST_PRIVATE_INCLUDE_DIRS
     "${PROJECT_SOURCE_DIR}/src/theme"
@@ -24,7 +24,8 @@ target_include_directories(tst_timeline_viewport PRIVATE
 )
 
 target_link_libraries(tst_timeline_viewport PRIVATE
-    QtQuickComponents
+    QtQuickComponentsImpl
+    Qt6::Quick
     Qt6::Test
 )
 
@@ -38,7 +39,8 @@ target_include_directories(tst_ruler_model PRIVATE
 )
 
 target_link_libraries(tst_ruler_model PRIVATE
-    QtQuickComponents
+    QtQuickComponentsImpl
+    Qt6::Quick
     Qt6::Test
 )
 
@@ -95,6 +97,9 @@ add_test(
     COMMAND ${CMAKE_COMMAND}
         -D QTC_SOURCE_DIR=${PROJECT_SOURCE_DIR}
         -D QTC_QMLDIR_FILE=$<TARGET_PROPERTY:QtQuickComponents,QT_QML_MODULE_OUTPUT_DIRECTORY>/qmldir
+        -D QTC_IMPL_QMLDIR_FILE=$<TARGET_PROPERTY:QtQuickComponentsImpl,QT_QML_MODULE_OUTPUT_DIRECTORY>/qmldir
+        -D QTC_QMLTYPES_FILE=$<TARGET_PROPERTY:QtQuickComponents,QT_QML_MODULE_OUTPUT_DIRECTORY>/QtQuickComponents.qmltypes
+        -D QTC_IMPL_QMLTYPES_FILE=$<TARGET_PROPERTY:QtQuickComponentsImpl,QT_QML_MODULE_OUTPUT_DIRECTORY>/QtQuickComponentsImpl.qmltypes
         -P "${CMAKE_CURRENT_SOURCE_DIR}/verify_qml_api_surface.cmake"
 )
 

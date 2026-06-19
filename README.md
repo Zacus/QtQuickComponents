@@ -62,6 +62,7 @@ engine.addImportPath(QStringLiteral(QML_IMPORT_PATH));
 #if defined(QT_STATIC)
 #  include <QtPlugin>
    Q_IMPORT_QML_PLUGIN(QtQuickComponentsPlugin)
+   Q_IMPORT_QML_PLUGIN(QtQuickComponentsImplPlugin)
 #endif
 ```
 

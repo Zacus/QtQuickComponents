@@ -1,7 +1,7 @@
 import QtQuick
 import QtTest
 import QuickUI.Components 1.0
-import "../../src/timeline" as TimelinePrivate
+import QuickUI.Components.impl 1.0 as TimelineImpl
 
 TestCase {
     name: "PlayheadOverlay"
@@ -9,12 +9,12 @@ TestCase {
     Component {
         id: playheadComponent
 
-        TimelinePrivate.PlayheadOverlay {
+        TimelineImpl.PlayheadOverlay {
             width: 200
             height: 60
             currentTime: 500
 
-            viewport: TimelineViewport {
+            viewport: TimelineImpl.TimelineViewport {
                 viewWidth: 200
                 totalStart: 0
                 totalEnd: 1000
