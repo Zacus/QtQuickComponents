@@ -6,7 +6,7 @@
 #include <QStringList>
 #include <QQmlEngine>
 
-#include "ThemeFileWatcher.h"
+#include <memory>
 
 struct ThemeTokens;
 
@@ -68,6 +68,8 @@ public:
         static ComponentTheme s;
         return s;
     }
+
+    ~ComponentTheme() override;
 
     // ── 当前风格 ──────────────────────────────────────────────
     Q_PROPERTY(Style style READ style WRITE setStyle NOTIFY styleChanged)
@@ -221,6 +223,8 @@ signals:
     void lastErrorChanged();
 
 private:
+    struct Private;
+
     explicit ComponentTheme(QObject* parent = nullptr);
     bool applyBuiltInTheme(const QString& themeId, Style style);
     void applyTokens(const ThemeTokens& tokens, Style style, const QString& currentThemeFile);
@@ -233,7 +237,7 @@ private:
     QString m_currentThemeFile;
     bool m_hotReloadEnabled = false;
     QString m_lastError;
-    ThemeFileWatcher m_themeWatcher;
+    std::unique_ptr<Private> d;
 
     // 强调色
     QColor m_accent;

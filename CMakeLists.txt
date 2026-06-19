@@ -50,13 +50,16 @@ endif()
 set(QTC_QML_MODULE_PATH "${QTC_QML_OUTPUT_BASE}/QuickUI/Components")
 
 set(QTC_PUBLIC_HEADERS
-    src/theme/ComponentTheme.h
+    include/QtQuickComponents/ComponentTheme.h
+    include/QtQuickComponents/TimelineEnums.h
+    include/QtQuickComponents/TimelineSegment.h
+    include/QtQuickComponents/TimelineModel.h
+)
+
+set(QTC_PRIVATE_HEADERS
     src/theme/ThemeFileWatcher.h
     src/theme/ThemeJsonLoader.h
     src/theme/ThemeTokens.h
-    src/timeline/TimelineEnums.h
-    src/timeline/TimelineSegment.h
-    src/timeline/TimelineModel.h
     src/timeline/TimelineViewport.h
     src/timeline/RulerTick.h
     src/timeline/RulerModel.h
@@ -73,18 +76,26 @@ set(QTC_CPP_SOURCES
     src/timeline/TimelineTrackModel.cpp
 )
 
-set(QTC_QML_FILES
+set(QTC_PUBLIC_QML_FILES
     src/controls/ComboBox.qml
     src/controls/IconButton.qml
     src/controls/ProgressSlider.qml
     src/controls/Button.qml
     src/controls/Label.qml
     src/controls/TextField.qml
+    src/timeline/TimelineView.qml
+)
+
+set(QTC_INTERNAL_QML_FILES
     src/timeline/TimelineTrack.qml
     src/timeline/TimelineRuler.qml
     src/timeline/TimelineInputHandler.qml
     src/timeline/PlayheadOverlay.qml
-    src/timeline/TimelineView.qml
+)
+
+set(QTC_QML_FILES
+    ${QTC_PUBLIC_QML_FILES}
+    ${QTC_INTERNAL_QML_FILES}
 )
 
 file(GLOB QTC_THEME_FILES CONFIGURE_DEPENDS
@@ -131,12 +142,17 @@ set_source_files_properties(
 set_source_files_properties(
     src/timeline/TimelineView.qml PROPERTIES QT_RESOURCE_ALIAS TimelineView.qml
 )
+foreach(_qtc_internal_qml_file IN LISTS QTC_INTERNAL_QML_FILES)
+    set_source_files_properties("${_qtc_internal_qml_file}" PROPERTIES
+        QT_QML_INTERNAL_TYPE TRUE
+    )
+endforeach()
 
 qt_add_qml_module(QtQuickComponents
     URI     "QuickUI.Components"
     VERSION ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
     OUTPUT_DIRECTORY "${QTC_QML_MODULE_PATH}"
-    SOURCES ${QTC_PUBLIC_HEADERS} ${QTC_CPP_SOURCES}
+    SOURCES ${QTC_PUBLIC_HEADERS} ${QTC_PRIVATE_HEADERS} ${QTC_CPP_SOURCES}
     QML_FILES ${QTC_QML_FILES}
     RESOURCES ${QTC_THEME_FILES}
 )
@@ -159,10 +175,12 @@ if(NOT _QTC_STATIC_QT)
 endif()
 
 target_include_directories(QtQuickComponents PUBLIC
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/theme>
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/timeline>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/QtQuickComponents>
     $<INSTALL_INTERFACE:include/QtQuickComponents>
+    PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/src
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/theme
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/timeline
 )
 
 target_link_libraries(QtQuickComponents PUBLIC
@@ -199,7 +217,7 @@ install(FILES
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/QtQuickComponents
 )
 install(FILES
-    ${QTC_QML_FILES}
+    ${QTC_PUBLIC_QML_FILES}
     DESTINATION ${CMAKE_INSTALL_DATADIR}/QtQuickComponents/qml
 )
 install(DIRECTORY "${QTC_QML_OUTPUT_BASE}/QuickUI/"

@@ -1,18 +1,27 @@
 #include "ComponentTheme.h"
+#include "ThemeFileWatcher.h"
 #include "ThemeJsonLoader.h"
 #include "ThemeTokens.h"
 
 #include <QDir>
 #include <QFileInfo>
 
+struct ComponentTheme::Private
+{
+    ThemeFileWatcher themeWatcher;
+};
+
 ComponentTheme::ComponentTheme(QObject* parent)
     : QObject(parent)
+    , d(std::make_unique<Private>())
 {
-    connect(&m_themeWatcher, &ThemeFileWatcher::reloadRequested,
+    connect(&d->themeWatcher, &ThemeFileWatcher::reloadRequested,
             this, [this]() { reloadCurrentTheme(); });
 
     applyBuiltInTheme(QStringLiteral("dark"), Dark);
 }
+
+ComponentTheme::~ComponentTheme() = default;
 
 void ComponentTheme::setStyle(Style s)
 {
@@ -40,7 +49,7 @@ void ComponentTheme::setStyle(Style s)
         m_themeId = QStringLiteral("custom");
         m_themeName = QStringLiteral("Custom");
         m_currentThemeFile.clear();
-        m_themeWatcher.clear();
+        d->themeWatcher.clear();
         break;   // 保留当前值，由外部逐项覆盖
     }
     setLastError(QString());
@@ -118,7 +127,7 @@ bool ComponentTheme::reloadCurrentTheme()
     const ThemeLoadResult result = ThemeJsonLoader::loadFile(m_currentThemeFile);
     if (!result.ok) {
         setLastError(result.error);
-        m_themeWatcher.setWatchedFile(m_currentThemeFile);
+        d->themeWatcher.setWatchedFile(m_currentThemeFile);
         return false;
     }
 
@@ -151,11 +160,11 @@ void ComponentTheme::setHotReloadEnabled(bool enabled)
 
     m_hotReloadEnabled = enabled;
     if (m_hotReloadEnabled) {
-        m_themeWatcher.setEnabled(true);
-        m_themeWatcher.setWatchedFile(m_currentThemeFile);
+        d->themeWatcher.setEnabled(true);
+        d->themeWatcher.setWatchedFile(m_currentThemeFile);
     } else {
-        m_themeWatcher.setEnabled(false);
-        m_themeWatcher.clear();
+        d->themeWatcher.setEnabled(false);
+        d->themeWatcher.clear();
     }
     emit hotReloadEnabledChanged();
 }
@@ -166,7 +175,7 @@ void ComponentTheme::setAccent(const QColor& c)
     m_themeId        = QStringLiteral("custom");
     m_themeName      = QStringLiteral("Custom");
     m_currentThemeFile.clear();
-    m_themeWatcher.clear();
+    d->themeWatcher.clear();
     setLastError(QString());
     m_accent         = c;
     m_accentHover    = c.lighter(115);
@@ -183,7 +192,7 @@ void ComponentTheme::setButtonRadius(int r)
     m_themeId      = QStringLiteral("custom");
     m_themeName    = QStringLiteral("Custom");
     m_currentThemeFile.clear();
-    m_themeWatcher.clear();
+    d->themeWatcher.clear();
     setLastError(QString());
     m_buttonRadius = r;
     // 输入框圆角与按钮保持一致
@@ -197,7 +206,7 @@ void ComponentTheme::setFontFamily(const QString& family)
     m_themeId    = QStringLiteral("custom");
     m_themeName  = QStringLiteral("Custom");
     m_currentThemeFile.clear();
-    m_themeWatcher.clear();
+    d->themeWatcher.clear();
     setLastError(QString());
     m_fontFamily = family;
     emit styleChanged();
@@ -270,8 +279,8 @@ void ComponentTheme::applyTokens(const ThemeTokens& tokens, Style style, const Q
     m_reducedMotion = tokens.reducedMotion;
 
     setLastError(QString());
-    m_themeWatcher.setEnabled(m_hotReloadEnabled);
-    m_themeWatcher.setWatchedFile(m_currentThemeFile);
+    d->themeWatcher.setEnabled(m_hotReloadEnabled);
+    d->themeWatcher.setWatchedFile(m_currentThemeFile);
 }
 
 void ComponentTheme::setLastError(const QString& error)
