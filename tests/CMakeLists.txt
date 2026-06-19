@@ -61,6 +61,21 @@ set_tests_properties(VideoSurface PROPERTIES
     ENVIRONMENT "QT_QPA_PLATFORM=offscreen"
 )
 
+qt_add_executable(tst_yuv420_render_node
+    tst_yuv420_render_node.cpp
+)
+target_include_directories(tst_yuv420_render_node PRIVATE
+    ${QTC_TEST_PRIVATE_INCLUDE_DIRS}
+)
+
+target_link_libraries(tst_yuv420_render_node PRIVATE
+    QtQuickComponentsImpl
+    Qt6::Quick
+    Qt6::Test
+)
+
+add_test(NAME Yuv420RenderNode COMMAND tst_yuv420_render_node)
+
 qt_add_executable(tst_timeline_viewport
     tst_timeline_viewport.cpp
 )

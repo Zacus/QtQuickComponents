@@ -73,6 +73,7 @@ set(QTC_IMPL_HEADERS
     src/timeline/TimelineTrackModel.h
     src/monitor/GlobalVideoRenderer.h
     src/monitor/VideoSurface.h
+    src/monitor/Yuv420RenderNode.h
 )
 
 set(QTC_CPP_SOURCES
@@ -89,6 +90,7 @@ set(QTC_IMPL_CPP_SOURCES
     src/timeline/TimelineTrackModel.cpp
     src/monitor/GlobalVideoRenderer.cpp
     src/monitor/VideoSurface.cpp
+    src/monitor/Yuv420RenderNode.cpp
 )
 
 set(QTC_PUBLIC_QML_FILES

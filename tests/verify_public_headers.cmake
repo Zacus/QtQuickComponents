@@ -35,6 +35,7 @@ set(_qtc_private_headers
     src/timeline/TimelineTrackModel.h
     src/monitor/GlobalVideoRenderer.h
     src/monitor/VideoSurface.h
+    src/monitor/Yuv420RenderNode.h
 )
 
 foreach(_qtc_private_header IN LISTS _qtc_private_headers)
