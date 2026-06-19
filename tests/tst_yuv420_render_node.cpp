@@ -9,6 +9,7 @@ class Yuv420RenderNodeTest : public QObject
 
 private slots:
     void storesSnapshotAndBounds();
+    void tracksTextureUploadStateForFrames();
 };
 
 void Yuv420RenderNodeTest::storesSnapshotAndBounds()
@@ -36,6 +37,40 @@ void Yuv420RenderNodeTest::storesSnapshotAndBounds()
     QCOMPARE(node.rect(), QRectF(4, 5, 60, 70));
 
     node.render(nullptr);
+}
+
+void Yuv420RenderNodeTest::tracksTextureUploadStateForFrames()
+{
+    GlobalVideoRenderer::Yuv420Snapshot snapshot;
+    snapshot.serial = 12;
+    snapshot.frame.width = 4;
+    snapshot.frame.height = 6;
+    snapshot.frame.yStride = 8;
+    snapshot.frame.uStride = 4;
+    snapshot.frame.vStride = 4;
+    snapshot.frame.yPlane = QByteArray(46, char(16));
+    snapshot.frame.uPlane = QByteArray(14, char(128));
+    snapshot.frame.vPlane = QByteArray(14, char(128));
+
+    Yuv420RenderNode node(snapshot, QRectF(0, 0, 40, 60));
+
+    QCOMPARE(node.yTextureSize(), QSize(4, 6));
+    QCOMPARE(node.uTextureSize(), QSize(2, 3));
+    QCOMPARE(node.vTextureSize(), QSize(2, 3));
+    QCOMPARE(node.uploadedSerial(), quint64(0));
+    QVERIFY(node.hasPendingTextureUpload());
+
+    QVERIFY(node.markTextureUploadCompleteForCurrentSnapshot());
+    QCOMPARE(node.uploadedSerial(), quint64(12));
+    QVERIFY(!node.hasPendingTextureUpload());
+
+    node.setSnapshot(snapshot);
+    QVERIFY(!node.hasPendingTextureUpload());
+
+    snapshot.serial = 13;
+    node.setSnapshot(snapshot);
+    QVERIFY(node.hasPendingTextureUpload());
+    QCOMPARE(node.uploadedSerial(), quint64(12));
 }
 
 QTEST_APPLESS_MAIN(Yuv420RenderNodeTest)

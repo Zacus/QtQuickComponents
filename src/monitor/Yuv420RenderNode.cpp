@@ -35,16 +35,47 @@ Yuv420RenderNode::Yuv420RenderNode(const GlobalVideoRenderer::Yuv420Snapshot& sn
     : m_snapshot(deepCopySnapshot(snapshot))
     , m_rect(rect)
 {
+    updateTexturePlan();
 }
 
 void Yuv420RenderNode::setSnapshot(const GlobalVideoRenderer::Yuv420Snapshot& snapshot)
 {
     m_snapshot = deepCopySnapshot(snapshot);
+    updateTexturePlan();
 }
 
 void Yuv420RenderNode::setRect(const QRectF& rect)
 {
     m_rect = rect;
+}
+
+QSize Yuv420RenderNode::yTextureSize() const
+{
+    return m_yTextureSize;
+}
+
+QSize Yuv420RenderNode::uTextureSize() const
+{
+    return m_uTextureSize;
+}
+
+QSize Yuv420RenderNode::vTextureSize() const
+{
+    return m_vTextureSize;
+}
+
+bool Yuv420RenderNode::hasPendingTextureUpload() const
+{
+    return m_snapshot.isValid() && m_snapshot.serial != m_uploadedSerial;
+}
+
+bool Yuv420RenderNode::markTextureUploadCompleteForCurrentSnapshot()
+{
+    if (!m_snapshot.isValid())
+        return false;
+
+    m_uploadedSerial = m_snapshot.serial;
+    return true;
 }
 
 QRectF Yuv420RenderNode::rect() const
@@ -59,4 +90,19 @@ QSGRenderNode::RenderingFlags Yuv420RenderNode::flags() const
 
 void Yuv420RenderNode::render(const RenderState*)
 {
+}
+
+void Yuv420RenderNode::updateTexturePlan()
+{
+    if (!m_snapshot.isValid()) {
+        m_yTextureSize = QSize();
+        m_uTextureSize = QSize();
+        m_vTextureSize = QSize();
+        return;
+    }
+
+    const auto& frame = m_snapshot.frame;
+    m_yTextureSize = QSize(frame.width, frame.height);
+    m_uTextureSize = QSize(frame.width / 2, frame.height / 2);
+    m_vTextureSize = QSize(frame.width / 2, frame.height / 2);
 }
