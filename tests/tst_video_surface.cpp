@@ -2,6 +2,7 @@
 
 #include "GlobalVideoRenderer.h"
 #include "VideoSurface.h"
+#include "Yuv420RenderNode.h"
 
 class VideoSurfaceTest : public QObject
 {
@@ -9,6 +10,7 @@ class VideoSurfaceTest : public QObject
 
 private slots:
     void followsMatchingRendererFrames();
+    void createsYuvRenderNodeForYuvFrames();
 };
 
 void VideoSurfaceTest::followsMatchingRendererFrames()
@@ -60,6 +62,42 @@ void VideoSurfaceTest::followsMatchingRendererFrames()
     QCOMPARE(surface.activeFrameFormat(), VideoSurface::NoFrame);
     QCOMPARE(surface.currentSerial(), quint64(0));
     QCOMPARE(frameSpy.count(), 4);
+}
+
+void VideoSurfaceTest::createsYuvRenderNodeForYuvFrames()
+{
+    GlobalVideoRenderer renderer;
+    VideoSurface surface;
+    surface.setWidth(160);
+    surface.setHeight(90);
+    surface.setChannelId(7);
+    surface.setVideoSink(&renderer);
+
+    GlobalVideoRenderer::Yuv420Frame frame;
+    frame.width = 2;
+    frame.height = 2;
+    frame.yStride = 2;
+    frame.uStride = 1;
+    frame.vStride = 1;
+    frame.yPlane = QByteArray(4, char(235));
+    frame.uPlane = QByteArray(1, char(128));
+    frame.vPlane = QByteArray(1, char(128));
+
+    QVERIFY(renderer.pushYuv420Frame(7, frame));
+    QCOMPARE(surface.activeFrameFormat(), VideoSurface::Yuv420Frame);
+
+    QSGNode* node = surface.updatePaintNode(nullptr, nullptr);
+    QVERIFY(node != nullptr);
+
+    auto* yuvNode = dynamic_cast<Yuv420RenderNode*>(node);
+    if (!yuvNode && node->childCount() > 0)
+        yuvNode = dynamic_cast<Yuv420RenderNode*>(node->childAtIndex(0));
+
+    QVERIFY(yuvNode != nullptr);
+    QCOMPARE(yuvNode->serial(), surface.currentSerial());
+    QCOMPARE(yuvNode->rect(), surface.boundingRect());
+
+    delete node;
 }
 
 QTEST_MAIN(VideoSurfaceTest)

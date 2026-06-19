@@ -1,6 +1,7 @@
 #include "VideoSurface.h"
 
 #include "GlobalVideoRenderer.h"
+#include "Yuv420RenderNode.h"
 
 #include <QQuickWindow>
 #include <QSGSimpleTextureNode>
@@ -37,11 +38,37 @@ void VideoSurface::setVideoSink(QObject* videoSink)
 
 QSGNode* VideoSurface::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData*)
 {
-    auto* node = static_cast<QSGSimpleTextureNode*>(oldNode);
-    if (!m_renderer || m_channelId < 0 || !window()) {
-        delete node;
+    if (!m_renderer || m_channelId < 0) {
+        delete oldNode;
         return nullptr;
     }
+
+    if (m_activeFrameFormat == Yuv420Frame) {
+        const auto snapshot = m_renderer->yuv420Snapshot(m_channelId);
+        if (!snapshot.isValid()) {
+            delete oldNode;
+            return nullptr;
+        }
+
+        auto* node = dynamic_cast<Yuv420RenderNode*>(oldNode);
+        if (!node) {
+            delete oldNode;
+            node = new Yuv420RenderNode(snapshot, boundingRect());
+        } else {
+            node->setSnapshot(snapshot);
+            node->setRect(boundingRect());
+        }
+        return node;
+    }
+
+    if (!window()) {
+        delete oldNode;
+        return nullptr;
+    }
+
+    auto* node = dynamic_cast<QSGSimpleTextureNode*>(oldNode);
+    if (!node)
+        delete oldNode;
 
     const auto snapshot = m_renderer->frameSnapshot(m_channelId);
     if (!snapshot.isValid()) {
