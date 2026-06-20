@@ -141,6 +141,22 @@ target_link_libraries(tst_yuv420_geometry_buffer PRIVATE
 
 add_test(NAME Yuv420GeometryBuffer COMMAND tst_yuv420_geometry_buffer)
 
+qt_add_executable(tst_yuv420_graphics_pipeline
+    tst_yuv420_graphics_pipeline.cpp
+)
+target_include_directories(tst_yuv420_graphics_pipeline PRIVATE
+    ${QTC_TEST_PRIVATE_INCLUDE_DIRS}
+)
+
+target_link_libraries(tst_yuv420_graphics_pipeline PRIVATE
+    QtQuickComponentsImpl
+    Qt6::GuiPrivate
+    Qt6::Quick
+    Qt6::Test
+)
+
+add_test(NAME Yuv420GraphicsPipeline COMMAND tst_yuv420_graphics_pipeline)
+
 qt_add_executable(tst_timeline_viewport
     tst_timeline_viewport.cpp
 )

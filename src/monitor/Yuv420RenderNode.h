@@ -2,6 +2,7 @@
 
 #include "GlobalVideoRenderer.h"
 #include "Yuv420GeometryBuffer.h"
+#include "Yuv420GraphicsPipeline.h"
 #include "Yuv420ShaderUniforms.h"
 #include "Yuv420TextureSet.h"
 
@@ -10,6 +11,7 @@
 #include <QSize>
 
 class QRhiResourceUpdateBatch;
+class QRhiRenderPassDescriptor;
 
 class Yuv420RenderNode : public QSGRenderNode
 {
@@ -36,6 +38,9 @@ public:
     bool ensureGeometryResources(QRhi* rhi, QRhiResourceUpdateBatch* updates);
     bool hasGeometryResources() const;
     QRhiBuffer* geometryBuffer() const;
+    bool ensurePipelineResources(QRhi* rhi, QRhiRenderPassDescriptor* renderPassDescriptor);
+    bool hasPipelineResources() const;
+    QRhiGraphicsPipeline* graphicsPipeline() const;
 
     void setRect(const QRectF& rect);
     QRectF rect() const override;
@@ -53,6 +58,7 @@ private:
     QSize m_vTextureSize;
     quint64 m_uploadedSerial = 0;
     Yuv420GeometryBuffer m_geometry;
+    Yuv420GraphicsPipeline m_pipeline;
     Yuv420TextureSet m_textures;
     Yuv420ShaderUniforms m_uniforms;
 };

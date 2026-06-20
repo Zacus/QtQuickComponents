@@ -142,6 +142,21 @@ QRhiBuffer* Yuv420RenderNode::geometryBuffer() const
     return m_geometry.vertexBuffer();
 }
 
+bool Yuv420RenderNode::ensurePipelineResources(QRhi* rhi, QRhiRenderPassDescriptor* renderPassDescriptor)
+{
+    return m_pipeline.ensure(rhi, m_textures.shaderResourceBindings(), renderPassDescriptor);
+}
+
+bool Yuv420RenderNode::hasPipelineResources() const
+{
+    return m_pipeline.isValid();
+}
+
+QRhiGraphicsPipeline* Yuv420RenderNode::graphicsPipeline() const
+{
+    return m_pipeline.graphicsPipeline();
+}
+
 QRectF Yuv420RenderNode::rect() const
 {
     return m_rect;
@@ -158,6 +173,7 @@ void Yuv420RenderNode::render(const RenderState*)
 
 void Yuv420RenderNode::releaseResources()
 {
+    m_pipeline.release();
     m_geometry.release();
     m_uniforms.release();
     m_textures.release();

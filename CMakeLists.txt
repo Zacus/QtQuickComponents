@@ -74,6 +74,7 @@ set(QTC_IMPL_HEADERS
     src/monitor/GlobalVideoRenderer.h
     src/monitor/VideoSurface.h
     src/monitor/Yuv420GeometryBuffer.h
+    src/monitor/Yuv420GraphicsPipeline.h
     src/monitor/Yuv420ShaderPipeline.h
     src/monitor/Yuv420ShaderUniforms.h
     src/monitor/Yuv420TextureSet.h
@@ -95,6 +96,7 @@ set(QTC_IMPL_CPP_SOURCES
     src/monitor/GlobalVideoRenderer.cpp
     src/monitor/VideoSurface.cpp
     src/monitor/Yuv420GeometryBuffer.cpp
+    src/monitor/Yuv420GraphicsPipeline.cpp
     src/monitor/Yuv420ShaderPipeline.cpp
     src/monitor/Yuv420ShaderUniforms.cpp
     src/monitor/Yuv420TextureSet.cpp
