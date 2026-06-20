@@ -1,6 +1,7 @@
 import QtQuick
 import QtTest
 import QuickUI.Components 1.0
+import QuickUI.Components.impl 1.0
 
 TestCase {
     name: "SingleWnd"
@@ -27,6 +28,19 @@ TestCase {
                     { text: "REC", position: 1, color: "red" }
                 ]
             }
+        }
+    }
+
+    Component {
+        id: noSignalLayerComponent
+
+        NoSignalLayer {
+            width: 120
+            height: 90
+            noSignalText: "offline"
+            connectingText: "connecting"
+            noSignalIconText: "N"
+            connectingIconText: "C"
         }
     }
 
@@ -108,6 +122,24 @@ TestCase {
 
         compare(clickSpy.count, 1)
         compare(clickSpy.signalArguments[0][0], 3)
+    }
+
+    function test_noSignalLayerShowsOnlyNonNormalStates() {
+        var layer = createTemporaryObject(noSignalLayerComponent, this)
+        verify(layer !== null)
+
+        var label = child(layer, "noSignalText")
+        layer.signalState = WndViewModel.NoSignal
+        compare(label.text, "offline")
+        compare(label.visible, true)
+
+        layer.signalState = WndViewModel.Connecting
+        compare(label.text, "connecting")
+        compare(label.visible, true)
+
+        layer.signalState = WndViewModel.Normal
+        compare(label.text, "")
+        compare(label.visible, false)
     }
 
     Component {
