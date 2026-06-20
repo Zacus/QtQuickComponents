@@ -16,7 +16,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_AUTOMOC ON)
 
-find_package(Qt6 REQUIRED COMPONENTS Quick QuickControls2 GuiPrivate)
+find_package(Qt6 REQUIRED COMPONENTS Quick QuickControls2 GuiPrivate ShaderTools)
 qt_standard_project_setup()
 include(GNUInstallDirs)
 
@@ -73,6 +73,7 @@ set(QTC_IMPL_HEADERS
     src/timeline/TimelineTrackModel.h
     src/monitor/GlobalVideoRenderer.h
     src/monitor/VideoSurface.h
+    src/monitor/Yuv420ShaderPipeline.h
     src/monitor/Yuv420ShaderUniforms.h
     src/monitor/Yuv420TextureSet.h
     src/monitor/Yuv420RenderNode.h
@@ -92,6 +93,7 @@ set(QTC_IMPL_CPP_SOURCES
     src/timeline/TimelineTrackModel.cpp
     src/monitor/GlobalVideoRenderer.cpp
     src/monitor/VideoSurface.cpp
+    src/monitor/Yuv420ShaderPipeline.cpp
     src/monitor/Yuv420ShaderUniforms.cpp
     src/monitor/Yuv420TextureSet.cpp
     src/monitor/Yuv420RenderNode.cpp
@@ -190,6 +192,17 @@ qt_add_qml_module(QtQuickComponentsImpl
     OUTPUT_DIRECTORY "${QTC_QML_IMPL_MODULE_PATH}"
     SOURCES ${QTC_IMPL_HEADERS} ${QTC_IMPL_CPP_SOURCES}
     QML_FILES ${QTC_INTERNAL_QML_FILES}
+)
+
+qt_add_shaders(QtQuickComponentsImpl "qtc_yuv420_shaders"
+    QUIET
+    PREFIX "/QuickUI/Components/impl/shaders"
+    FILES
+        src/monitor/shaders/Yuv420Blit.vert
+        src/monitor/shaders/Yuv420Blit.frag
+    OUTPUTS
+        Yuv420Blit.vert.qsb
+        Yuv420Blit.frag.qsb
 )
 
 qt_add_qml_module(QtQuickComponents

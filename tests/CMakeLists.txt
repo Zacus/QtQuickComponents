@@ -109,6 +109,22 @@ target_link_libraries(tst_yuv420_shader_uniforms PRIVATE
 
 add_test(NAME Yuv420ShaderUniforms COMMAND tst_yuv420_shader_uniforms)
 
+qt_add_executable(tst_yuv420_shader_pipeline
+    tst_yuv420_shader_pipeline.cpp
+)
+target_include_directories(tst_yuv420_shader_pipeline PRIVATE
+    ${QTC_TEST_PRIVATE_INCLUDE_DIRS}
+)
+
+target_link_libraries(tst_yuv420_shader_pipeline PRIVATE
+    QtQuickComponentsImpl
+    Qt6::GuiPrivate
+    Qt6::Quick
+    Qt6::Test
+)
+
+add_test(NAME Yuv420ShaderPipeline COMMAND tst_yuv420_shader_pipeline)
+
 qt_add_executable(tst_timeline_viewport
     tst_timeline_viewport.cpp
 )
