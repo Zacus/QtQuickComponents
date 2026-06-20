@@ -32,6 +32,47 @@ TestCase {
     }
 
     Component {
+        id: dualWndComponent
+
+        Item {
+            width: 640
+            height: 180
+            visible: true
+
+            SingleWnd {
+                id: sourceWnd
+                objectName: "sourceWnd"
+                width: 320
+                height: 180
+                visible: true
+
+                vm: WndViewModel {
+                    wndId: 3
+                    channelId: 12
+                    channelName: "Source camera"
+                    signalState: WndViewModel.Normal
+                }
+            }
+
+            SingleWnd {
+                id: targetWnd
+                objectName: "targetWnd"
+                x: 320
+                width: 320
+                height: 180
+                visible: true
+
+                vm: WndViewModel {
+                    wndId: 4
+                    channelId: 18
+                    channelName: "Target camera"
+                    signalState: WndViewModel.Normal
+                }
+            }
+        }
+    }
+
+    Component {
         id: noSignalLayerComponent
 
         NoSignalLayer {
@@ -193,6 +234,29 @@ TestCase {
         mouseRelease(wnd, 80, 100)
         wait(80)
         compare(wnd.opacity, 1.0)
+    }
+
+    function test_dragTargetHighlightsWhileSourceHovers() {
+        var fixture = createTemporaryObject(dualWndComponent, this)
+        verify(fixture !== null)
+
+        var source = child(fixture, "sourceWnd")
+        var target = child(fixture, "targetWnd")
+        var targetDragLayer = child(target, "dragLayer")
+
+        compare(targetDragLayer.border.width, 0)
+
+        mousePress(source, 20, 80)
+        mouseMove(source, 360, 80)
+        wait(80)
+
+        verify(targetDragLayer.border.width > 0)
+
+        mouseMove(source, 20, 80)
+        wait(80)
+        compare(targetDragLayer.border.width, 0)
+
+        mouseRelease(source, 20, 80)
     }
 
     function test_noSignalLayerShowsOnlyNonNormalStates() {

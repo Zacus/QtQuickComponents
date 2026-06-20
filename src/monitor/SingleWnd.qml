@@ -8,10 +8,18 @@ Item {
     property WndViewModel vm: null
     property alias videoSurface: videoSurface
 
+    readonly property string dragKey: "quickui-single-wnd-channel"
+
     implicitWidth: 320
     implicitHeight: 180
     clip: true
     opacity: dragHandler.active ? 0.62 : 1.0
+    Drag.active: dragHandler.active && root.vm && root.vm.channelId >= 0
+    Drag.source: root
+    Drag.keys: [dragKey]
+    Drag.supportedActions: Qt.MoveAction
+    Drag.hotSpot.x: dragHandler.centroid.position.x
+    Drag.hotSpot.y: dragHandler.centroid.position.y
 
     Rectangle {
         anchors.fill: parent
@@ -84,8 +92,26 @@ Item {
         objectName: "dragLayer"
         anchors.fill: parent
         z: 5
+        property bool dropTargetActive: false
         color: "transparent"
-        border.width: 0
+        border.width: dropTargetActive ? 2 : 0
+        border.color: "#39a7ff"
+    }
+
+    DropArea {
+        id: dropArea
+        anchors.fill: parent
+        keys: [root.dragKey]
+        onEntered: function(drag) {
+            if (drag.source !== root)
+                dragLayer.dropTargetActive = true
+        }
+        onExited: {
+            dragLayer.dropTargetActive = false
+        }
+        onDropped: {
+            dragLayer.dropTargetActive = false
+        }
     }
 
     MouseArea {
