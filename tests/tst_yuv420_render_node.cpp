@@ -146,6 +146,13 @@ void Yuv420RenderNodeTest::uploadsCurrentSnapshotToTextureResources()
     QVERIFY(node.hasTextureResources());
     QCOMPARE(node.uploadedSerial(), quint64(32));
     QVERIFY(!node.hasPendingTextureUpload());
+
+    QVERIFY(node.ensureShaderResources(rhi.get()));
+    QVERIFY(node.hasShaderResources());
+
+    node.releaseResources();
+    QVERIFY(!node.hasTextureResources());
+    QVERIFY(!node.hasShaderResources());
 }
 
 QTEST_APPLESS_MAIN(Yuv420RenderNodeTest)

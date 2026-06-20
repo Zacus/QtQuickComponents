@@ -8,6 +8,8 @@
 
 class QRhi;
 class QRhiResourceUpdateBatch;
+class QRhiSampler;
+class QRhiShaderResourceBindings;
 class QRhiTexture;
 
 class Yuv420TextureSet
@@ -17,6 +19,7 @@ public:
     ~Yuv420TextureSet();
 
     bool ensureTextures(QRhi* rhi, const QSize& ySize, const QSize& uSize, const QSize& vSize);
+    bool ensureShaderResources(QRhi* rhi);
     bool uploadFrame(QRhi* rhi,
                      QRhiResourceUpdateBatch* updates,
                      const GlobalVideoRenderer::Yuv420Frame& frame,
@@ -34,11 +37,23 @@ public:
     QRhiTexture* yTexture() const { return m_yPlane.texture.get(); }
     QRhiTexture* uTexture() const { return m_uPlane.texture.get(); }
     QRhiTexture* vTexture() const { return m_vPlane.texture.get(); }
+    QRhiSampler* sampler() const { return m_sampler.get(); }
+    QRhiShaderResourceBindings* shaderResourceBindings() const { return m_shaderResourceBindings.get(); }
 
 private:
     struct TextureDeleter
     {
         void operator()(QRhiTexture* texture) const;
+    };
+
+    struct SamplerDeleter
+    {
+        void operator()(QRhiSampler* sampler) const;
+    };
+
+    struct ShaderResourceBindingsDeleter
+    {
+        void operator()(QRhiShaderResourceBindings* bindings) const;
     };
 
     struct PlaneTexture
@@ -56,11 +71,16 @@ private:
                      const QByteArray& bytes,
                      int stride,
                      const QSize& sourceSize);
+    bool ensureSampler();
+    bool ensureShaderResourceBindings();
+    void releaseShaderResourceBindings();
     void releasePlane(PlaneTexture& plane);
 
     QRhi* m_rhi = nullptr;
     PlaneTexture m_yPlane;
     PlaneTexture m_uPlane;
     PlaneTexture m_vPlane;
+    std::unique_ptr<QRhiSampler, SamplerDeleter> m_sampler;
+    std::unique_ptr<QRhiShaderResourceBindings, ShaderResourceBindingsDeleter> m_shaderResourceBindings;
     quint64 m_uploadedSerial = 0;
 };

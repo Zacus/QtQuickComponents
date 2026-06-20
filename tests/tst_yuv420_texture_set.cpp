@@ -29,6 +29,7 @@ class Yuv420TextureSetTest : public QObject
 private slots:
     void createsReusesAndReleasesPlaneTextures();
     void uploadsFramePlanesAndTracksSerial();
+    void createsShaderResourceBindingsForPlanes();
     void rejectsInvalidInputs();
 };
 
@@ -97,6 +98,60 @@ void Yuv420TextureSetTest::uploadsFramePlanesAndTracksSerial()
     QVERIFY(textures.uploadFrame(rhi.get(), updates.get(), frame, 7));
     QCOMPARE(textures.uploadedSerial(), quint64(7));
     QCOMPARE(textures.yTexture(), yTexture);
+}
+
+void Yuv420TextureSetTest::createsShaderResourceBindingsForPlanes()
+{
+    QRhiNullInitParams params;
+    std::unique_ptr<QRhi> rhi(QRhi::create(QRhi::Null, &params));
+    QVERIFY(rhi != nullptr);
+
+    GlobalVideoRenderer::Yuv420Frame frame;
+    frame.width = 4;
+    frame.height = 4;
+    frame.yStride = 4;
+    frame.uStride = 2;
+    frame.vStride = 2;
+    frame.yPlane = QByteArray(16, char(16));
+    frame.uPlane = QByteArray(4, char(128));
+    frame.vPlane = QByteArray(4, char(128));
+
+    Yuv420TextureSet textures;
+    ResourceUpdateBatchPtr updates(rhi->nextResourceUpdateBatch());
+    QVERIFY(updates != nullptr);
+    QVERIFY(textures.uploadFrame(rhi.get(), updates.get(), frame, 9));
+
+    QVERIFY(textures.ensureShaderResources(rhi.get()));
+    QVERIFY(textures.shaderResourceBindings() != nullptr);
+    QVERIFY(textures.sampler() != nullptr);
+    QCOMPARE(textures.sampler()->magFilter(), QRhiSampler::Linear);
+    QCOMPARE(textures.sampler()->minFilter(), QRhiSampler::Linear);
+    QCOMPARE(textures.sampler()->addressU(), QRhiSampler::ClampToEdge);
+    QCOMPARE(textures.shaderResourceBindings()->bindingCount(), qsizetype(3));
+
+    const QVector<quint32> layout = textures.shaderResourceBindings()->serializedLayoutDescription();
+    const QVector<quint32> expectedLayout = {
+        0, quint32(QRhiShaderResourceBinding::FragmentStage), quint32(QRhiShaderResourceBinding::SampledTexture), 1,
+        1, quint32(QRhiShaderResourceBinding::FragmentStage), quint32(QRhiShaderResourceBinding::SampledTexture), 1,
+        2, quint32(QRhiShaderResourceBinding::FragmentStage), quint32(QRhiShaderResourceBinding::SampledTexture), 1,
+    };
+    QCOMPARE(layout, expectedLayout);
+
+    QRhiShaderResourceBindings* bindings = textures.shaderResourceBindings();
+    QVERIFY(textures.ensureShaderResources(rhi.get()));
+    QCOMPARE(textures.shaderResourceBindings(), bindings);
+
+    frame.width = 8;
+    frame.height = 4;
+    frame.yStride = 8;
+    frame.uStride = 4;
+    frame.vStride = 4;
+    frame.yPlane = QByteArray(32, char(16));
+    frame.uPlane = QByteArray(8, char(128));
+    frame.vPlane = QByteArray(8, char(128));
+    QVERIFY(textures.uploadFrame(rhi.get(), updates.get(), frame, 10));
+    QVERIFY(textures.ensureShaderResources(rhi.get()));
+    QVERIFY(textures.shaderResourceBindings() != bindings);
 }
 
 void Yuv420TextureSetTest::rejectsInvalidInputs()

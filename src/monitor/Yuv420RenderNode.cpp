@@ -91,6 +91,16 @@ bool Yuv420RenderNode::hasTextureResources() const
     return m_textures.isValid();
 }
 
+bool Yuv420RenderNode::ensureShaderResources(QRhi* rhi)
+{
+    return m_textures.ensureShaderResources(rhi);
+}
+
+bool Yuv420RenderNode::hasShaderResources() const
+{
+    return m_textures.shaderResourceBindings() != nullptr;
+}
+
 bool Yuv420RenderNode::uploadPendingTextureData(QRhi* rhi, QRhiResourceUpdateBatch* updates)
 {
     if (!m_snapshot.isValid())

@@ -39,6 +39,16 @@ void Yuv420TextureSet::TextureDeleter::operator()(QRhiTexture* texture) const
     delete texture;
 }
 
+void Yuv420TextureSet::SamplerDeleter::operator()(QRhiSampler* sampler) const
+{
+    delete sampler;
+}
+
+void Yuv420TextureSet::ShaderResourceBindingsDeleter::operator()(QRhiShaderResourceBindings* bindings) const
+{
+    delete bindings;
+}
+
 Yuv420TextureSet::PlaneTexture::~PlaneTexture() = default;
 
 Yuv420TextureSet::~Yuv420TextureSet()
@@ -66,6 +76,9 @@ bool Yuv420TextureSet::ensureTextures(QRhi* rhi, const QSize& ySize, const QSize
         m_rhi = rhi;
     }
 
+    if (resourcesWillChange)
+        releaseShaderResourceBindings();
+
     if (!ensurePlane(m_yPlane, ySize) || !ensurePlane(m_uPlane, uSize) || !ensurePlane(m_vPlane, vSize)) {
         release();
         return false;
@@ -75,6 +88,14 @@ bool Yuv420TextureSet::ensureTextures(QRhi* rhi, const QSize& ySize, const QSize
         m_uploadedSerial = 0;
 
     return true;
+}
+
+bool Yuv420TextureSet::ensureShaderResources(QRhi* rhi)
+{
+    if (!rhi || !isValid() || rhi != m_rhi)
+        return false;
+
+    return ensureSampler() && ensureShaderResourceBindings();
 }
 
 bool Yuv420TextureSet::uploadFrame(QRhi* rhi,
@@ -105,6 +126,11 @@ bool Yuv420TextureSet::uploadFrame(QRhi* rhi,
 
 void Yuv420TextureSet::release()
 {
+    releaseShaderResourceBindings();
+    if (m_sampler) {
+        m_sampler->destroy();
+        m_sampler.reset();
+    }
     releasePlane(m_yPlane);
     releasePlane(m_uPlane);
     releasePlane(m_vPlane);
@@ -151,6 +177,57 @@ bool Yuv420TextureSet::uploadPlane(QRhiResourceUpdateBatch* updates,
 
     updates->uploadTexture(plane.texture.get(), QRhiTextureUploadDescription(QRhiTextureUploadEntry(0, 0, subresource)));
     return true;
+}
+
+bool Yuv420TextureSet::ensureSampler()
+{
+    if (m_sampler)
+        return true;
+
+    std::unique_ptr<QRhiSampler, SamplerDeleter> sampler(
+        m_rhi->newSampler(QRhiSampler::Linear,
+                          QRhiSampler::Linear,
+                          QRhiSampler::None,
+                          QRhiSampler::ClampToEdge,
+                          QRhiSampler::ClampToEdge));
+    if (!sampler || !sampler->create())
+        return false;
+
+    m_sampler = std::move(sampler);
+    return true;
+}
+
+bool Yuv420TextureSet::ensureShaderResourceBindings()
+{
+    if (m_shaderResourceBindings)
+        return true;
+
+    if (!m_sampler || !m_yPlane.texture || !m_uPlane.texture || !m_vPlane.texture)
+        return false;
+
+    std::unique_ptr<QRhiShaderResourceBindings, ShaderResourceBindingsDeleter> bindings(m_rhi->newShaderResourceBindings());
+    if (!bindings)
+        return false;
+
+    bindings->setBindings({
+        QRhiShaderResourceBinding::sampledTexture(0, QRhiShaderResourceBinding::FragmentStage, m_yPlane.texture.get(), m_sampler.get()),
+        QRhiShaderResourceBinding::sampledTexture(1, QRhiShaderResourceBinding::FragmentStage, m_uPlane.texture.get(), m_sampler.get()),
+        QRhiShaderResourceBinding::sampledTexture(2, QRhiShaderResourceBinding::FragmentStage, m_vPlane.texture.get(), m_sampler.get()),
+    });
+
+    if (!bindings->create())
+        return false;
+
+    m_shaderResourceBindings = std::move(bindings);
+    return true;
+}
+
+void Yuv420TextureSet::releaseShaderResourceBindings()
+{
+    if (m_shaderResourceBindings) {
+        m_shaderResourceBindings->destroy();
+        m_shaderResourceBindings.reset();
+    }
 }
 
 void Yuv420TextureSet::releasePlane(PlaneTexture& plane)

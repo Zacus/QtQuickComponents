@@ -26,6 +26,8 @@ public:
     bool markTextureUploadCompleteForCurrentSnapshot();
     bool ensureTextureResources(QRhi* rhi);
     bool hasTextureResources() const;
+    bool ensureShaderResources(QRhi* rhi);
+    bool hasShaderResources() const;
     bool uploadPendingTextureData(QRhi* rhi, QRhiResourceUpdateBatch* updates);
 
     void setRect(const QRectF& rect);
