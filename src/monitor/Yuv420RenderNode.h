@@ -19,6 +19,9 @@ class Yuv420RenderNode : public QSGRenderNode
 public:
     Yuv420RenderNode(const GlobalVideoRenderer::Yuv420Snapshot& snapshot, const QRectF& rect);
 
+    void setRhi(QRhi* rhi);
+    QRhi* rhi() const { return m_rhi; }
+
     void setSnapshot(const GlobalVideoRenderer::Yuv420Snapshot& snapshot);
     const GlobalVideoRenderer::Yuv420Snapshot& snapshot() const { return m_snapshot; }
     quint64 serial() const { return m_snapshot.serial; }
@@ -62,6 +65,7 @@ private:
     QSize m_yTextureSize;
     QSize m_uTextureSize;
     QSize m_vTextureSize;
+    QRhi* m_rhi = nullptr;
     quint64 m_uploadedSerial = 0;
     Yuv420GeometryBuffer m_geometry;
     Yuv420GraphicsPipeline m_pipeline;

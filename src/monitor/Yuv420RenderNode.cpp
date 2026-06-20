@@ -40,6 +40,15 @@ Yuv420RenderNode::Yuv420RenderNode(const GlobalVideoRenderer::Yuv420Snapshot& sn
     updateTexturePlan();
 }
 
+void Yuv420RenderNode::setRhi(QRhi* rhi)
+{
+    if (m_rhi == rhi)
+        return;
+
+    releaseResources();
+    m_rhi = rhi;
+}
+
 void Yuv420RenderNode::setSnapshot(const GlobalVideoRenderer::Yuv420Snapshot& snapshot)
 {
     m_snapshot = deepCopySnapshot(snapshot);

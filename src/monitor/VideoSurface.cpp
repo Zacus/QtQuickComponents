@@ -50,6 +50,7 @@ QSGNode* VideoSurface::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData*)
             return nullptr;
         }
 
+        QRhi* rhi = window() ? window()->rhi() : nullptr;
         auto* node = dynamic_cast<Yuv420RenderNode*>(oldNode);
         if (!node) {
             delete oldNode;
@@ -58,6 +59,7 @@ QSGNode* VideoSurface::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData*)
             node->setSnapshot(snapshot);
             node->setRect(boundingRect());
         }
+        node->setRhi(rhi);
         return node;
     }
 
