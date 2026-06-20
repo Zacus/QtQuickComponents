@@ -7,6 +7,8 @@
 #include <QSGRenderNode>
 #include <QSize>
 
+class QRhiResourceUpdateBatch;
+
 class Yuv420RenderNode : public QSGRenderNode
 {
 public:
@@ -24,6 +26,7 @@ public:
     bool markTextureUploadCompleteForCurrentSnapshot();
     bool ensureTextureResources(QRhi* rhi);
     bool hasTextureResources() const;
+    bool uploadPendingTextureData(QRhi* rhi, QRhiResourceUpdateBatch* updates);
 
     void setRect(const QRectF& rect);
     QRectF rect() const override;

@@ -91,6 +91,19 @@ bool Yuv420RenderNode::hasTextureResources() const
     return m_textures.isValid();
 }
 
+bool Yuv420RenderNode::uploadPendingTextureData(QRhi* rhi, QRhiResourceUpdateBatch* updates)
+{
+    if (!m_snapshot.isValid())
+        return false;
+
+    if (m_textures.uploadFrame(rhi, updates, m_snapshot.frame, m_snapshot.serial)) {
+        m_uploadedSerial = m_snapshot.serial;
+        return true;
+    }
+
+    return false;
+}
+
 QRectF Yuv420RenderNode::rect() const
 {
     return m_rect;

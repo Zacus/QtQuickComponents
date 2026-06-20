@@ -7,6 +7,21 @@
 
 #include <memory>
 
+namespace {
+
+struct ResourceUpdateBatchReleaser
+{
+    void operator()(QRhiResourceUpdateBatch* updates) const
+    {
+        if (updates)
+            updates->release();
+    }
+};
+
+using ResourceUpdateBatchPtr = std::unique_ptr<QRhiResourceUpdateBatch, ResourceUpdateBatchReleaser>;
+
+} // namespace
+
 class Yuv420RenderNodeTest : public QObject
 {
     Q_OBJECT
@@ -15,6 +30,7 @@ private slots:
     void storesSnapshotAndBounds();
     void tracksTextureUploadStateForFrames();
     void releasesTextureResourcesWithSceneGraphNode();
+    void uploadsCurrentSnapshotToTextureResources();
 };
 
 void Yuv420RenderNodeTest::storesSnapshotAndBounds()
@@ -101,6 +117,35 @@ void Yuv420RenderNodeTest::releasesTextureResourcesWithSceneGraphNode()
 
     node.releaseResources();
     QVERIFY(!node.hasTextureResources());
+}
+
+void Yuv420RenderNodeTest::uploadsCurrentSnapshotToTextureResources()
+{
+    QRhiNullInitParams params;
+    std::unique_ptr<QRhi> rhi(QRhi::create(QRhi::Null, &params));
+    QVERIFY(rhi != nullptr);
+
+    ResourceUpdateBatchPtr updates(rhi->nextResourceUpdateBatch());
+    QVERIFY(updates != nullptr);
+
+    GlobalVideoRenderer::Yuv420Snapshot snapshot;
+    snapshot.serial = 32;
+    snapshot.frame.width = 4;
+    snapshot.frame.height = 4;
+    snapshot.frame.yStride = 8;
+    snapshot.frame.uStride = 4;
+    snapshot.frame.vStride = 4;
+    snapshot.frame.yPlane = QByteArray(28, char(16));
+    snapshot.frame.uPlane = QByteArray(6, char(128));
+    snapshot.frame.vPlane = QByteArray(6, char(128));
+
+    Yuv420RenderNode node(snapshot, QRectF(0, 0, 40, 40));
+    QVERIFY(node.hasPendingTextureUpload());
+
+    QVERIFY(node.uploadPendingTextureData(rhi.get(), updates.get()));
+    QVERIFY(node.hasTextureResources());
+    QCOMPARE(node.uploadedSerial(), quint64(32));
+    QVERIFY(!node.hasPendingTextureUpload());
 }
 
 QTEST_APPLESS_MAIN(Yuv420RenderNodeTest)

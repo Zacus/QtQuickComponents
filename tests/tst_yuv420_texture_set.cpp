@@ -1,10 +1,26 @@
 #include <QtTest/QtTest>
 
+#include "GlobalVideoRenderer.h"
 #include "Yuv420TextureSet.h"
 
 #include <rhi/qrhi_platform.h>
 
 #include <memory>
+
+namespace {
+
+struct ResourceUpdateBatchReleaser
+{
+    void operator()(QRhiResourceUpdateBatch* updates) const
+    {
+        if (updates)
+            updates->release();
+    }
+};
+
+using ResourceUpdateBatchPtr = std::unique_ptr<QRhiResourceUpdateBatch, ResourceUpdateBatchReleaser>;
+
+} // namespace
 
 class Yuv420TextureSetTest : public QObject
 {
@@ -12,6 +28,7 @@ class Yuv420TextureSetTest : public QObject
 
 private slots:
     void createsReusesAndReleasesPlaneTextures();
+    void uploadsFramePlanesAndTracksSerial();
     void rejectsInvalidInputs();
 };
 
@@ -49,12 +66,50 @@ void Yuv420TextureSetTest::createsReusesAndReleasesPlaneTextures()
     QCOMPARE(textures.yTexture(), nullptr);
 }
 
+void Yuv420TextureSetTest::uploadsFramePlanesAndTracksSerial()
+{
+    QRhiNullInitParams params;
+    std::unique_ptr<QRhi> rhi(QRhi::create(QRhi::Null, &params));
+    QVERIFY(rhi != nullptr);
+
+    GlobalVideoRenderer::Yuv420Frame frame;
+    frame.width = 4;
+    frame.height = 4;
+    frame.yStride = 8;
+    frame.uStride = 4;
+    frame.vStride = 4;
+    frame.yPlane = QByteArray(28, char(16));
+    frame.uPlane = QByteArray(6, char(128));
+    frame.vPlane = QByteArray(6, char(128));
+
+    Yuv420TextureSet textures;
+    ResourceUpdateBatchPtr updates(rhi->nextResourceUpdateBatch());
+    QVERIFY(updates != nullptr);
+
+    QVERIFY(textures.uploadFrame(rhi.get(), updates.get(), frame, 7));
+    QCOMPARE(textures.uploadedSerial(), quint64(7));
+    QCOMPARE(textures.yTextureSize(), QSize(4, 4));
+    QCOMPARE(textures.uTextureSize(), QSize(2, 2));
+    QCOMPARE(textures.vTextureSize(), QSize(2, 2));
+    QVERIFY(textures.isValid());
+
+    QRhiTexture* yTexture = textures.yTexture();
+    QVERIFY(textures.uploadFrame(rhi.get(), updates.get(), frame, 7));
+    QCOMPARE(textures.uploadedSerial(), quint64(7));
+    QCOMPARE(textures.yTexture(), yTexture);
+}
+
 void Yuv420TextureSetTest::rejectsInvalidInputs()
 {
     Yuv420TextureSet textures;
 
     QVERIFY(!textures.ensureTextures(nullptr, QSize(4, 4), QSize(2, 2), QSize(2, 2)));
     QVERIFY(!textures.isValid());
+
+    GlobalVideoRenderer::Yuv420Frame invalidFrame;
+    ResourceUpdateBatchPtr updates;
+    QVERIFY(!textures.uploadFrame(nullptr, updates.get(), invalidFrame, 1));
+    QCOMPARE(textures.uploadedSerial(), quint64(0));
 }
 
 QTEST_APPLESS_MAIN(Yuv420TextureSetTest)
