@@ -127,6 +127,21 @@ bool Yuv420RenderNode::hasShaderUniforms() const
     return m_uniforms.isValid();
 }
 
+bool Yuv420RenderNode::ensureGeometryResources(QRhi* rhi, QRhiResourceUpdateBatch* updates)
+{
+    return m_geometry.ensure(rhi, updates);
+}
+
+bool Yuv420RenderNode::hasGeometryResources() const
+{
+    return m_geometry.isValid();
+}
+
+QRhiBuffer* Yuv420RenderNode::geometryBuffer() const
+{
+    return m_geometry.vertexBuffer();
+}
+
 QRectF Yuv420RenderNode::rect() const
 {
     return m_rect;
@@ -143,6 +158,7 @@ void Yuv420RenderNode::render(const RenderState*)
 
 void Yuv420RenderNode::releaseResources()
 {
+    m_geometry.release();
     m_uniforms.release();
     m_textures.release();
 }

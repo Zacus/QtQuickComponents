@@ -32,6 +32,7 @@ private slots:
     void releasesTextureResourcesWithSceneGraphNode();
     void uploadsCurrentSnapshotToTextureResources();
     void uploadsShaderUniformsWithSceneGraphNode();
+    void ownsGeometryBufferForDraw();
 };
 
 void Yuv420RenderNodeTest::storesSnapshotAndBounds()
@@ -183,6 +184,42 @@ void Yuv420RenderNodeTest::uploadsShaderUniformsWithSceneGraphNode()
 
     node.releaseResources();
     QVERIFY(!node.hasShaderUniforms());
+}
+
+void Yuv420RenderNodeTest::ownsGeometryBufferForDraw()
+{
+    QRhiNullInitParams params;
+    std::unique_ptr<QRhi> rhi(QRhi::create(QRhi::Null, &params));
+    QVERIFY(rhi != nullptr);
+
+    GlobalVideoRenderer::Yuv420Snapshot snapshot;
+    snapshot.serial = 19;
+    snapshot.frame.width = 4;
+    snapshot.frame.height = 4;
+    snapshot.frame.yStride = 4;
+    snapshot.frame.uStride = 2;
+    snapshot.frame.vStride = 2;
+    snapshot.frame.yPlane = QByteArray(16, char(16));
+    snapshot.frame.uPlane = QByteArray(4, char(128));
+    snapshot.frame.vPlane = QByteArray(4, char(128));
+
+    Yuv420RenderNode node(snapshot, QRectF(0, 0, 40, 40));
+    ResourceUpdateBatchPtr updates(rhi->nextResourceUpdateBatch());
+    QVERIFY(updates != nullptr);
+
+    QVERIFY(!node.hasGeometryResources());
+    QVERIFY(node.ensureGeometryResources(rhi.get(), updates.get()));
+    QVERIFY(node.hasGeometryResources());
+    QVERIFY(node.geometryBuffer() != nullptr);
+    QCOMPARE(node.geometryBuffer()->usage(), QRhiBuffer::UsageFlags(QRhiBuffer::VertexBuffer));
+
+    QRhiBuffer* buffer = node.geometryBuffer();
+    QVERIFY(node.ensureGeometryResources(rhi.get(), updates.get()));
+    QCOMPARE(node.geometryBuffer(), buffer);
+
+    node.releaseResources();
+    QVERIFY(!node.hasGeometryResources());
+    QCOMPARE(node.geometryBuffer(), nullptr);
 }
 
 QTEST_APPLESS_MAIN(Yuv420RenderNodeTest)
