@@ -88,20 +88,38 @@ Item {
     }
 
     MouseArea {
+        id: clickArea
         anchors.fill: parent
         z: 3.5
         acceptedButtons: Qt.LeftButton
         hoverEnabled: false
         propagateComposedEvents: true
+        property bool suppressNextClick: false
         onClicked: function(mouse) {
-            if (root.vm)
-                root.vm.clicked(root.vm.wndId)
+            if (suppressNextClick) {
+                suppressNextClick = false
+                mouse.accepted = false
+                return
+            }
+            clickConfirmTimer.restart()
             mouse.accepted = false
         }
         onDoubleClicked: function(mouse) {
+            clickConfirmTimer.stop()
+            suppressNextClick = true
             if (root.vm)
                 root.vm.doubleClicked(root.vm.wndId, root.vm.channelId)
             mouse.accepted = false
+        }
+    }
+
+    Timer {
+        id: clickConfirmTimer
+        interval: 220
+        repeat: false
+        onTriggered: {
+            if (root.vm)
+                root.vm.clicked(root.vm.wndId)
         }
     }
 

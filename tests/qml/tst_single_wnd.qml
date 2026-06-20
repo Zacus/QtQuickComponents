@@ -133,9 +133,32 @@ TestCase {
         })
 
         mouseClick(wnd, 20, 80)
+        wait(260)
 
         compare(clickSpy.count, 1)
         compare(clickSpy.signalArguments[0][0], 3)
+    }
+
+    function test_doubleClickForwardsOnlyDoubleClickedSignal() {
+        var wnd = createTemporaryObject(singleWndComponent, this)
+        verify(wnd !== null)
+
+        var clickSpy = signalSpy.createObject(this, {
+            target: wnd.vm,
+            signalName: "clicked"
+        })
+        var doubleClickSpy = signalSpy.createObject(this, {
+            target: wnd.vm,
+            signalName: "doubleClicked"
+        })
+
+        mouseDoubleClickSequence(wnd, 20, 80)
+        wait(260)
+
+        compare(clickSpy.count, 0)
+        compare(doubleClickSpy.count, 1)
+        compare(doubleClickSpy.signalArguments[0][0], 3)
+        compare(doubleClickSpy.signalArguments[0][1], 12)
     }
 
     function test_noSignalLayerShowsOnlyNonNormalStates() {
