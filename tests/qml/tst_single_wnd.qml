@@ -109,6 +109,20 @@ TestCase {
         compare(closeSpy.count, 1)
     }
 
+    function test_titleBarRecordingIndicatorFollowsViewModel() {
+        var wnd = createTemporaryObject(singleWndComponent, this)
+        verify(wnd !== null)
+
+        var indicator = child(wnd, "recordingIndicator")
+        compare(indicator.visible, false)
+
+        wnd.vm.isRecording = true
+        compare(indicator.visible, true)
+
+        wnd.vm.isRecording = false
+        compare(indicator.visible, false)
+    }
+
     function test_singleClickForwardsClickedSignal() {
         var wnd = createTemporaryObject(singleWndComponent, this)
         verify(wnd !== null)

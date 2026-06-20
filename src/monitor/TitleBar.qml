@@ -72,6 +72,7 @@ Item {
             onClicked: root.recordClicked()
 
             Rectangle {
+                objectName: "recordingIndicator"
                 anchors {
                     right: parent.right
                     top: parent.top
