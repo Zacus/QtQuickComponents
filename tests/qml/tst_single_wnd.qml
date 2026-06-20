@@ -44,6 +44,15 @@ TestCase {
         }
     }
 
+    Component {
+        id: borderLayerComponent
+
+        BorderLayer {
+            width: 120
+            height: 90
+        }
+    }
+
     function child(root, objectName) {
         var result = findChild(root, objectName)
         verify(result !== null, "Missing child " + objectName)
@@ -177,6 +186,30 @@ TestCase {
         layer.signalState = WndViewModel.Normal
         compare(label.text, "")
         compare(label.visible, false)
+    }
+
+    function test_borderLayerAppliesPriorityAndHidesWhenInactive() {
+        var layer = createTemporaryObject(borderLayerComponent, this)
+        verify(layer !== null)
+
+        compare(layer.border.width, 0)
+        compare(layer.visible, false)
+
+        layer.isActive = true
+        compare(layer.visible, true)
+        compare(layer.border.width, 2)
+        verify(Qt.colorEqual(layer.border.color, layer.activeColor))
+
+        layer.alarmLevel = WndViewModel.Warning
+        verify(Qt.colorEqual(layer.border.color, layer.warningColor))
+
+        layer.alarmLevel = WndViewModel.Critical
+        verify(Qt.colorEqual(layer.border.color, layer.criticalColor))
+
+        layer.alarmLevel = WndViewModel.None
+        layer.isActive = false
+        compare(layer.border.width, 0)
+        compare(layer.visible, false)
     }
 
     Component {
