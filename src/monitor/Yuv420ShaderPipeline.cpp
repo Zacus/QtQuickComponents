@@ -68,3 +68,18 @@ QVector<Yuv420ShaderPipeline::Vertex> Yuv420ShaderPipeline::quadVertices()
         {1.0f, 1.0f, 1.0f, 0.0f},
     };
 }
+
+QVector<Yuv420ShaderPipeline::Vertex> Yuv420ShaderPipeline::quadVertices(const QRectF& rect)
+{
+    const float left = float(rect.left());
+    const float right = float(rect.right());
+    const float top = float(rect.top());
+    const float bottom = float(rect.bottom());
+
+    return {
+        {left, bottom, 0.0f, 1.0f},
+        {right, bottom, 1.0f, 1.0f},
+        {left, top, 0.0f, 0.0f},
+        {right, top, 1.0f, 0.0f},
+    };
+}

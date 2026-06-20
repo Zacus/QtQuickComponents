@@ -214,8 +214,10 @@ bool Yuv420TextureSet::ensureShaderResourceBindings(QRhiBuffer* uniformBuffer)
     if (!bindings)
         return false;
 
+    const auto uniformStages = QRhiShaderResourceBinding::StageFlags(QRhiShaderResourceBinding::VertexStage
+                                                                    | QRhiShaderResourceBinding::FragmentStage);
     bindings->setBindings({
-        QRhiShaderResourceBinding::uniformBuffer(0, QRhiShaderResourceBinding::FragmentStage, uniformBuffer),
+        QRhiShaderResourceBinding::uniformBuffer(0, uniformStages, uniformBuffer),
         QRhiShaderResourceBinding::sampledTexture(1, QRhiShaderResourceBinding::FragmentStage, m_yPlane.texture.get(), m_sampler.get()),
         QRhiShaderResourceBinding::sampledTexture(2, QRhiShaderResourceBinding::FragmentStage, m_uPlane.texture.get(), m_sampler.get()),
         QRhiShaderResourceBinding::sampledTexture(3, QRhiShaderResourceBinding::FragmentStage, m_vPlane.texture.get(), m_sampler.get()),

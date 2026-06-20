@@ -2,6 +2,8 @@
 
 #include "Yuv420ShaderUniforms.h"
 
+#include <QMatrix4x4>
+
 #include <rhi/qrhi_platform.h>
 
 #include <memory>
@@ -33,9 +35,17 @@ private slots:
 
 void Yuv420ShaderUniformsTest::buildsDefaultBt601UniformBlock()
 {
-    const Yuv420ShaderUniforms::UniformBlock block = Yuv420ShaderUniforms::makeUniformBlock(0.75f);
+    QMatrix4x4 transform;
+    transform.translate(10.0f, 20.0f);
+    const Yuv420ShaderUniforms::UniformBlock block =
+        Yuv420ShaderUniforms::makeUniformBlock(0.75f, transform);
 
-    QCOMPARE(sizeof(Yuv420ShaderUniforms::UniformBlock), size_t(80));
+    QCOMPARE(sizeof(Yuv420ShaderUniforms::UniformBlock), size_t(144));
+    QCOMPARE(block.transform[0], 1.0f);
+    QCOMPARE(block.transform[5], 1.0f);
+    QCOMPARE(block.transform[10], 1.0f);
+    QCOMPARE(block.transform[12], 10.0f);
+    QCOMPARE(block.transform[13], 20.0f);
     QCOMPARE(block.opacity[0], 0.75f);
     QCOMPARE(block.opacity[1], 0.0f);
     QCOMPARE(block.yuvToRgb[0], 1.164383f);
@@ -75,6 +85,13 @@ void Yuv420ShaderUniformsTest::uploadsUniformBufferAndTracksState()
     QVERIFY(uniforms.upload(rhi.get(), updates.get(), 0.25f, 11));
     QCOMPARE(uniforms.buffer(), buffer);
     QCOMPARE(uniforms.opacity(), 0.25f);
+
+    QMatrix4x4 transform;
+    transform.scale(2.0f, 3.0f);
+    QVERIFY(uniforms.upload(rhi.get(), updates.get(), transform, 0.25f, 11));
+    QCOMPARE(uniforms.buffer(), buffer);
+    QCOMPARE(uniforms.uniformBlock().transform[0], 2.0f);
+    QCOMPARE(uniforms.uniformBlock().transform[5], 3.0f);
 
     uniforms.release();
     QVERIFY(!uniforms.isValid());

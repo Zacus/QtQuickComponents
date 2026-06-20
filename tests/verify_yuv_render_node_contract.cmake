@@ -12,7 +12,21 @@ endif()
 file(READ "${_qtc_render_node}" _qtc_render_node_cpp)
 
 if(NOT _qtc_render_node_cpp MATCHES
-        "void[ \t\r\n]+Yuv420RenderNode::render\\([^)]*\\)[ \t\r\n]*\\{[ \t\r\n]*renderFrame\\(renderTarget\\(\\),[ \t\r\n]*commandBuffer\\(\\),[ \t\r\n]*float\\(inheritedOpacity\\(\\)\\)\\);[ \t\r\n]*\\}")
+        "void[ \t\r\n]+Yuv420RenderNode::render\\([^)]*\\)")
     message(FATAL_ERROR
-        "Yuv420RenderNode::render() must delegate to renderFrame(renderTarget(), commandBuffer(), float(inheritedOpacity())).")
+        "Yuv420RenderNode::render() implementation was not found.")
+endif()
+
+if(NOT _qtc_render_node_cpp MATCHES
+        "if[ \t\r\n]*\\([ \t\r\n]*!renderTarget\\(\\)[ \t\r\n]*\\|\\|[ \t\r\n]*!commandBuffer\\(\\)[ \t\r\n]*\\)")
+    message(FATAL_ERROR
+        "Yuv420RenderNode::render() must guard missing SceneGraph render resources.")
+endif()
+
+if(NOT _qtc_render_node_cpp MATCHES "projectionMatrix\\(\\)"
+        OR NOT _qtc_render_node_cpp MATCHES "matrix\\(\\)"
+        OR NOT _qtc_render_node_cpp MATCHES
+            "renderFrame\\(renderTarget\\(\\),[ \t\r\n]*commandBuffer\\(\\),[ \t\r\n]*transform,[ \t\r\n]*float\\(inheritedOpacity\\(\\)\\)\\)")
+    message(FATAL_ERROR
+        "Yuv420RenderNode::render() must pass the SceneGraph transform into renderFrame().")
 endif()

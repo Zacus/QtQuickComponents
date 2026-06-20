@@ -2,6 +2,8 @@
 
 #include "Yuv420ShaderPipeline.h"
 
+#include <QRectF>
+
 class Yuv420ShaderPipelineTest : public QObject
 {
     Q_OBJECT
@@ -10,6 +12,7 @@ private slots:
     void loadsShaderBytecodeFromResources();
     void exposesFixedVertexInputLayout();
     void exposesFullscreenTriangleStripVertices();
+    void exposesLocalRectTriangleStripVertices();
 };
 
 void Yuv420ShaderPipelineTest::loadsShaderBytecodeFromResources()
@@ -58,6 +61,25 @@ void Yuv420ShaderPipelineTest::exposesFullscreenTriangleStripVertices()
     QCOMPARE(vertices.at(0).v, 1.0f);
     QCOMPARE(vertices.at(3).x, 1.0f);
     QCOMPARE(vertices.at(3).y, 1.0f);
+    QCOMPARE(vertices.at(3).u, 1.0f);
+    QCOMPARE(vertices.at(3).v, 0.0f);
+}
+
+void Yuv420ShaderPipelineTest::exposesLocalRectTriangleStripVertices()
+{
+    const auto vertices = Yuv420ShaderPipeline::quadVertices(QRectF(10.0, 20.0, 30.0, 40.0));
+
+    QCOMPARE(vertices.size(), qsizetype(4));
+    QCOMPARE(vertices.at(0).x, 10.0f);
+    QCOMPARE(vertices.at(0).y, 60.0f);
+    QCOMPARE(vertices.at(0).u, 0.0f);
+    QCOMPARE(vertices.at(0).v, 1.0f);
+    QCOMPARE(vertices.at(1).x, 40.0f);
+    QCOMPARE(vertices.at(1).y, 60.0f);
+    QCOMPARE(vertices.at(2).x, 10.0f);
+    QCOMPARE(vertices.at(2).y, 20.0f);
+    QCOMPARE(vertices.at(3).x, 40.0f);
+    QCOMPARE(vertices.at(3).y, 20.0f);
     QCOMPARE(vertices.at(3).u, 1.0f);
     QCOMPARE(vertices.at(3).v, 0.0f);
 }

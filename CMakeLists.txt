@@ -79,6 +79,7 @@ set(QTC_IMPL_HEADERS
     src/monitor/Yuv420ShaderUniforms.h
     src/monitor/Yuv420TextureSet.h
     src/monitor/Yuv420RenderNode.h
+    src/monitor/Yuv420Vertex.h
 )
 
 set(QTC_CPP_SOURCES

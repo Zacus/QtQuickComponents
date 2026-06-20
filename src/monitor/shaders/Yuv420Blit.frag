@@ -5,6 +5,7 @@ layout(location = 0) out vec4 fragColor;
 
 layout(binding = 0) uniform Yuv420Uniforms
 {
+    mat4 transform;
     mat4 yuvToRgb;
     vec4 opacity;
 } ubuf;

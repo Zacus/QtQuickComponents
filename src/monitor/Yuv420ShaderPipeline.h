@@ -1,5 +1,8 @@
 #pragma once
 
+#include "Yuv420Vertex.h"
+
+#include <QRectF>
 #include <QVector>
 
 #include <rhi/qshader.h>
@@ -8,13 +11,7 @@
 class Yuv420ShaderPipeline
 {
 public:
-    struct Vertex
-    {
-        float x = 0.0f;
-        float y = 0.0f;
-        float u = 0.0f;
-        float v = 0.0f;
-    };
+    using Vertex = Yuv420Vertex;
 
     bool loadShaders();
     bool hasShaders() const;
@@ -26,6 +23,7 @@ public:
     static QRhiVertexInputLayout vertexInputLayout();
     static QRhiGraphicsPipeline::Topology topology();
     static QVector<Vertex> quadVertices();
+    static QVector<Vertex> quadVertices(const QRectF& rect);
 
 private:
     QShader m_vertexShader;

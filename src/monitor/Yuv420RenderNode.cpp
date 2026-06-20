@@ -1,5 +1,7 @@
 #include "Yuv420RenderNode.h"
 
+#include "Yuv420ShaderPipeline.h"
+
 #include <rhi/qrhi.h>
 
 #include <memory>
@@ -140,10 +142,18 @@ bool Yuv420RenderNode::uploadPendingTextureData(QRhi* rhi, QRhiResourceUpdateBat
 
 bool Yuv420RenderNode::uploadShaderUniforms(QRhi* rhi, QRhiResourceUpdateBatch* updates, float opacity)
 {
+    return uploadShaderUniforms(rhi, updates, QMatrix4x4(), opacity);
+}
+
+bool Yuv420RenderNode::uploadShaderUniforms(QRhi* rhi,
+                                            QRhiResourceUpdateBatch* updates,
+                                            const QMatrix4x4& transform,
+                                            float opacity)
+{
     if (!m_snapshot.isValid())
         return false;
 
-    return m_uniforms.upload(rhi, updates, opacity, m_snapshot.serial);
+    return m_uniforms.upload(rhi, updates, transform, opacity, m_snapshot.serial);
 }
 
 bool Yuv420RenderNode::hasShaderUniforms() const
@@ -153,7 +163,7 @@ bool Yuv420RenderNode::hasShaderUniforms() const
 
 bool Yuv420RenderNode::ensureGeometryResources(QRhi* rhi, QRhiResourceUpdateBatch* updates)
 {
-    return m_geometry.ensure(rhi, updates);
+    return m_geometry.ensure(rhi, updates, Yuv420ShaderPipeline::quadVertices(m_rect));
 }
 
 bool Yuv420RenderNode::hasGeometryResources() const
@@ -186,11 +196,20 @@ bool Yuv420RenderNode::prepareResources(QRhi* rhi,
                                         QRhiRenderPassDescriptor* renderPassDescriptor,
                                         float opacity)
 {
+    return prepareResources(rhi, updates, renderPassDescriptor, QMatrix4x4(), opacity);
+}
+
+bool Yuv420RenderNode::prepareResources(QRhi* rhi,
+                                        QRhiResourceUpdateBatch* updates,
+                                        QRhiRenderPassDescriptor* renderPassDescriptor,
+                                        const QMatrix4x4& transform,
+                                        float opacity)
+{
     if (!rhi || !updates || !renderPassDescriptor || !m_snapshot.isValid())
         return false;
 
     return uploadPendingTextureData(rhi, updates)
-        && uploadShaderUniforms(rhi, updates, opacity)
+        && uploadShaderUniforms(rhi, updates, transform, opacity)
         && ensureShaderResources(rhi)
         && ensureGeometryResources(rhi, updates)
         && ensurePipelineResources(rhi, renderPassDescriptor);
@@ -217,6 +236,14 @@ bool Yuv420RenderNode::renderFrame(QRhiRenderTarget* renderTarget,
                                    QRhiCommandBuffer* commandBuffer,
                                    float opacity)
 {
+    return renderFrame(renderTarget, commandBuffer, QMatrix4x4(), opacity);
+}
+
+bool Yuv420RenderNode::renderFrame(QRhiRenderTarget* renderTarget,
+                                   QRhiCommandBuffer* commandBuffer,
+                                   const QMatrix4x4& transform,
+                                   float opacity)
+{
     if (!m_rhi || !renderTarget || !commandBuffer || !renderTarget->renderPassDescriptor())
         return false;
 
@@ -224,7 +251,7 @@ bool Yuv420RenderNode::renderFrame(QRhiRenderTarget* renderTarget,
     if (!updates)
         return false;
 
-    if (!prepareResources(m_rhi, updates.get(), renderTarget->renderPassDescriptor(), opacity))
+    if (!prepareResources(m_rhi, updates.get(), renderTarget->renderPassDescriptor(), transform, opacity))
         return false;
 
     commandBuffer->resourceUpdate(updates.get());
@@ -245,7 +272,16 @@ QSGRenderNode::RenderingFlags Yuv420RenderNode::flags() const
 
 void Yuv420RenderNode::render(const RenderState*)
 {
-    renderFrame(renderTarget(), commandBuffer(), float(inheritedOpacity()));
+    if (!renderTarget() || !commandBuffer())
+        return;
+
+    QMatrix4x4 transform;
+    if (const QMatrix4x4* projection = projectionMatrix())
+        transform = *projection;
+    if (const QMatrix4x4* model = matrix())
+        transform *= *model;
+
+    renderFrame(renderTarget(), commandBuffer(), transform, float(inheritedOpacity()));
 }
 
 void Yuv420RenderNode::releaseResources()

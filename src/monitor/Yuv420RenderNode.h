@@ -6,6 +6,7 @@
 #include "Yuv420ShaderUniforms.h"
 #include "Yuv420TextureSet.h"
 
+#include <QMatrix4x4>
 #include <QRectF>
 #include <QSGRenderNode>
 #include <QSize>
@@ -39,6 +40,10 @@ public:
     bool hasShaderResources() const;
     bool uploadPendingTextureData(QRhi* rhi, QRhiResourceUpdateBatch* updates);
     bool uploadShaderUniforms(QRhi* rhi, QRhiResourceUpdateBatch* updates, float opacity);
+    bool uploadShaderUniforms(QRhi* rhi,
+                              QRhiResourceUpdateBatch* updates,
+                              const QMatrix4x4& transform,
+                              float opacity);
     bool hasShaderUniforms() const;
     bool ensureGeometryResources(QRhi* rhi, QRhiResourceUpdateBatch* updates);
     bool hasGeometryResources() const;
@@ -50,8 +55,17 @@ public:
                           QRhiResourceUpdateBatch* updates,
                           QRhiRenderPassDescriptor* renderPassDescriptor,
                           float opacity);
+    bool prepareResources(QRhi* rhi,
+                          QRhiResourceUpdateBatch* updates,
+                          QRhiRenderPassDescriptor* renderPassDescriptor,
+                          const QMatrix4x4& transform,
+                          float opacity);
     bool recordDrawCommands(QRhiCommandBuffer* commandBuffer);
     bool renderFrame(QRhiRenderTarget* renderTarget, QRhiCommandBuffer* commandBuffer, float opacity);
+    bool renderFrame(QRhiRenderTarget* renderTarget,
+                     QRhiCommandBuffer* commandBuffer,
+                     const QMatrix4x4& transform,
+                     float opacity);
 
     void setRect(const QRectF& rect);
     QRectF rect() const override;

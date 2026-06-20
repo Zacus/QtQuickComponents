@@ -133,8 +133,10 @@ void Yuv420TextureSetTest::createsShaderResourceBindingsForPlanes()
     QCOMPARE(textures.shaderResourceBindings()->bindingCount(), qsizetype(4));
 
     const QVector<quint32> layout = textures.shaderResourceBindings()->serializedLayoutDescription();
+    const quint32 uniformStages = quint32(QRhiShaderResourceBinding::VertexStage)
+        | quint32(QRhiShaderResourceBinding::FragmentStage);
     const QVector<quint32> expectedLayout = {
-        0, quint32(QRhiShaderResourceBinding::FragmentStage), quint32(QRhiShaderResourceBinding::UniformBuffer), 1,
+        0, uniformStages, quint32(QRhiShaderResourceBinding::UniformBuffer), 1,
         1, quint32(QRhiShaderResourceBinding::FragmentStage), quint32(QRhiShaderResourceBinding::SampledTexture), 1,
         2, quint32(QRhiShaderResourceBinding::FragmentStage), quint32(QRhiShaderResourceBinding::SampledTexture), 1,
         3, quint32(QRhiShaderResourceBinding::FragmentStage), quint32(QRhiShaderResourceBinding::SampledTexture), 1,

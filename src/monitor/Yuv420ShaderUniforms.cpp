@@ -4,6 +4,8 @@
 
 #include <QtGlobal>
 
+#include <algorithm>
+
 void Yuv420ShaderUniforms::BufferDeleter::operator()(QRhiBuffer* buffer) const
 {
     delete buffer;
@@ -16,7 +18,14 @@ Yuv420ShaderUniforms::~Yuv420ShaderUniforms()
 
 Yuv420ShaderUniforms::UniformBlock Yuv420ShaderUniforms::makeUniformBlock(float opacity)
 {
+    return makeUniformBlock(opacity, QMatrix4x4());
+}
+
+Yuv420ShaderUniforms::UniformBlock Yuv420ShaderUniforms::makeUniformBlock(float opacity,
+                                                                          const QMatrix4x4& transform)
+{
     UniformBlock block;
+    std::copy(transform.constData(), transform.constData() + 16, block.transform);
 
     block.yuvToRgb[0] = 1.164383f;
     block.yuvToRgb[1] = 0.0f;
@@ -44,20 +53,30 @@ Yuv420ShaderUniforms::UniformBlock Yuv420ShaderUniforms::makeUniformBlock(float 
 
 bool Yuv420ShaderUniforms::upload(QRhi* rhi, QRhiResourceUpdateBatch* updates, float opacity, quint64 serial)
 {
+    return upload(rhi, updates, QMatrix4x4(), opacity, serial);
+}
+
+bool Yuv420ShaderUniforms::upload(QRhi* rhi,
+                                  QRhiResourceUpdateBatch* updates,
+                                  const QMatrix4x4& transform,
+                                  float opacity,
+                                  quint64 serial)
+{
     if (!rhi || !updates || serial == 0)
         return false;
 
     if (!ensureBuffer(rhi))
         return false;
 
-    if (m_uploadedSerial == serial && qFuzzyCompare(m_opacity, opacity))
+    if (m_uploadedSerial == serial && qFuzzyCompare(m_opacity, opacity) && m_transform == transform)
         return true;
 
-    m_uniformBlock = makeUniformBlock(opacity);
+    m_uniformBlock = makeUniformBlock(opacity, transform);
     updates->updateDynamicBuffer(m_buffer.get(), 0, quint32(sizeof(UniformBlock)), &m_uniformBlock);
 
     m_uploadedSerial = serial;
     m_opacity = opacity;
+    m_transform = transform;
     return true;
 }
 
@@ -70,6 +89,7 @@ void Yuv420ShaderUniforms::release()
 
     m_rhi = nullptr;
     m_uniformBlock = UniformBlock();
+    m_transform = QMatrix4x4();
     m_uploadedSerial = 0;
     m_opacity = 1.0f;
 }
