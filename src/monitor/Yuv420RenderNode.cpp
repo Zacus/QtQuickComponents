@@ -203,6 +203,7 @@ QSGRenderNode::RenderingFlags Yuv420RenderNode::flags() const
 
 void Yuv420RenderNode::render(const RenderState*)
 {
+    recordDrawCommands(commandBuffer());
 }
 
 void Yuv420RenderNode::releaseResources()

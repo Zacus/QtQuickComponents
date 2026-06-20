@@ -244,6 +244,13 @@ add_test(
         -P "${CMAKE_CURRENT_SOURCE_DIR}/verify_qml_api_surface.cmake"
 )
 
+add_test(
+    NAME YuvRenderNodeContract
+    COMMAND ${CMAKE_COMMAND}
+        -D QTC_SOURCE_DIR=${PROJECT_SOURCE_DIR}
+        -P "${CMAKE_CURRENT_SOURCE_DIR}/verify_yuv_render_node_contract.cmake"
+)
+
 qt_add_executable(tst_qml_components
     tst_qml_components.cpp
 )
