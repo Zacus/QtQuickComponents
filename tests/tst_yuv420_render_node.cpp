@@ -37,6 +37,7 @@ private slots:
     void preparesAllResourcesForDraw();
     void recordsDrawCommandsForPreparedResources();
     void tracksRhiAndReleasesResourcesWhenRhiChanges();
+    void rendersFrameWithSceneGraphResources();
 };
 
 void Yuv420RenderNodeTest::storesSnapshotAndBounds()
@@ -443,6 +444,59 @@ void Yuv420RenderNodeTest::tracksRhiAndReleasesResourcesWhenRhiChanges()
     QVERIFY(!node.hasShaderResources());
     QVERIFY(!node.hasGeometryResources());
     QVERIFY(!node.hasPipelineResources());
+}
+
+void Yuv420RenderNodeTest::rendersFrameWithSceneGraphResources()
+{
+    QRhiNullInitParams params;
+    std::unique_ptr<QRhi> rhi(QRhi::create(QRhi::Null, &params));
+    QVERIFY(rhi != nullptr);
+
+    std::unique_ptr<QRhiTexture> colorTexture(rhi->newTexture(QRhiTexture::RGBA8,
+                                                              QSize(4, 4),
+                                                              1,
+                                                              QRhiTexture::RenderTarget));
+    QVERIFY(colorTexture != nullptr);
+    QVERIFY(colorTexture->create());
+
+    QRhiTextureRenderTargetDescription renderTargetDescription(QRhiColorAttachment(colorTexture.get()));
+    std::unique_ptr<QRhiTextureRenderTarget> renderTarget(rhi->newTextureRenderTarget(renderTargetDescription));
+    QVERIFY(renderTarget != nullptr);
+    std::unique_ptr<QRhiRenderPassDescriptor> renderPass(renderTarget->newCompatibleRenderPassDescriptor());
+    QVERIFY(renderPass != nullptr);
+    renderTarget->setRenderPassDescriptor(renderPass.get());
+    QVERIFY(renderTarget->create());
+
+    GlobalVideoRenderer::Yuv420Snapshot snapshot;
+    snapshot.serial = 53;
+    snapshot.frame.width = 4;
+    snapshot.frame.height = 4;
+    snapshot.frame.yStride = 4;
+    snapshot.frame.uStride = 2;
+    snapshot.frame.vStride = 2;
+    snapshot.frame.yPlane = QByteArray(16, char(16));
+    snapshot.frame.uPlane = QByteArray(4, char(128));
+    snapshot.frame.vPlane = QByteArray(4, char(128));
+
+    Yuv420RenderNode node(snapshot, QRectF(0, 0, 40, 40));
+    QVERIFY(!node.renderFrame(renderTarget.get(), nullptr, 1.0f));
+    node.setRhi(rhi.get());
+
+    QRhiCommandBuffer* commandBuffer = nullptr;
+    QCOMPARE(rhi->beginOffscreenFrame(&commandBuffer), QRhi::FrameOpSuccess);
+    QVERIFY(commandBuffer != nullptr);
+
+    commandBuffer->beginPass(renderTarget.get(), QColor(Qt::transparent), QRhiDepthStencilClearValue(), nullptr);
+    QVERIFY(node.renderFrame(renderTarget.get(), commandBuffer, 0.5f));
+    commandBuffer->endPass();
+    QCOMPARE(rhi->endOffscreenFrame(), QRhi::FrameOpSuccess);
+
+    QVERIFY(!node.hasPendingTextureUpload());
+    QVERIFY(node.hasTextureResources());
+    QVERIFY(node.hasShaderUniforms());
+    QVERIFY(node.hasShaderResources());
+    QVERIFY(node.hasGeometryResources());
+    QVERIFY(node.hasPipelineResources());
 }
 
 QTEST_APPLESS_MAIN(Yuv420RenderNodeTest)

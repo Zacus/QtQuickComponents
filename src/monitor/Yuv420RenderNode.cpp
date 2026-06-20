@@ -2,7 +2,20 @@
 
 #include <rhi/qrhi.h>
 
+#include <memory>
+
 namespace {
+
+struct ResourceUpdateBatchReleaser
+{
+    void operator()(QRhiResourceUpdateBatch* updates) const
+    {
+        if (updates)
+            updates->release();
+    }
+};
+
+using ResourceUpdateBatchPtr = std::unique_ptr<QRhiResourceUpdateBatch, ResourceUpdateBatchReleaser>;
 
 QByteArray deepCopyBytes(const QByteArray& data)
 {
@@ -200,6 +213,26 @@ bool Yuv420RenderNode::recordDrawCommands(QRhiCommandBuffer* commandBuffer)
     return true;
 }
 
+bool Yuv420RenderNode::renderFrame(QRhiRenderTarget* renderTarget,
+                                   QRhiCommandBuffer* commandBuffer,
+                                   float opacity)
+{
+    if (!m_rhi || !renderTarget || !commandBuffer || !renderTarget->renderPassDescriptor())
+        return false;
+
+    ResourceUpdateBatchPtr updates(m_rhi->nextResourceUpdateBatch());
+    if (!updates)
+        return false;
+
+    if (!prepareResources(m_rhi, updates.get(), renderTarget->renderPassDescriptor(), opacity))
+        return false;
+
+    commandBuffer->resourceUpdate(updates.get());
+    updates.release();
+
+    return recordDrawCommands(commandBuffer);
+}
+
 QRectF Yuv420RenderNode::rect() const
 {
     return m_rect;
@@ -212,7 +245,7 @@ QSGRenderNode::RenderingFlags Yuv420RenderNode::flags() const
 
 void Yuv420RenderNode::render(const RenderState*)
 {
-    recordDrawCommands(commandBuffer());
+    renderFrame(renderTarget(), commandBuffer(), float(inheritedOpacity()));
 }
 
 void Yuv420RenderNode::releaseResources()
