@@ -1,4 +1,4 @@
-find_package(Qt6 REQUIRED COMPONENTS Quick QuickTest Test)
+find_package(Qt6 REQUIRED COMPONENTS Quick QuickTest Test GuiPrivate)
 
 set(QTC_TEST_PRIVATE_INCLUDE_DIRS
     "${PROJECT_SOURCE_DIR}/src/theme"
@@ -70,11 +70,28 @@ target_include_directories(tst_yuv420_render_node PRIVATE
 
 target_link_libraries(tst_yuv420_render_node PRIVATE
     QtQuickComponentsImpl
+    Qt6::GuiPrivate
     Qt6::Quick
     Qt6::Test
 )
 
 add_test(NAME Yuv420RenderNode COMMAND tst_yuv420_render_node)
+
+qt_add_executable(tst_yuv420_texture_set
+    tst_yuv420_texture_set.cpp
+)
+target_include_directories(tst_yuv420_texture_set PRIVATE
+    ${QTC_TEST_PRIVATE_INCLUDE_DIRS}
+)
+
+target_link_libraries(tst_yuv420_texture_set PRIVATE
+    QtQuickComponentsImpl
+    Qt6::GuiPrivate
+    Qt6::Quick
+    Qt6::Test
+)
+
+add_test(NAME Yuv420TextureSet COMMAND tst_yuv420_texture_set)
 
 qt_add_executable(tst_timeline_viewport
     tst_timeline_viewport.cpp

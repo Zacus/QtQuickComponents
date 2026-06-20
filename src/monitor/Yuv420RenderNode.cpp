@@ -78,6 +78,19 @@ bool Yuv420RenderNode::markTextureUploadCompleteForCurrentSnapshot()
     return true;
 }
 
+bool Yuv420RenderNode::ensureTextureResources(QRhi* rhi)
+{
+    if (!m_snapshot.isValid())
+        return false;
+
+    return m_textures.ensureTextures(rhi, m_yTextureSize, m_uTextureSize, m_vTextureSize);
+}
+
+bool Yuv420RenderNode::hasTextureResources() const
+{
+    return m_textures.isValid();
+}
+
 QRectF Yuv420RenderNode::rect() const
 {
     return m_rect;
@@ -90,6 +103,11 @@ QSGRenderNode::RenderingFlags Yuv420RenderNode::flags() const
 
 void Yuv420RenderNode::render(const RenderState*)
 {
+}
+
+void Yuv420RenderNode::releaseResources()
+{
+    m_textures.release();
 }
 
 void Yuv420RenderNode::updateTexturePlan()

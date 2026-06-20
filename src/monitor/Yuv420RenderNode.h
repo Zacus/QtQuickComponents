@@ -1,6 +1,7 @@
 #pragma once
 
 #include "GlobalVideoRenderer.h"
+#include "Yuv420TextureSet.h"
 
 #include <QRectF>
 #include <QSGRenderNode>
@@ -21,11 +22,14 @@ public:
     QSize vTextureSize() const;
     bool hasPendingTextureUpload() const;
     bool markTextureUploadCompleteForCurrentSnapshot();
+    bool ensureTextureResources(QRhi* rhi);
+    bool hasTextureResources() const;
 
     void setRect(const QRectF& rect);
     QRectF rect() const override;
     RenderingFlags flags() const override;
     void render(const RenderState* state) override;
+    void releaseResources() override;
 
 private:
     void updateTexturePlan();
@@ -36,4 +40,5 @@ private:
     QSize m_uTextureSize;
     QSize m_vTextureSize;
     quint64 m_uploadedSerial = 0;
+    Yuv420TextureSet m_textures;
 };

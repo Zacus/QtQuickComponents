@@ -16,7 +16,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_AUTOMOC ON)
 
-find_package(Qt6 REQUIRED COMPONENTS Quick QuickControls2)
+find_package(Qt6 REQUIRED COMPONENTS Quick QuickControls2 GuiPrivate)
 qt_standard_project_setup()
 include(GNUInstallDirs)
 
@@ -73,6 +73,7 @@ set(QTC_IMPL_HEADERS
     src/timeline/TimelineTrackModel.h
     src/monitor/GlobalVideoRenderer.h
     src/monitor/VideoSurface.h
+    src/monitor/Yuv420TextureSet.h
     src/monitor/Yuv420RenderNode.h
 )
 
@@ -90,6 +91,7 @@ set(QTC_IMPL_CPP_SOURCES
     src/timeline/TimelineTrackModel.cpp
     src/monitor/GlobalVideoRenderer.cpp
     src/monitor/VideoSurface.cpp
+    src/monitor/Yuv420TextureSet.cpp
     src/monitor/Yuv420RenderNode.cpp
 )
 
@@ -243,6 +245,7 @@ target_link_libraries(QtQuickComponentsImpl PRIVATE
     QtQuickComponents
     Qt6::Quick
     Qt6::QuickControls2
+    Qt6::GuiPrivate
 )
 
 target_compile_definitions(QtQuickComponents PRIVATE
