@@ -114,6 +114,19 @@ bool Yuv420RenderNode::uploadPendingTextureData(QRhi* rhi, QRhiResourceUpdateBat
     return false;
 }
 
+bool Yuv420RenderNode::uploadShaderUniforms(QRhi* rhi, QRhiResourceUpdateBatch* updates, float opacity)
+{
+    if (!m_snapshot.isValid())
+        return false;
+
+    return m_uniforms.upload(rhi, updates, opacity, m_snapshot.serial);
+}
+
+bool Yuv420RenderNode::hasShaderUniforms() const
+{
+    return m_uniforms.isValid();
+}
+
 QRectF Yuv420RenderNode::rect() const
 {
     return m_rect;
@@ -130,6 +143,7 @@ void Yuv420RenderNode::render(const RenderState*)
 
 void Yuv420RenderNode::releaseResources()
 {
+    m_uniforms.release();
     m_textures.release();
 }
 

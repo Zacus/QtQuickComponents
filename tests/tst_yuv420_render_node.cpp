@@ -31,6 +31,7 @@ private slots:
     void tracksTextureUploadStateForFrames();
     void releasesTextureResourcesWithSceneGraphNode();
     void uploadsCurrentSnapshotToTextureResources();
+    void uploadsShaderUniformsWithSceneGraphNode();
 };
 
 void Yuv420RenderNodeTest::storesSnapshotAndBounds()
@@ -153,6 +154,34 @@ void Yuv420RenderNodeTest::uploadsCurrentSnapshotToTextureResources()
     node.releaseResources();
     QVERIFY(!node.hasTextureResources());
     QVERIFY(!node.hasShaderResources());
+}
+
+void Yuv420RenderNodeTest::uploadsShaderUniformsWithSceneGraphNode()
+{
+    QRhiNullInitParams params;
+    std::unique_ptr<QRhi> rhi(QRhi::create(QRhi::Null, &params));
+    QVERIFY(rhi != nullptr);
+
+    ResourceUpdateBatchPtr updates(rhi->nextResourceUpdateBatch());
+    QVERIFY(updates != nullptr);
+
+    GlobalVideoRenderer::Yuv420Snapshot snapshot;
+    snapshot.serial = 44;
+    snapshot.frame.width = 4;
+    snapshot.frame.height = 4;
+    snapshot.frame.yStride = 4;
+    snapshot.frame.uStride = 2;
+    snapshot.frame.vStride = 2;
+    snapshot.frame.yPlane = QByteArray(16, char(16));
+    snapshot.frame.uPlane = QByteArray(4, char(128));
+    snapshot.frame.vPlane = QByteArray(4, char(128));
+
+    Yuv420RenderNode node(snapshot, QRectF(0, 0, 40, 40));
+    QVERIFY(node.uploadShaderUniforms(rhi.get(), updates.get(), 0.6f));
+    QVERIFY(node.hasShaderUniforms());
+
+    node.releaseResources();
+    QVERIFY(!node.hasShaderUniforms());
 }
 
 QTEST_APPLESS_MAIN(Yuv420RenderNodeTest)

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "GlobalVideoRenderer.h"
+#include "Yuv420ShaderUniforms.h"
 #include "Yuv420TextureSet.h"
 
 #include <QRectF>
@@ -29,6 +30,8 @@ public:
     bool ensureShaderResources(QRhi* rhi);
     bool hasShaderResources() const;
     bool uploadPendingTextureData(QRhi* rhi, QRhiResourceUpdateBatch* updates);
+    bool uploadShaderUniforms(QRhi* rhi, QRhiResourceUpdateBatch* updates, float opacity);
+    bool hasShaderUniforms() const;
 
     void setRect(const QRectF& rect);
     QRectF rect() const override;
@@ -46,4 +49,5 @@ private:
     QSize m_vTextureSize;
     quint64 m_uploadedSerial = 0;
     Yuv420TextureSet m_textures;
+    Yuv420ShaderUniforms m_uniforms;
 };

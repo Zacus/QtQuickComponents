@@ -137,9 +137,9 @@ void Yuv420TextureSetTest::createsShaderResourceBindingsForPlanes()
     };
     QCOMPARE(layout, expectedLayout);
 
-    QRhiShaderResourceBindings* bindings = textures.shaderResourceBindings();
+    const quint64 bindingsId = textures.shaderResourceBindings()->globalResourceId();
     QVERIFY(textures.ensureShaderResources(rhi.get()));
-    QCOMPARE(textures.shaderResourceBindings(), bindings);
+    QCOMPARE(textures.shaderResourceBindings()->globalResourceId(), bindingsId);
 
     frame.width = 8;
     frame.height = 4;
@@ -151,7 +151,7 @@ void Yuv420TextureSetTest::createsShaderResourceBindingsForPlanes()
     frame.vPlane = QByteArray(8, char(128));
     QVERIFY(textures.uploadFrame(rhi.get(), updates.get(), frame, 10));
     QVERIFY(textures.ensureShaderResources(rhi.get()));
-    QVERIFY(textures.shaderResourceBindings() != bindings);
+    QVERIFY(textures.shaderResourceBindings()->globalResourceId() != bindingsId);
 }
 
 void Yuv420TextureSetTest::rejectsInvalidInputs()

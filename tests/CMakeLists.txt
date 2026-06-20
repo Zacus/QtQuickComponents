@@ -93,6 +93,22 @@ target_link_libraries(tst_yuv420_texture_set PRIVATE
 
 add_test(NAME Yuv420TextureSet COMMAND tst_yuv420_texture_set)
 
+qt_add_executable(tst_yuv420_shader_uniforms
+    tst_yuv420_shader_uniforms.cpp
+)
+target_include_directories(tst_yuv420_shader_uniforms PRIVATE
+    ${QTC_TEST_PRIVATE_INCLUDE_DIRS}
+)
+
+target_link_libraries(tst_yuv420_shader_uniforms PRIVATE
+    QtQuickComponentsImpl
+    Qt6::GuiPrivate
+    Qt6::Quick
+    Qt6::Test
+)
+
+add_test(NAME Yuv420ShaderUniforms COMMAND tst_yuv420_shader_uniforms)
+
 qt_add_executable(tst_timeline_viewport
     tst_timeline_viewport.cpp
 )
