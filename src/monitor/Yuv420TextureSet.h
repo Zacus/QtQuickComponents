@@ -7,6 +7,7 @@
 #include <memory>
 
 class QRhi;
+class QRhiBuffer;
 class QRhiResourceUpdateBatch;
 class QRhiSampler;
 class QRhiShaderResourceBindings;
@@ -19,7 +20,7 @@ public:
     ~Yuv420TextureSet();
 
     bool ensureTextures(QRhi* rhi, const QSize& ySize, const QSize& uSize, const QSize& vSize);
-    bool ensureShaderResources(QRhi* rhi);
+    bool ensureShaderResources(QRhi* rhi, QRhiBuffer* uniformBuffer);
     bool uploadFrame(QRhi* rhi,
                      QRhiResourceUpdateBatch* updates,
                      const GlobalVideoRenderer::Yuv420Frame& frame,
@@ -72,7 +73,7 @@ private:
                      int stride,
                      const QSize& sourceSize);
     bool ensureSampler();
-    bool ensureShaderResourceBindings();
+    bool ensureShaderResourceBindings(QRhiBuffer* uniformBuffer);
     void releaseShaderResourceBindings();
     void releasePlane(PlaneTexture& plane);
 
@@ -82,5 +83,6 @@ private:
     PlaneTexture m_vPlane;
     std::unique_ptr<QRhiSampler, SamplerDeleter> m_sampler;
     std::unique_ptr<QRhiShaderResourceBindings, ShaderResourceBindingsDeleter> m_shaderResourceBindings;
+    QRhiBuffer* m_uniformBuffer = nullptr;
     quint64 m_uploadedSerial = 0;
 };

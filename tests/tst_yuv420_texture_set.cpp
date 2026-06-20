@@ -1,6 +1,7 @@
 #include <QtTest/QtTest>
 
 #include "GlobalVideoRenderer.h"
+#include "Yuv420ShaderUniforms.h"
 #include "Yuv420TextureSet.h"
 
 #include <rhi/qrhi_platform.h>
@@ -117,28 +118,31 @@ void Yuv420TextureSetTest::createsShaderResourceBindingsForPlanes()
     frame.vPlane = QByteArray(4, char(128));
 
     Yuv420TextureSet textures;
+    Yuv420ShaderUniforms uniforms;
     ResourceUpdateBatchPtr updates(rhi->nextResourceUpdateBatch());
     QVERIFY(updates != nullptr);
     QVERIFY(textures.uploadFrame(rhi.get(), updates.get(), frame, 9));
+    QVERIFY(uniforms.upload(rhi.get(), updates.get(), 1.0f, 9));
 
-    QVERIFY(textures.ensureShaderResources(rhi.get()));
+    QVERIFY(textures.ensureShaderResources(rhi.get(), uniforms.buffer()));
     QVERIFY(textures.shaderResourceBindings() != nullptr);
     QVERIFY(textures.sampler() != nullptr);
     QCOMPARE(textures.sampler()->magFilter(), QRhiSampler::Linear);
     QCOMPARE(textures.sampler()->minFilter(), QRhiSampler::Linear);
     QCOMPARE(textures.sampler()->addressU(), QRhiSampler::ClampToEdge);
-    QCOMPARE(textures.shaderResourceBindings()->bindingCount(), qsizetype(3));
+    QCOMPARE(textures.shaderResourceBindings()->bindingCount(), qsizetype(4));
 
     const QVector<quint32> layout = textures.shaderResourceBindings()->serializedLayoutDescription();
     const QVector<quint32> expectedLayout = {
-        0, quint32(QRhiShaderResourceBinding::FragmentStage), quint32(QRhiShaderResourceBinding::SampledTexture), 1,
+        0, quint32(QRhiShaderResourceBinding::FragmentStage), quint32(QRhiShaderResourceBinding::UniformBuffer), 1,
         1, quint32(QRhiShaderResourceBinding::FragmentStage), quint32(QRhiShaderResourceBinding::SampledTexture), 1,
         2, quint32(QRhiShaderResourceBinding::FragmentStage), quint32(QRhiShaderResourceBinding::SampledTexture), 1,
+        3, quint32(QRhiShaderResourceBinding::FragmentStage), quint32(QRhiShaderResourceBinding::SampledTexture), 1,
     };
     QCOMPARE(layout, expectedLayout);
 
     const quint64 bindingsId = textures.shaderResourceBindings()->globalResourceId();
-    QVERIFY(textures.ensureShaderResources(rhi.get()));
+    QVERIFY(textures.ensureShaderResources(rhi.get(), uniforms.buffer()));
     QCOMPARE(textures.shaderResourceBindings()->globalResourceId(), bindingsId);
 
     frame.width = 8;
@@ -150,7 +154,8 @@ void Yuv420TextureSetTest::createsShaderResourceBindingsForPlanes()
     frame.uPlane = QByteArray(8, char(128));
     frame.vPlane = QByteArray(8, char(128));
     QVERIFY(textures.uploadFrame(rhi.get(), updates.get(), frame, 10));
-    QVERIFY(textures.ensureShaderResources(rhi.get()));
+    QVERIFY(uniforms.upload(rhi.get(), updates.get(), 1.0f, 10));
+    QVERIFY(textures.ensureShaderResources(rhi.get(), uniforms.buffer()));
     QVERIFY(textures.shaderResourceBindings()->globalResourceId() != bindingsId);
 }
 

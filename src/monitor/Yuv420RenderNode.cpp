@@ -93,7 +93,7 @@ bool Yuv420RenderNode::hasTextureResources() const
 
 bool Yuv420RenderNode::ensureShaderResources(QRhi* rhi)
 {
-    return m_textures.ensureShaderResources(rhi);
+    return m_textures.ensureShaderResources(rhi, m_uniforms.buffer());
 }
 
 bool Yuv420RenderNode::hasShaderResources() const
