@@ -7,6 +7,42 @@
 #include <QSGSimpleTextureNode>
 #include <QSGTexture>
 
+namespace {
+
+QRectF fittedContentRect(const QRectF& bounds, const QSize& contentSize)
+{
+    if (bounds.width() <= 0.0
+        || bounds.height() <= 0.0
+        || contentSize.width() <= 0
+        || contentSize.height() <= 0) {
+        return QRectF();
+    }
+
+    const qreal contentAspect = qreal(contentSize.width()) / qreal(contentSize.height());
+    const qreal boundsAspect = bounds.width() / bounds.height();
+
+    QSizeF fittedSize;
+    if (boundsAspect > contentAspect) {
+        fittedSize.setHeight(bounds.height());
+        fittedSize.setWidth(bounds.height() * contentAspect);
+    } else {
+        fittedSize.setWidth(bounds.width());
+        fittedSize.setHeight(bounds.width() / contentAspect);
+    }
+
+    return QRectF(bounds.x() + (bounds.width() - fittedSize.width()) / 2.0,
+                  bounds.y() + (bounds.height() - fittedSize.height()) / 2.0,
+                  fittedSize.width(),
+                  fittedSize.height());
+}
+
+QSize yuvFrameSize(const GlobalVideoRenderer::Yuv420Frame& frame)
+{
+    return QSize(frame.width, frame.height);
+}
+
+} // namespace
+
 VideoSurface::VideoSurface(QQuickItem* parent)
     : QQuickItem(parent)
 {
@@ -51,13 +87,14 @@ QSGNode* VideoSurface::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData*)
         }
 
         QRhi* rhi = window() ? window()->rhi() : nullptr;
+        const QRectF videoRect = fittedContentRect(boundingRect(), yuvFrameSize(snapshot.frame));
         auto* node = dynamic_cast<Yuv420RenderNode*>(oldNode);
         if (!node) {
             delete oldNode;
-            node = new Yuv420RenderNode(snapshot, boundingRect());
+            node = new Yuv420RenderNode(snapshot, videoRect);
         } else {
             node->setSnapshot(snapshot);
-            node->setRect(boundingRect());
+            node->setRect(videoRect);
         }
         node->setRhi(rhi);
         return node;
@@ -84,7 +121,7 @@ QSGNode* VideoSurface::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData*)
     QSGTexture* texture = window()->createTextureFromImage(snapshot.image);
     node->setTexture(texture);
     node->setOwnsTexture(true);
-    node->setRect(boundingRect());
+    node->setRect(fittedContentRect(boundingRect(), snapshot.image.size()));
 
     return node;
 }

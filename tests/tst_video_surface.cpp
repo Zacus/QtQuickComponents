@@ -95,7 +95,7 @@ void VideoSurfaceTest::createsYuvRenderNodeForYuvFrames()
 
     QVERIFY(yuvNode != nullptr);
     QCOMPARE(yuvNode->serial(), surface.currentSerial());
-    QCOMPARE(yuvNode->rect(), surface.boundingRect());
+    QCOMPARE(yuvNode->rect(), QRectF(35, 0, 90, 90));
 
     delete node;
 }
