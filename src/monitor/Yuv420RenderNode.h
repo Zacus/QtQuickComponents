@@ -41,6 +41,10 @@ public:
     bool ensurePipelineResources(QRhi* rhi, QRhiRenderPassDescriptor* renderPassDescriptor);
     bool hasPipelineResources() const;
     QRhiGraphicsPipeline* graphicsPipeline() const;
+    bool prepareResources(QRhi* rhi,
+                          QRhiResourceUpdateBatch* updates,
+                          QRhiRenderPassDescriptor* renderPassDescriptor,
+                          float opacity);
 
     void setRect(const QRectF& rect);
     QRectF rect() const override;

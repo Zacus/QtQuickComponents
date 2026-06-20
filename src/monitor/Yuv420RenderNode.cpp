@@ -157,6 +157,21 @@ QRhiGraphicsPipeline* Yuv420RenderNode::graphicsPipeline() const
     return m_pipeline.graphicsPipeline();
 }
 
+bool Yuv420RenderNode::prepareResources(QRhi* rhi,
+                                        QRhiResourceUpdateBatch* updates,
+                                        QRhiRenderPassDescriptor* renderPassDescriptor,
+                                        float opacity)
+{
+    if (!rhi || !updates || !renderPassDescriptor || !m_snapshot.isValid())
+        return false;
+
+    return uploadPendingTextureData(rhi, updates)
+        && uploadShaderUniforms(rhi, updates, opacity)
+        && ensureShaderResources(rhi)
+        && ensureGeometryResources(rhi, updates)
+        && ensurePipelineResources(rhi, renderPassDescriptor);
+}
+
 QRectF Yuv420RenderNode::rect() const
 {
     return m_rect;
