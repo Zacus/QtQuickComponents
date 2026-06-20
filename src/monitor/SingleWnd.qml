@@ -11,6 +11,7 @@ Item {
     implicitWidth: 320
     implicitHeight: 180
     clip: true
+    opacity: dragHandler.active ? 0.62 : 1.0
 
     Rectangle {
         anchors.fill: parent
@@ -120,6 +121,21 @@ Item {
         onTriggered: {
             if (root.vm)
                 root.vm.clicked(root.vm.wndId)
+        }
+    }
+
+    DragHandler {
+        id: dragHandler
+        target: null
+        acceptedButtons: Qt.LeftButton
+        onActiveChanged: {
+            if (!active)
+                return
+
+            clickConfirmTimer.stop()
+            clickArea.suppressNextClick = true
+            if (root.vm && root.vm.channelId >= 0)
+                root.vm.dragStarted(root.vm.wndId, root.vm.channelId)
         }
     }
 

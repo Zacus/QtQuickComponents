@@ -170,6 +170,31 @@ TestCase {
         compare(doubleClickSpy.signalArguments[0][1], 12)
     }
 
+    function test_dragStartReportsSignalAndRestoresVisualState() {
+        var wnd = createTemporaryObject(singleWndComponent, this)
+        verify(wnd !== null)
+
+        var dragSpy = signalSpy.createObject(this, {
+            target: wnd.vm,
+            signalName: "dragStarted"
+        })
+
+        compare(wnd.opacity, 1.0)
+
+        mousePress(wnd, 20, 80)
+        mouseMove(wnd, 80, 100)
+        wait(80)
+
+        compare(dragSpy.count, 1)
+        compare(dragSpy.signalArguments[0][0], 3)
+        compare(dragSpy.signalArguments[0][1], 12)
+        verify(wnd.opacity < 1.0)
+
+        mouseRelease(wnd, 80, 100)
+        wait(80)
+        compare(wnd.opacity, 1.0)
+    }
+
     function test_noSignalLayerShowsOnlyNonNormalStates() {
         var layer = createTemporaryObject(noSignalLayerComponent, this)
         verify(layer !== null)
