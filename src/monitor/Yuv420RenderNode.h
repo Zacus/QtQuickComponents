@@ -12,6 +12,7 @@
 
 class QRhiResourceUpdateBatch;
 class QRhiRenderPassDescriptor;
+class QRhiCommandBuffer;
 
 class Yuv420RenderNode : public QSGRenderNode
 {
@@ -45,6 +46,7 @@ public:
                           QRhiResourceUpdateBatch* updates,
                           QRhiRenderPassDescriptor* renderPassDescriptor,
                           float opacity);
+    bool recordDrawCommands(QRhiCommandBuffer* commandBuffer);
 
     void setRect(const QRectF& rect);
     QRectF rect() const override;

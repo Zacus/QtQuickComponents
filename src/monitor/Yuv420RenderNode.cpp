@@ -1,5 +1,7 @@
 #include "Yuv420RenderNode.h"
 
+#include <rhi/qrhi.h>
+
 namespace {
 
 QByteArray deepCopyBytes(const QByteArray& data)
@@ -170,6 +172,23 @@ bool Yuv420RenderNode::prepareResources(QRhi* rhi,
         && ensureShaderResources(rhi)
         && ensureGeometryResources(rhi, updates)
         && ensurePipelineResources(rhi, renderPassDescriptor);
+}
+
+bool Yuv420RenderNode::recordDrawCommands(QRhiCommandBuffer* commandBuffer)
+{
+    if (!commandBuffer
+        || !hasShaderResources()
+        || !hasGeometryResources()
+        || !hasPipelineResources()) {
+        return false;
+    }
+
+    QRhiCommandBuffer::VertexInput vertexInput(m_geometry.vertexBuffer(), m_geometry.vertexOffset());
+    commandBuffer->setGraphicsPipeline(m_pipeline.graphicsPipeline());
+    commandBuffer->setShaderResources(m_textures.shaderResourceBindings());
+    commandBuffer->setVertexInput(0, 1, &vertexInput);
+    commandBuffer->draw(m_geometry.vertexCount());
+    return true;
 }
 
 QRectF Yuv420RenderNode::rect() const
