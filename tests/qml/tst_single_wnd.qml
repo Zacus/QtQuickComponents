@@ -259,6 +259,29 @@ TestCase {
         mouseRelease(source, 20, 80)
     }
 
+    function test_dropOnTargetReportsTargetWndAndSourceChannel() {
+        var fixture = createTemporaryObject(dualWndComponent, this)
+        verify(fixture !== null)
+
+        var source = child(fixture, "sourceWnd")
+        var target = child(fixture, "targetWnd")
+        var dropSpy = signalSpy.createObject(this, {
+            target: target.vm,
+            signalName: "dropReceived"
+        })
+
+        mousePress(source, 20, 80)
+        mouseMove(source, 360, 80)
+        wait(80)
+        mouseRelease(source, 360, 80)
+        wait(80)
+
+        compare(dropSpy.count, 1)
+        compare(dropSpy.signalArguments[0][0], 4)
+        compare(dropSpy.signalArguments[0][1], 12)
+        compare(child(target, "dragLayer").border.width, 0)
+    }
+
     function test_noSignalLayerShowsOnlyNonNormalStates() {
         var layer = createTemporaryObject(noSignalLayerComponent, this)
         verify(layer !== null)

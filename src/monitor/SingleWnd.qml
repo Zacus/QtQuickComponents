@@ -103,14 +103,25 @@ Item {
         anchors.fill: parent
         keys: [root.dragKey]
         onEntered: function(drag) {
-            if (drag.source !== root)
+            if (drag.source !== root) {
                 dragLayer.dropTargetActive = true
+                drag.accept(Qt.MoveAction)
+            }
         }
         onExited: {
             dragLayer.dropTargetActive = false
         }
-        onDropped: {
+        onDropped: function(drop) {
             dragLayer.dropTargetActive = false
+            if (!root.vm || !drop.source || drop.source === root || !drop.source.vm)
+                return
+
+            var sourceChannelId = drop.source.vm.channelId
+            if (sourceChannelId < 0)
+                return
+
+            root.vm.dropReceived(root.vm.wndId, sourceChannelId)
+            drop.acceptProposedAction()
         }
     }
 
@@ -155,8 +166,11 @@ Item {
         target: null
         acceptedButtons: Qt.LeftButton
         onActiveChanged: {
-            if (!active)
+            if (!active) {
+                if (root.Drag.active)
+                    root.Drag.drop()
                 return
+            }
 
             clickConfirmTimer.stop()
             clickArea.suppressNextClick = true
