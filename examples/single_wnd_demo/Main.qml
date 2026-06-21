@@ -19,6 +19,7 @@ QQC2.ApplicationWindow {
     color: "#10131a"
 
     property int selectedIndex: 0
+    property int maximizedIndex: -1
     readonly property var viewModels: [vm1, vm2, vm3, vm4]
     readonly property var selectedVm: viewModels[selectedIndex]
     readonly property var channelList: [vm1.channelId, vm2.channelId, vm3.channelId, vm4.channelId]
@@ -84,6 +85,12 @@ QQC2.ApplicationWindow {
             viewModels[i].isActive = i === index
     }
 
+    function toggleMaximized(index) {
+        selectWindow(index)
+        maximizedIndex = maximizedIndex === index ? -1 : index
+        addLog(maximizedIndex === -1 ? "layout restored" : "maximized wnd=" + viewModels[index].wndId)
+    }
+
     function handleDrop(wndId, fromChannelId) {
         var target = vmForWndId(wndId)
         var source = vmForChannelId(fromChannelId)
@@ -107,8 +114,8 @@ QQC2.ApplicationWindow {
             addLog("clicked wnd=" + wndId)
         })
         vm.doubleClicked.connect(function(wndId, channelId) {
-            selectWindow(index)
             addLog("doubleClicked wnd=" + wndId + " channel=" + channelId)
+            toggleMaximized(index)
         })
         vm.screenshotRequested.connect(function(wndId, channelId) {
             addLog("screenshotRequested wnd=" + wndId + " channel=" + channelId)
@@ -231,6 +238,16 @@ QQC2.ApplicationWindow {
                     checked: true
                     text: checked ? "Streaming" : "Stopped"
                 }
+
+                Button {
+                    visible: window.maximizedIndex >= 0
+                    text: "Exit Max"
+                    variant: "outline"
+                    onClicked: {
+                        window.maximizedIndex = -1
+                        window.addLog("layout restored")
+                    }
+                }
             }
 
             GridLayout {
@@ -252,6 +269,9 @@ QQC2.ApplicationWindow {
                         Layout.fillHeight: true
                         Layout.minimumWidth: 260
                         Layout.minimumHeight: 160
+                        Layout.columnSpan: window.maximizedIndex === tile.index ? 2 : 1
+                        Layout.rowSpan: window.maximizedIndex === tile.index ? 2 : 1
+                        visible: window.maximizedIndex < 0 || window.maximizedIndex === tile.index
 
                         SingleWnd {
                             id: wnd
@@ -264,6 +284,7 @@ QQC2.ApplicationWindow {
                             color: "transparent"
                             border.width: window.selectedIndex === tile.index ? 2 : 0
                             border.color: "#38bdf8"
+                            enabled: false
                             z: 8
                         }
                     }
