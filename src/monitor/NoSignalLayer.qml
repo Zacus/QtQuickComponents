@@ -32,6 +32,7 @@ Item {
             anchors.horizontalCenter: parent.horizontalCenter
             width: parent.width
             horizontalAlignment: Text.AlignHCenter
+            elide: Text.ElideRight
             text: root.isConnecting
                 ? root.connectingIconText
                 : root.isNoSignal ? root.noSignalIconText : ""

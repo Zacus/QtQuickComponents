@@ -95,6 +95,19 @@ TestCase {
     }
 
     Component {
+        id: compactNoSignalLayerComponent
+
+        NoSignalLayer {
+            width: 120
+            height: 90
+            noSignalText: "offline camera disconnected in loading dock"
+            connectingText: "connecting to upstream video service"
+            noSignalIconText: "CUSTOM_OFFLINE_ICON"
+            connectingIconText: "CUSTOM_CONNECTING_ICON"
+        }
+    }
+
+    Component {
         id: borderLayerComponent
 
         BorderLayer {
@@ -107,6 +120,18 @@ TestCase {
         var result = findChild(root, objectName)
         verify(result !== null, "Missing child " + objectName)
         return result
+    }
+
+    function textItem(root, text) {
+        if (root && root.text === text)
+            return root
+
+        for (var i = 0; root && root.children && i < root.children.length; ++i) {
+            var result = textItem(root.children[i], text)
+            if (result)
+                return result
+        }
+        return null
     }
 
     function test_layersFollowViewModelState() {
@@ -345,6 +370,23 @@ TestCase {
 
         layer.signalState = WndViewModel.Connecting
         verify(layer.connectingIconText.length > 0)
+    }
+
+    function test_noSignalLayerKeepsCustomContentInsideCompactBounds() {
+        var layer = createTemporaryObject(compactNoSignalLayerComponent, this)
+        verify(layer !== null)
+
+        layer.signalState = WndViewModel.NoSignal
+        var noSignalIcon = textItem(layer, layer.noSignalIconText)
+        verify(noSignalIcon !== null)
+        verify(noSignalIcon.paintedWidth <= noSignalIcon.width)
+        verify(child(layer, "noSignalText").paintedWidth <= child(layer, "noSignalText").width)
+
+        layer.signalState = WndViewModel.Connecting
+        var connectingIcon = textItem(layer, layer.connectingIconText)
+        verify(connectingIcon !== null)
+        verify(connectingIcon.paintedWidth <= connectingIcon.width)
+        verify(child(layer, "noSignalText").paintedWidth <= child(layer, "noSignalText").width)
     }
 
     function test_borderLayerAppliesPriorityAndHidesWhenInactive() {
