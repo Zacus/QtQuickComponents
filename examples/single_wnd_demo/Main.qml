@@ -19,7 +19,7 @@ QQC2.ApplicationWindow {
     color: "#10131a"
 
     property int selectedIndex: 0
-    property int maximizedIndex: -1
+    property int maximizedWndId: 0
     readonly property var viewModels: [vm1, vm2, vm3, vm4]
     readonly property var selectedVm: viewModels[selectedIndex]
     readonly property var channelList: [vm1.channelId, vm2.channelId, vm3.channelId, vm4.channelId]
@@ -63,6 +63,14 @@ QQC2.ApplicationWindow {
         return null
     }
 
+    function indexForWndId(wndId) {
+        for (var i = 0; i < viewModels.length; ++i) {
+            if (viewModels[i].wndId === wndId)
+                return i
+        }
+        return -1
+    }
+
     function vmForChannelId(channelId) {
         for (var i = 0; i < viewModels.length; ++i) {
             if (viewModels[i].channelId === channelId)
@@ -85,10 +93,16 @@ QQC2.ApplicationWindow {
             viewModels[i].isActive = i === index
     }
 
-    function toggleMaximized(index) {
-        selectWindow(index)
-        maximizedIndex = maximizedIndex === index ? -1 : index
-        addLog(maximizedIndex === -1 ? "layout restored" : "maximized wnd=" + viewModels[index].wndId)
+    function selectWindowByWndId(wndId) {
+        var index = indexForWndId(wndId)
+        if (index >= 0)
+            selectWindow(index)
+    }
+
+    function toggleMaximized(wndId) {
+        selectWindowByWndId(wndId)
+        maximizedWndId = maximizedWndId === wndId ? 0 : wndId
+        addLog(maximizedWndId === 0 ? "layout restored" : "maximized wnd=" + wndId)
     }
 
     function handleDrop(wndId, fromChannelId) {
@@ -108,14 +122,14 @@ QQC2.ApplicationWindow {
         addLog("dropReceived wnd=" + wndId + " fromChannel=" + fromChannelId)
     }
 
-    function connectVmSignals(vm, index) {
+    function connectVmSignals(vm) {
         vm.clicked.connect(function(wndId) {
-            selectWindow(index)
+            selectWindowByWndId(wndId)
             addLog("clicked wnd=" + wndId)
         })
         vm.doubleClicked.connect(function(wndId, channelId) {
             addLog("doubleClicked wnd=" + wndId + " channel=" + channelId)
-            toggleMaximized(index)
+            toggleMaximized(wndId)
         })
         vm.screenshotRequested.connect(function(wndId, channelId) {
             addLog("screenshotRequested wnd=" + wndId + " channel=" + channelId)
@@ -131,7 +145,7 @@ QQC2.ApplicationWindow {
             addLog("channelClosed wnd=" + wndId + " channel=" + channelId)
         })
         vm.dragStarted.connect(function(wndId, channelId) {
-            selectWindow(index)
+            selectWindowByWndId(wndId)
             addLog("dragStarted wnd=" + wndId + " channel=" + channelId)
         })
         vm.dropReceived.connect(function(wndId, fromChannelId) {
@@ -143,7 +157,7 @@ QQC2.ApplicationWindow {
         ComponentTheme.style = ComponentTheme.Dark
         for (var i = 0; i < viewModels.length; ++i) {
             refreshOsd(viewModels[i])
-            connectVmSignals(viewModels[i], i)
+            connectVmSignals(viewModels[i])
         }
         selectWindow(0)
         addLog("demoReady")
@@ -240,11 +254,11 @@ QQC2.ApplicationWindow {
                 }
 
                 Button {
-                    visible: window.maximizedIndex >= 0
+                    visible: window.maximizedWndId !== 0
                     text: "Exit Max"
                     variant: "outline"
                     onClicked: {
-                        window.maximizedIndex = -1
+                        window.maximizedWndId = 0
                         window.addLog("layout restored")
                     }
                 }
@@ -264,14 +278,15 @@ QQC2.ApplicationWindow {
                         id: tile
                         required property int index
                         readonly property var tileVm: window.viewModels[index]
+                        readonly property bool maximized: window.maximizedWndId === tile.tileVm.wndId
 
                         Layout.fillWidth: true
                         Layout.fillHeight: true
                         Layout.minimumWidth: 260
                         Layout.minimumHeight: 160
-                        Layout.columnSpan: window.maximizedIndex === tile.index ? 2 : 1
-                        Layout.rowSpan: window.maximizedIndex === tile.index ? 2 : 1
-                        visible: window.maximizedIndex < 0 || window.maximizedIndex === tile.index
+                        Layout.columnSpan: tile.maximized ? 2 : 1
+                        Layout.rowSpan: tile.maximized ? 2 : 1
+                        visible: window.maximizedWndId === 0 || tile.maximized
 
                         SingleWnd {
                             id: wnd
