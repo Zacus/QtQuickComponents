@@ -29,6 +29,7 @@ Item {
 
     Text {
         id: titleText
+        objectName: "titleText"
         anchors {
             left: parent.left
             leftMargin: 8

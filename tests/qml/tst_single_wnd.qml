@@ -274,6 +274,27 @@ TestCase {
         compare(indicator.visible, false)
     }
 
+    function test_titleBarHoverAndLongChannelNameStayBounded() {
+        var wnd = createTemporaryObject(singleWndComponent, this)
+        verify(wnd !== null)
+
+        var titleBar = child(wnd, "titleBar")
+        compare(titleBar.expanded, false)
+
+        mouseMove(wnd, 20, 20)
+        wait(80)
+        compare(titleBar.expanded, true)
+
+        var titleText = child(wnd, "titleText")
+        compare(titleText.text, wnd.vm.channelName)
+        verify(titleText.width > 0)
+        verify(titleText.paintedWidth <= titleText.width)
+
+        mouseMove(wnd, wnd.width + 20, wnd.height + 20)
+        wait(80)
+        compare(titleBar.expanded, false)
+    }
+
     function test_singleClickForwardsClickedSignal() {
         var wnd = createTemporaryObject(singleWndComponent, this)
         verify(wnd !== null)
