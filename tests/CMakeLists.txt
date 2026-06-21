@@ -43,6 +43,18 @@ target_link_libraries(tst_global_video_renderer PRIVATE
 
 add_test(NAME GlobalVideoRenderer COMMAND tst_global_video_renderer)
 
+qt_add_executable(manual_video_stress
+    manual_video_stress.cpp
+)
+target_include_directories(manual_video_stress PRIVATE
+    ${QTC_TEST_PRIVATE_INCLUDE_DIRS}
+)
+
+target_link_libraries(manual_video_stress PRIVATE
+    QtQuickComponentsImpl
+    Qt6::Quick
+)
+
 qt_add_executable(tst_video_surface
     tst_video_surface.cpp
 )
