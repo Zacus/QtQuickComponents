@@ -22,6 +22,7 @@ Rectangle {
     opacity: alarmLevel === WndViewModel.Critical ? 0.35 : 1.0
 
     SequentialAnimation on opacity {
+        objectName: "criticalPulseAnimation"
         running: root.alarmLevel === WndViewModel.Critical
         loops: Animation.Infinite
         NumberAnimation { from: 0.35; to: 1.0; duration: 420 }

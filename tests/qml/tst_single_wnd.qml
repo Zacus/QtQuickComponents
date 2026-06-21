@@ -480,6 +480,31 @@ TestCase {
         compare(layer.visible, false)
     }
 
+    function test_borderLayerAlarmOverridesActiveAndCriticalPulseRuns() {
+        var layer = createTemporaryObject(borderLayerComponent, this)
+        verify(layer !== null)
+
+        layer.isActive = true
+        verify(Qt.colorEqual(layer.border.color, layer.activeColor))
+
+        layer.alarmLevel = WndViewModel.Warning
+        compare(layer.visible, true)
+        compare(layer.border.width, 2)
+        verify(Qt.colorEqual(layer.border.color, layer.warningColor))
+
+        layer.alarmLevel = WndViewModel.Critical
+        compare(layer.visible, true)
+        compare(layer.border.width, 2)
+        verify(Qt.colorEqual(layer.border.color, layer.criticalColor))
+        compare(child(layer, "criticalPulseAnimation").running, true)
+
+        layer.alarmLevel = WndViewModel.None
+        layer.isActive = false
+        compare(child(layer, "criticalPulseAnimation").running, false)
+        compare(layer.border.width, 0)
+        compare(layer.visible, false)
+    }
+
     Component {
         id: signalSpy
         SignalSpy {}
