@@ -163,6 +163,44 @@ TestCase {
         compare(child(wnd, "osdTopRightText").text, "")
     }
 
+    function test_osdModelRendersFourCornersAndUpdatesColors() {
+        var wnd = createTemporaryObject(singleWndComponent, this)
+        verify(wnd !== null)
+
+        wnd.vm.osdModel = [
+            { text: "TOP-LEFT", position: 0, color: "#ff0000" },
+            { text: "TOP-RIGHT", position: 1, color: "#00ff00" },
+            { text: "BOTTOM-LEFT", position: 2, color: "#0000ff" },
+            { text: "BOTTOM-RIGHT", position: 3, color: "#ffff00" }
+        ]
+
+        var topLeft = child(wnd, "osdTopLeftText")
+        var topRight = child(wnd, "osdTopRightText")
+        var bottomLeft = child(wnd, "osdBottomLeftText")
+        var bottomRight = child(wnd, "osdBottomRightText")
+
+        compare(topLeft.text, "TOP-LEFT")
+        compare(topRight.text, "TOP-RIGHT")
+        compare(bottomLeft.text, "BOTTOM-LEFT")
+        compare(bottomRight.text, "BOTTOM-RIGHT")
+        verify(Qt.colorEqual(topLeft.color, "#ff0000"))
+        verify(Qt.colorEqual(topRight.color, "#00ff00"))
+        verify(Qt.colorEqual(bottomLeft.color, "#0000ff"))
+        verify(Qt.colorEqual(bottomRight.color, "#ffff00"))
+
+        wnd.vm.osdModel = [
+            { text: "UPDATED-LEFT", position: 0, color: "#00ffff" },
+            { text: "UPDATED-BOTTOM", position: 3, color: "#ff00ff" }
+        ]
+
+        compare(topLeft.text, "UPDATED-LEFT")
+        compare(topRight.text, "")
+        compare(bottomLeft.text, "")
+        compare(bottomRight.text, "UPDATED-BOTTOM")
+        verify(Qt.colorEqual(topLeft.color, "#00ffff"))
+        verify(Qt.colorEqual(bottomRight.color, "#ff00ff"))
+    }
+
     function test_titleButtonsForwardViewModelSignals() {
         var wnd = createTemporaryObject(singleWndComponent, this)
         verify(wnd !== null)
