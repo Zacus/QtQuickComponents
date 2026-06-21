@@ -35,15 +35,15 @@ set(_qtc_public_qml_files
     src/controls/Button.qml
     src/controls/Label.qml
     src/controls/TextField.qml
-    src/window/singleWnd/SingleWnd.qml
+    src/window/singleWnd/qml/SingleWnd.qml
     src/timeline/TimelineView.qml
 )
 
 set(_qtc_internal_qml_files
-    src/window/singleWnd/NoSignalLayer.qml
-    src/window/singleWnd/OSDLayer.qml
-    src/window/singleWnd/BorderLayer.qml
-    src/window/singleWnd/TitleBar.qml
+    src/window/singleWnd/qml/NoSignalLayer.qml
+    src/window/singleWnd/qml/OSDLayer.qml
+    src/window/singleWnd/qml/BorderLayer.qml
+    src/window/singleWnd/qml/TitleBar.qml
     src/timeline/TimelineTrack.qml
     src/timeline/TimelineRuler.qml
     src/timeline/TimelineInputHandler.qml

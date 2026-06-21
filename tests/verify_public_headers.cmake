@@ -33,9 +33,9 @@ set(_qtc_private_headers
     src/timeline/RulerTick.h
     src/timeline/RulerModel.h
     src/timeline/TimelineTrackModel.h
-    src/window/singleWnd/GlobalVideoRenderer.h
-    src/window/singleWnd/VideoSurface.h
-    src/window/singleWnd/Yuv420RenderNode.h
+    src/window/singleWnd/video/GlobalVideoRenderer.h
+    src/window/singleWnd/video/VideoSurface.h
+    src/window/singleWnd/rendering/Yuv420RenderNode.h
 )
 
 foreach(_qtc_private_header IN LISTS _qtc_private_headers)

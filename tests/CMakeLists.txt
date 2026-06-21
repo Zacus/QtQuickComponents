@@ -3,7 +3,9 @@ find_package(Qt6 REQUIRED COMPONENTS Quick QuickTest Test GuiPrivate)
 set(QTC_TEST_PRIVATE_INCLUDE_DIRS
     "${PROJECT_SOURCE_DIR}/src/theme"
     "${PROJECT_SOURCE_DIR}/src/timeline"
-    "${PROJECT_SOURCE_DIR}/src/window/singleWnd"
+    "${PROJECT_SOURCE_DIR}/src/window/singleWnd/model"
+    "${PROJECT_SOURCE_DIR}/src/window/singleWnd/video"
+    "${PROJECT_SOURCE_DIR}/src/window/singleWnd/rendering"
 )
 
 qt_add_executable(tst_timeline_model

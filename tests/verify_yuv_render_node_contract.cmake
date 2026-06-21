@@ -4,7 +4,7 @@ if(NOT DEFINED QTC_SOURCE_DIR)
     message(FATAL_ERROR "QTC_SOURCE_DIR is required")
 endif()
 
-set(_qtc_render_node "${QTC_SOURCE_DIR}/src/window/singleWnd/Yuv420RenderNode.cpp")
+set(_qtc_render_node "${QTC_SOURCE_DIR}/src/window/singleWnd/rendering/Yuv420RenderNode.cpp")
 if(NOT EXISTS "${_qtc_render_node}")
     message(FATAL_ERROR "Yuv420RenderNode.cpp not found: ${_qtc_render_node}")
 endif()

@@ -2,7 +2,7 @@ qt_add_executable(qtc_single_wnd_demo
     main.cpp
 )
 target_include_directories(qtc_single_wnd_demo PRIVATE
-    ${PROJECT_SOURCE_DIR}/src/window/singleWnd
+    ${PROJECT_SOURCE_DIR}/src/window/singleWnd/video
 )
 
 qt_add_qml_module(qtc_single_wnd_demo
