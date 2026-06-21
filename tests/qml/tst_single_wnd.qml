@@ -126,6 +126,47 @@ TestCase {
     }
 
     Component {
+        id: overlappedWndComponent
+
+        Item {
+            width: 640
+            height: 360
+            visible: true
+
+            SingleWnd {
+                id: bottomWnd
+                objectName: "bottomWnd"
+                width: 320
+                height: 180
+                visible: true
+
+                vm: WndViewModel {
+                    wndId: 4
+                    channelId: 18
+                    channelName: "Bottom camera"
+                    signalState: WndViewModel.Normal
+                }
+            }
+
+            SingleWnd {
+                id: topWnd
+                objectName: "topWnd"
+                width: 640
+                height: 360
+                visible: true
+                z: 1
+
+                vm: WndViewModel {
+                    wndId: 3
+                    channelId: 12
+                    channelName: "Top camera"
+                    signalState: WndViewModel.Normal
+                }
+            }
+        }
+    }
+
+    Component {
         id: noSignalLayerComponent
 
         NoSignalLayer {
@@ -390,6 +431,40 @@ TestCase {
         compare(doubleClickSpy.count, 1)
         compare(doubleClickSpy.signalArguments[0][0], 3)
         compare(doubleClickSpy.signalArguments[0][1], 12)
+    }
+
+    function test_overlappedWindowConsumesClickAndDoubleClickEvents() {
+        var fixture = createTemporaryObject(overlappedWndComponent, this)
+        verify(fixture !== null)
+
+        var top = child(fixture, "topWnd")
+        var bottom = child(fixture, "bottomWnd")
+        var topClickSpy = signalSpy.createObject(this, {
+            target: top.vm,
+            signalName: "clicked"
+        })
+        var topDoubleClickSpy = signalSpy.createObject(this, {
+            target: top.vm,
+            signalName: "doubleClicked"
+        })
+        var bottomClickSpy = signalSpy.createObject(this, {
+            target: bottom.vm,
+            signalName: "clicked"
+        })
+        var bottomDoubleClickSpy = signalSpy.createObject(this, {
+            target: bottom.vm,
+            signalName: "doubleClicked"
+        })
+
+        mouseClick(fixture, 20, 80)
+        wait(260)
+        mouseDoubleClickSequence(fixture, 20, 80)
+        wait(260)
+
+        compare(topClickSpy.count, 1)
+        compare(topDoubleClickSpy.count, 1)
+        compare(bottomClickSpy.count, 0)
+        compare(bottomDoubleClickSpy.count, 0)
     }
 
     function test_dragStartReportsSignalAndRestoresVisualState() {

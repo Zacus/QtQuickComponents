@@ -145,23 +145,22 @@ Item {
         z: 3.5
         acceptedButtons: Qt.LeftButton
         hoverEnabled: false
-        propagateComposedEvents: true
         property bool suppressNextClick: false
         onClicked: function(mouse) {
             if (suppressNextClick) {
                 suppressNextClick = false
-                mouse.accepted = false
+                mouse.accepted = true
                 return
             }
             clickConfirmTimer.restart()
-            mouse.accepted = false
+            mouse.accepted = true
         }
         onDoubleClicked: function(mouse) {
             clickConfirmTimer.stop()
             suppressNextClick = true
             if (root.vm)
                 root.vm.doubleClicked(root.vm.wndId, root.vm.channelId)
-            mouse.accepted = false
+            mouse.accepted = true
         }
     }
 
