@@ -256,6 +256,10 @@ TestCase {
         verifyTimelineViewRulerVisibleWithTheme(ComponentTheme.Light)
     }
 
+    function test_timelineViewRulerHasVisibleBackgroundBandWithDarkTheme() {
+        verifyTimelineViewRulerBackgroundBand(ComponentTheme.Dark)
+    }
+
     function verifyTimelineViewRulerVisibleWithTheme(style) {
         ComponentTheme.style = style
         var root = createTemporaryObject(themedSurfaceTimelineViewComponent, this)
@@ -285,6 +289,39 @@ TestCase {
             }
         }
         verify(visiblePixels > 0)
+    }
+
+    function test_timelineViewRulerHasVisibleBackgroundBandWithLightTheme() {
+        verifyTimelineViewRulerBackgroundBand(ComponentTheme.Light)
+    }
+
+    function verifyTimelineViewRulerBackgroundBand(style) {
+        ComponentTheme.style = style
+        var root = createTemporaryObject(themedSurfaceTimelineViewComponent, this)
+        verify(root !== null)
+
+        var timelineView = findChild(root, "timelineView")
+        verify(timelineView !== null)
+
+        tryVerify(function() { return timelineView.viewport.viewSpan > 0 })
+        wait(100)
+
+        var image = grabImage(root)
+        var bgRed = Math.round(root.color.r * 255)
+        var bgGreen = Math.round(root.color.g * 255)
+        var bgBlue = Math.round(root.color.b * 255)
+        var bandPixels = 0
+        var rulerPixelCount = Math.min(timelineView.rulerHeight, image.height) * image.width
+        for (var y = 0; y < Math.min(timelineView.rulerHeight, image.height); ++y) {
+            for (var x = 0; x < image.width; ++x) {
+                var distance = Math.abs(image.red(x, y) - bgRed)
+                    + Math.abs(image.green(x, y) - bgGreen)
+                    + Math.abs(image.blue(x, y) - bgBlue)
+                if (distance > 20)
+                    ++bandPixels
+            }
+        }
+        verify(bandPixels > rulerPixelCount * 0.8)
     }
 
     function isNearColor(image, x, y, red, green, blue, tolerance) {

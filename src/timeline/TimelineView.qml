@@ -59,7 +59,7 @@ Item {
     property var    segmentColors: ["#4c6ef5", "#20c997", "#f03e3e"]
     property real   segmentRadius: 2
 
-    property color  rulerBg:             "transparent"
+    property color  rulerBg:             ComponentTheme.trackBg
     property color  rulerMajorColor:     ComponentTheme.textSecondary
     property color  rulerMinorColor:     Qt.rgba(
                                              ComponentTheme.textSecondary.r,
