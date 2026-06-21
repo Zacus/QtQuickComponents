@@ -7,6 +7,7 @@
 
 #include <memory>
 
+using QuickUI::Components::Internal::GlobalVideoRenderer;
 using QuickUI::Components::Internal::Yuv420RenderNode;
 
 namespace {

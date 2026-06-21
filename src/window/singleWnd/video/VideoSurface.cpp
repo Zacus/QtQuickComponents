@@ -7,6 +7,7 @@
 #include <QSGSimpleTextureNode>
 #include <QSGTexture>
 
+using QuickUI::Components::Internal::GlobalVideoRenderer;
 using QuickUI::Components::Internal::Yuv420RenderNode;
 
 namespace {
@@ -44,6 +45,8 @@ QSize yuvFrameSize(const GlobalVideoRenderer::Yuv420Frame& frame)
 }
 
 } // namespace
+
+namespace QuickUI::Components::Internal {
 
 VideoSurface::VideoSurface(QQuickItem* parent)
     : QQuickItem(parent)
@@ -199,3 +202,5 @@ void VideoSurface::setFrameState(bool hasFrame, quint64 serial, VideoSurface::Fr
     m_activeFrameFormat = frameFormat;
     emit frameStateChanged();
 }
+
+} // namespace QuickUI::Components::Internal

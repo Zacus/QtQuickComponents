@@ -6,6 +6,8 @@
 
 #include <memory>
 
+using QuickUI::Components::Internal::GlobalVideoRenderer;
+
 namespace {
 
 struct ResourceUpdateBatchReleaser

@@ -2,6 +2,8 @@
 
 #include <rhi/qrhi.h>
 
+using QuickUI::Components::Internal::GlobalVideoRenderer;
+
 namespace {
 
 int planeMinimumSize(int stride, int rows, int rowWidth)

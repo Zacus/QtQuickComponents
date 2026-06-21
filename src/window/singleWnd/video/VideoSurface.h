@@ -4,13 +4,16 @@
 #include <QQuickItem>
 #include <QQmlEngine>
 
-class GlobalVideoRenderer;
 class QSGNode;
+
+namespace QuickUI::Components::Internal {
+
+class GlobalVideoRenderer;
 
 class VideoSurface : public QQuickItem
 {
     Q_OBJECT
-    QML_ELEMENT
+    QML_NAMED_ELEMENT(VideoSurface)
 
     Q_PROPERTY(int channelId READ channelId WRITE setChannelId NOTIFY channelIdChanged)
     Q_PROPERTY(QObject* videoSink READ videoSink WRITE setVideoSink NOTIFY videoSinkChanged)
@@ -60,3 +63,5 @@ private:
     quint64 m_currentSerial = 0;
     FrameFormat m_activeFrameFormat = NoFrame;
 };
+
+} // namespace QuickUI::Components::Internal

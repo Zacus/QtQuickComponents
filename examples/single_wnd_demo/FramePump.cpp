@@ -6,6 +6,8 @@
 #include <QImage>
 #include <QtGlobal>
 
+using QuickUI::Components::Internal::GlobalVideoRenderer;
+
 namespace {
 
 QImage makeFrame(int width, int height, int channelIndex, quint64 tick)

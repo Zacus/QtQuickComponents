@@ -7,10 +7,12 @@
 #include <QQmlEngine>
 #include <QByteArray>
 
+namespace QuickUI::Components::Internal {
+
 class GlobalVideoRenderer : public QObject
 {
     Q_OBJECT
-    QML_ELEMENT
+    QML_NAMED_ELEMENT(GlobalVideoRenderer)
 
 public:
     struct FrameSnapshot
@@ -67,3 +69,5 @@ private:
     QHash<int, Yuv420Snapshot> m_yuvFrames;
     quint64 m_nextSerial = 1;
 };
+
+} // namespace QuickUI::Components::Internal

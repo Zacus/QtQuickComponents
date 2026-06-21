@@ -3,6 +3,8 @@
 #include <QMutexLocker>
 #include <algorithm>
 
+using QuickUI::Components::Internal::GlobalVideoRenderer;
+
 namespace {
 
 int clampByte(int value)
@@ -87,6 +89,8 @@ QImage convertYuv420ToImage(const GlobalVideoRenderer::Yuv420Frame& frame)
 }
 
 } // namespace
+
+namespace QuickUI::Components::Internal {
 
 GlobalVideoRenderer::GlobalVideoRenderer(QObject* parent)
     : QObject(parent)
@@ -193,3 +197,5 @@ bool GlobalVideoRenderer::storeFrameSnapshot(int channelId, FrameSnapshot snapsh
     emit frameReady(channelId, snapshot.serial);
     return true;
 }
+
+} // namespace QuickUI::Components::Internal

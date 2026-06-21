@@ -4,6 +4,8 @@
 #include "VideoSurface.h"
 #include "Yuv420RenderNode.h"
 
+using QuickUI::Components::Internal::GlobalVideoRenderer;
+using QuickUI::Components::Internal::VideoSurface;
 using QuickUI::Components::Internal::Yuv420RenderNode;
 
 class VideoSurfaceTest : public QObject

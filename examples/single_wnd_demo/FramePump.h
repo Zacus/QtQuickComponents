@@ -6,8 +6,6 @@
 #include <QTimer>
 #include <QVariantList>
 
-class GlobalVideoRenderer;
-
 class FramePump : public QObject
 {
     Q_OBJECT

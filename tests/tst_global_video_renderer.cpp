@@ -6,6 +6,8 @@
 
 #include "GlobalVideoRenderer.h"
 
+using QuickUI::Components::Internal::GlobalVideoRenderer;
+
 class GlobalVideoRendererTest : public QObject
 {
     Q_OBJECT

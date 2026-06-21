@@ -15,6 +15,8 @@
 #include <thread>
 #include <vector>
 
+using QuickUI::Components::Internal::GlobalVideoRenderer;
+
 namespace {
 
 enum class FrameMode {

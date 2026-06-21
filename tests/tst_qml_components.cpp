@@ -6,6 +6,8 @@
 #include <QQmlEngine>
 #include <QtQuickTest/quicktest.h>
 
+using QuickUI::Components::Internal::GlobalVideoRenderer;
+
 class TestVideoFrameSource : public QObject
 {
     Q_OBJECT
