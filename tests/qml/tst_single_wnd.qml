@@ -201,6 +201,35 @@ TestCase {
         verify(Qt.colorEqual(bottomRight.color, "#ff00ff"))
     }
 
+    function test_osdModelEmptyAndLongTextStayInsideBounds() {
+        var wnd = createTemporaryObject(singleWndComponent, this)
+        verify(wnd !== null)
+
+        var topLeft = child(wnd, "osdTopLeftText")
+        var topRight = child(wnd, "osdTopRightText")
+        var bottomLeft = child(wnd, "osdBottomLeftText")
+        var bottomRight = child(wnd, "osdBottomRightText")
+
+        wnd.vm.osdModel = []
+        compare(topLeft.visible, false)
+        compare(topRight.visible, false)
+        compare(bottomLeft.visible, false)
+        compare(bottomRight.visible, false)
+
+        var longText = "VERY-LONG-OSD-VALUE-WITHOUT-SPACES-0123456789"
+        wnd.vm.osdModel = [
+            { text: longText + "-TL", position: 0, color: "white" },
+            { text: longText + "-TR", position: 1, color: "white" },
+            { text: longText + "-BL", position: 2, color: "white" },
+            { text: longText + "-BR", position: 3, color: "white" }
+        ]
+
+        verify(topLeft.paintedWidth <= topLeft.width)
+        verify(topRight.paintedWidth <= topRight.width)
+        verify(bottomLeft.paintedWidth <= bottomLeft.width)
+        verify(bottomRight.paintedWidth <= bottomRight.width)
+    }
+
     function test_titleButtonsForwardViewModelSignals() {
         var wnd = createTemporaryObject(singleWndComponent, this)
         verify(wnd !== null)
