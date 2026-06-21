@@ -355,4 +355,5 @@ endif()
 
 if(QTC_BUILD_EXAMPLES)
     add_subdirectory(examples/demo)
+    add_subdirectory(examples/single_wnd_demo)
 endif()
