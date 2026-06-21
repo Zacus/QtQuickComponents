@@ -86,6 +86,15 @@ TestCase {
     }
 
     Component {
+        id: defaultNoSignalLayerComponent
+
+        NoSignalLayer {
+            width: 120
+            height: 90
+        }
+    }
+
+    Component {
         id: borderLayerComponent
 
         BorderLayer {
@@ -328,6 +337,14 @@ TestCase {
         layer.signalState = WndViewModel.Normal
         compare(label.text, "")
         compare(label.visible, false)
+    }
+
+    function test_noSignalLayerProvidesDefaultConnectingIcon() {
+        var layer = createTemporaryObject(defaultNoSignalLayerComponent, this)
+        verify(layer !== null)
+
+        layer.signalState = WndViewModel.Connecting
+        verify(layer.connectingIconText.length > 0)
     }
 
     function test_borderLayerAppliesPriorityAndHidesWhenInactive() {

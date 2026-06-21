@@ -8,7 +8,7 @@ Item {
     property string noSignalText: qsTr("无信号")
     property string connectingText: qsTr("连接中")
     property string noSignalIconText: "!"
-    property string connectingIconText: ""
+    property string connectingIconText: "↻"
     property color textColor: ComponentTheme.textSecondary
     property color iconColor: ComponentTheme.textSecondary
     readonly property bool isConnecting: signalState === WndViewModel.Connecting
