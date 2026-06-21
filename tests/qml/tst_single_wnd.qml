@@ -282,6 +282,36 @@ TestCase {
         compare(child(target, "dragLayer").border.width, 0)
     }
 
+    function test_escapeCancelsDragAndRestoresVisualState() {
+        var fixture = createTemporaryObject(dualWndComponent, this)
+        verify(fixture !== null)
+
+        var source = child(fixture, "sourceWnd")
+        var target = child(fixture, "targetWnd")
+        var targetDragLayer = child(target, "dragLayer")
+        var dropSpy = signalSpy.createObject(this, {
+            target: target.vm,
+            signalName: "dropReceived"
+        })
+
+        mousePress(source, 20, 80)
+        mouseMove(source, 360, 80)
+        wait(80)
+
+        verify(source.opacity < 1.0)
+        verify(targetDragLayer.border.width > 0)
+        source.forceActiveFocus()
+
+        keyClick(Qt.Key_Escape)
+        wait(80)
+
+        compare(dropSpy.count, 0)
+        compare(source.opacity, 1.0)
+        compare(targetDragLayer.border.width, 0)
+
+        mouseRelease(source, 360, 80)
+    }
+
     function test_noSignalLayerShowsOnlyNonNormalStates() {
         var layer = createTemporaryObject(noSignalLayerComponent, this)
         verify(layer !== null)

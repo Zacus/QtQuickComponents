@@ -9,17 +9,31 @@ Item {
     property alias videoSurface: videoSurface
 
     readonly property string dragKey: "quickui-single-wnd-channel"
+    readonly property bool effectiveDragActive: dragHandler.active && !dragCancelled && root.vm && root.vm.channelId >= 0
+    property bool dragCancelled: false
 
     implicitWidth: 320
     implicitHeight: 180
     clip: true
-    opacity: dragHandler.active ? 0.62 : 1.0
-    Drag.active: dragHandler.active && root.vm && root.vm.channelId >= 0
+    opacity: effectiveDragActive ? 0.62 : 1.0
+    Drag.active: effectiveDragActive
     Drag.source: root
     Drag.keys: [dragKey]
     Drag.supportedActions: Qt.MoveAction
     Drag.hotSpot.x: dragHandler.centroid.position.x
     Drag.hotSpot.y: dragHandler.centroid.position.y
+
+    function cancelDrag() {
+        if (!dragHandler.active || dragCancelled)
+            return
+
+        if (root.Drag.active)
+            root.Drag.cancel()
+
+        dragCancelled = true
+        clickConfirmTimer.stop()
+        clickArea.suppressNextClick = true
+    }
 
     Rectangle {
         anchors.fill: parent
@@ -161,6 +175,14 @@ Item {
         }
     }
 
+    Keys.onEscapePressed: function(event) {
+        if (!dragHandler.active)
+            return
+
+        cancelDrag()
+        event.accepted = true
+    }
+
     DragHandler {
         id: dragHandler
         target: null
@@ -169,9 +191,12 @@ Item {
             if (!active) {
                 if (root.Drag.active)
                     root.Drag.drop()
+                dragCancelled = false
                 return
             }
 
+            dragCancelled = false
+            root.forceActiveFocus(Qt.MouseFocusReason)
             clickConfirmTimer.stop()
             clickArea.suppressNextClick = true
             if (root.vm && root.vm.channelId >= 0)
