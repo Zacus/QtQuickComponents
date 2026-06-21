@@ -83,9 +83,6 @@ TestCase {
                 anchors.fill: parent
                 visible: true
                 model: timelineModel
-                trackColor: ComponentTheme.style === ComponentTheme.Dark
-                    ? "#141824"
-                    : "#f4f6fb"
             }
         }
     }
@@ -151,6 +148,16 @@ TestCase {
         verify(timelineView !== null)
         tryVerify(function() { return timelineView.viewport.viewSpan > 0 })
         verify(timelineView.viewport.pixelsPerMs > 0)
+    }
+
+    function test_timelineViewDefaultColorsFollowTheme() {
+        ComponentTheme.style = ComponentTheme.Dark
+        var timelineView = createTemporaryObject(directTimelineViewComponent, this)
+        verify(timelineView !== null)
+
+        compare(timelineView.trackColor, ComponentTheme.trackBg)
+        compare(timelineView.rulerBg, ComponentTheme.trackBg)
+        compare(timelineView.playheadColor, ComponentTheme.textPrimary)
     }
 
     function test_rulerModelGeneratesTicksInQml() {

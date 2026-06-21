@@ -13,7 +13,7 @@ Item {
     required property var viewport
     required property var model
 
-    property color trackColor:    "#1a1a28"
+    property color trackColor:    ComponentTheme.trackBg
     property var   segmentColors: [
         "#4c6ef5",
         "#20c997",

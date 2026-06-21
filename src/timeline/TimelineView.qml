@@ -55,7 +55,7 @@ Item {
     // 对外接口 — 外观
     // ══════════════════════════════════════════════════════
 
-    property color  trackColor:    "#1a1a28"
+    property color  trackColor:    ComponentTheme.trackBg
     property var    segmentColors: ["#4c6ef5", "#20c997", "#f03e3e"]
     property real   segmentRadius: 2
 
@@ -69,7 +69,7 @@ Item {
     property color  rulerSeparatorColor: ComponentTheme.separator
     property string rulerLabelFont:      "11px sans-serif"
 
-    property color  playheadColor:        "#ffffff"
+    property color  playheadColor:        ComponentTheme.textPrimary
     property real   playheadLineWidth:    1.5
     property real   playheadHeadSize:     10
     property bool   playheadLabelVisible: true

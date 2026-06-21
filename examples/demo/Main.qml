@@ -192,9 +192,6 @@ ApplicationWindow {
                     model: timelineModel
                     followMode: TimelineEnums.FollowEdge
                     segmentColors: ["#4c6ef5", "#20c997", "#ff6b6b"]
-                    trackColor: ComponentTheme.style === ComponentTheme.Dark
-                        ? "#141824"
-                        : "#f4f6fb"
                     onSeeked: function(t) {
                         currentTime = t
                         statusLabel.text = "Seeked to " + Math.round(t / 1000) + "s"
