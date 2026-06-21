@@ -4,6 +4,8 @@
 #include <QFileInfo>
 #include <QStringList>
 
+namespace QuickUI::Components::Internal {
+
 ThemeFileWatcher::ThemeFileWatcher(QObject* parent)
     : QObject(parent)
 {
@@ -124,3 +126,5 @@ void ThemeFileWatcher::pollFileTimestamp()
         scheduleReload();
     }
 }
+
+} // namespace QuickUI::Components::Internal

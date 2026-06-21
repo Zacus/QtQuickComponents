@@ -2,6 +2,8 @@
 
 #include <algorithm>
 
+namespace QuickUI::Components::Internal {
+
 TimelineTrackModel::TimelineTrackModel(QObject* parent)
     : QObject(parent)
 {}
@@ -181,3 +183,5 @@ void TimelineTrackModel::rebuild()
     m_rects = std::move(newRects);
     emit rectsChanged();
 }
+
+} // namespace QuickUI::Components::Internal

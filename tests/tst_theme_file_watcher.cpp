@@ -7,6 +7,8 @@
 
 #include "ThemeFileWatcher.h"
 
+using QuickUI::Components::Internal::ThemeFileWatcher;
+
 class ThemeFileWatcherTest : public QObject
 {
     Q_OBJECT

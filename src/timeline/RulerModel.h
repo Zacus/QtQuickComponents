@@ -8,6 +8,8 @@
 #include "RulerTick.h"
 #include "TimelineViewport.h"
 
+namespace QuickUI::Components::Internal {
+
 /**
  * @brief 时间轴刻度模型
  *
@@ -67,9 +69,9 @@
 class RulerModel : public QAbstractListModel
 {
     Q_OBJECT
-    QML_ELEMENT
+    QML_NAMED_ELEMENT(RulerModel)
 
-    Q_PROPERTY(TimelineViewport* viewport READ viewport
+    Q_PROPERTY(QuickUI::Components::Internal::TimelineViewport* viewport READ viewport
                WRITE setViewport NOTIFY viewportChanged)
 
     Q_PROPERTY(int     count         READ rowCount    NOTIFY ticksChanged)
@@ -97,8 +99,8 @@ public:
     QHash<int, QByteArray> roleNames() const override;
 
     // ── viewport 属性 ─────────────────────────────────────────
-    TimelineViewport* viewport() const { return m_viewport; }
-    void setViewport(TimelineViewport* vp);
+    QuickUI::Components::Internal::TimelineViewport* viewport() const { return m_viewport; }
+    void setViewport(QuickUI::Components::Internal::TimelineViewport* vp);
 
     // ── 派生信息（渲染层可直接读，不用遍历列表）──────────────
     QString majorFormat()   const { return m_majorFormat;   }
@@ -106,7 +108,7 @@ public:
     qint64  minorInterval() const { return m_minorInterval; }
 
     /** 按索引取刻度（Canvas 绘制时比 data() 更直接）*/
-    Q_INVOKABLE RulerTick tickAt(int index) const;
+    Q_INVOKABLE QuickUI::Components::Internal::RulerTick tickAt(int index) const;
 
     /** 只读访问底层列表（渲染层迭代用）*/
     const QList<RulerTick>& ticks() const { return m_ticks; }
@@ -145,7 +147,7 @@ private:
     // 格式化主刻度标签
     QString formatLabel(qint64 timeMs, const QString& fmt) const;
 
-    TimelineViewport*   m_viewport      = nullptr;
+    QuickUI::Components::Internal::TimelineViewport* m_viewport = nullptr;
     QList<RulerTick>    m_ticks;
     QString             m_majorFormat;
     qint64              m_majorInterval = 0;
@@ -159,3 +161,5 @@ private:
     // 刻度级别表（按 spanThreshold 降序排列，selectLevel 从头扫描）
     static const QList<Level> s_levels;
 };
+
+} // namespace QuickUI::Components::Internal

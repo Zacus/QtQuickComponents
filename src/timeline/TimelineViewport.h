@@ -4,6 +4,8 @@
 #include <QQmlEngine>
 #include <QtCore/qmath.h>
 
+namespace QuickUI::Components::Internal {
+
 /**
  * @brief 时间轴视口状态与坐标变换
  *
@@ -46,7 +48,7 @@
 class TimelineViewport : public QObject
 {
     Q_OBJECT
-    QML_ELEMENT
+    QML_NAMED_ELEMENT(TimelineViewport)
 
 public:
     // ── 缩放极限常量（ms）────────────────────────────────────
@@ -237,3 +239,5 @@ private:
     qreal  m_minZoomFactor = 1.1;
     qreal  m_maxZoomFactor = 1.1;  // 仅用于 zoomAt 的单步限幅，不影响绝对范围
 };
+
+} // namespace QuickUI::Components::Internal

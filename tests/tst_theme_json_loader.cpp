@@ -7,6 +7,9 @@
 
 #include "ThemeJsonLoader.h"
 
+using QuickUI::Components::Internal::ThemeJsonLoader;
+using QuickUI::Components::Internal::ThemeLoadResult;
+
 class ThemeJsonLoaderTest : public QObject
 {
     Q_OBJECT

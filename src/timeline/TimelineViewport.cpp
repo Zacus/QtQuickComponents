@@ -3,6 +3,8 @@
 #include <QtCore/qdebug.h>
 #include <algorithm>
 
+namespace QuickUI::Components::Internal {
+
 // ── 构造 ──────────────────────────────────────────────────────────────
 
 TimelineViewport::TimelineViewport(QObject* parent)
@@ -229,3 +231,5 @@ void TimelineViewport::clampToBounds(qint64& start, qint64& end) const
         start = end - span;
     }
 }
+
+} // namespace QuickUI::Components::Internal

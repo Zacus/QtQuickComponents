@@ -6,6 +6,11 @@
 #include <QDir>
 #include <QFileInfo>
 
+using QuickUI::Components::Internal::ThemeFileWatcher;
+using QuickUI::Components::Internal::ThemeJsonLoader;
+using QuickUI::Components::Internal::ThemeLoadResult;
+using QuickUI::Components::Internal::ThemeTokens;
+
 struct ComponentTheme::Private
 {
     ThemeFileWatcher themeWatcher;

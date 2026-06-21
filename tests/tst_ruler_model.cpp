@@ -3,6 +3,10 @@
 #include "RulerModel.h"
 #include "TimelineViewport.h"
 
+using QuickUI::Components::Internal::RulerModel;
+using QuickUI::Components::Internal::RulerTick;
+using QuickUI::Components::Internal::TimelineViewport;
+
 class RulerModelTest : public QObject
 {
     Q_OBJECT

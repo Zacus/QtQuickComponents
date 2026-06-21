@@ -4,6 +4,8 @@
 #include <QtCore/qdatetime.h>
 #include <QtCore/qtimezone.h>
 
+namespace QuickUI::Components::Internal {
+
 // ── 刻度级别表（静态，进程生命周期内只初始化一次）────────────────────
 //
 // 按 spanThreshold 从大到小排列。selectLevel() 从头扫描，
@@ -316,3 +318,5 @@ QString RulerModel::formatLabel(qint64 timeMs, const QString& fmt) const
     const QDateTime dt = QDateTime::fromMSecsSinceEpoch(timeMs, QTimeZone::UTC);
     return dt.toString(fmt);
 }
+
+} // namespace QuickUI::Components::Internal

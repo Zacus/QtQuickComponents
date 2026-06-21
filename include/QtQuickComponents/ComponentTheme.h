@@ -8,7 +8,9 @@
 
 #include <memory>
 
+namespace QuickUI::Components::Internal {
 struct ThemeTokens;
+}
 
 /**
  * @brief 组件库全局主题单例
@@ -227,7 +229,9 @@ private:
 
     explicit ComponentTheme(QObject* parent = nullptr);
     bool applyBuiltInTheme(const QString& themeId, Style style);
-    void applyTokens(const ThemeTokens& tokens, Style style, const QString& currentThemeFile);
+    void applyTokens(const QuickUI::Components::Internal::ThemeTokens& tokens,
+                     Style style,
+                     const QString& currentThemeFile);
     void setLastError(const QString& error);
 
     Style  m_style = Dark;

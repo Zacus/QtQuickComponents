@@ -81,6 +81,8 @@ QColor parseThemeColor(const QString& colorText)
 
 } // namespace
 
+namespace QuickUI::Components::Internal {
+
 ThemeLoadResult ThemeJsonLoader::loadFile(const QString& path)
 {
     QFile file(path);
@@ -300,3 +302,5 @@ QStringList ThemeJsonLoader::builtInThemeIds()
 {
     return { QStringLiteral("dark"), QStringLiteral("light") };
 }
+
+} // namespace QuickUI::Components::Internal

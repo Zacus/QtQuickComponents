@@ -4,6 +4,8 @@
 #include <QObject>
 #include <QTimer>
 
+namespace QuickUI::Components::Internal {
+
 class ThemeFileWatcher : public QObject
 {
     Q_OBJECT
@@ -36,3 +38,5 @@ private:
     qint64 m_lastModifiedMs = 0;
     qint64 m_lastSize = -1;
 };
+
+} // namespace QuickUI::Components::Internal

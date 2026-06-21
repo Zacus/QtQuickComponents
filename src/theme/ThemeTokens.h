@@ -3,6 +3,8 @@
 #include <QColor>
 #include <QString>
 
+namespace QuickUI::Components::Internal {
+
 struct ThemeTokens
 {
     QString id;
@@ -48,3 +50,5 @@ struct ThemeTokens
     int durationNormal = 120;
     bool reducedMotion = false;
 };
+
+} // namespace QuickUI::Components::Internal

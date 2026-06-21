@@ -8,6 +8,8 @@
 #include "TimelineModel.h"
 #include "TimelineViewport.h"
 
+namespace QuickUI::Components::Internal {
+
 /**
  * @brief 像素级合并区间模型（渲染优化层）
  *
@@ -57,10 +59,10 @@
 class TimelineTrackModel : public QObject
 {
     Q_OBJECT
-    QML_ELEMENT
+    QML_NAMED_ELEMENT(TimelineTrackModel)
 
     Q_PROPERTY(TimelineModel*    model    READ model    WRITE setModel    NOTIFY modelChanged)
-    Q_PROPERTY(TimelineViewport* viewport READ viewport WRITE setViewport NOTIFY viewportChanged)
+    Q_PROPERTY(QuickUI::Components::Internal::TimelineViewport* viewport READ viewport WRITE setViewport NOTIFY viewportChanged)
 
     // 合并阈值：像素间距 < mergeGapPx 的同 type 区间合并为一个矩形（默认 1px）
     Q_PROPERTY(qreal mergeGapPx  READ mergeGapPx  WRITE setMergeGapPx  NOTIFY mergeGapPxChanged)
@@ -76,14 +78,14 @@ public:
     explicit TimelineTrackModel(QObject* parent = nullptr);
 
     TimelineModel*    model()    const { return m_model;    }
-    TimelineViewport* viewport() const { return m_viewport; }
+    QuickUI::Components::Internal::TimelineViewport* viewport() const { return m_viewport; }
     qreal mergeGapPx()  const { return m_mergeGapPx;  }
     qreal trackHeight() const { return m_trackHeight; }
     qreal trackY()      const { return m_trackY;      }
     int   rectCount()   const;
 
     void setModel      (TimelineModel*    v);
-    void setViewport   (TimelineViewport* v);
+    void setViewport   (QuickUI::Components::Internal::TimelineViewport* v);
     void setMergeGapPx (qreal v);
     void setTrackHeight(qreal v);
     void setTrackY     (qreal v);
@@ -121,8 +123,10 @@ private:
     QHash<int, QList<QRectF>> m_rects;
 
     TimelineModel*    m_model       = nullptr;
-    TimelineViewport* m_viewport    = nullptr;
+    QuickUI::Components::Internal::TimelineViewport* m_viewport = nullptr;
     qreal             m_mergeGapPx  = 1.0;
     qreal             m_trackHeight = 20.0;
     qreal             m_trackY      = 0.0;
 };
+
+} // namespace QuickUI::Components::Internal

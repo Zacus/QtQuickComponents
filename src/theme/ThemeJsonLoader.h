@@ -6,6 +6,8 @@
 #include <QString>
 #include <QStringList>
 
+namespace QuickUI::Components::Internal {
+
 struct ThemeLoadResult
 {
     bool ok = false;
@@ -22,3 +24,5 @@ public:
     static bool isValidThemeId(const QString& themeId);
     static QStringList builtInThemeIds();
 };
+
+} // namespace QuickUI::Components::Internal

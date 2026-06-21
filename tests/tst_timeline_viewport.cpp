@@ -2,6 +2,8 @@
 
 #include "TimelineViewport.h"
 
+using QuickUI::Components::Internal::TimelineViewport;
+
 class TimelineViewportTest : public QObject
 {
     Q_OBJECT

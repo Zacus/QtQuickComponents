@@ -3,6 +3,8 @@
 #include <QtQml/qqml.h>
 #include <QString>
 
+namespace QuickUI::Components::Internal {
+
 /**
  * @brief 单条刻度的渲染数据
  *
@@ -45,4 +47,6 @@ private:
     QString m_label;
 };
 
-Q_DECLARE_METATYPE(RulerTick)
+} // namespace QuickUI::Components::Internal
+
+Q_DECLARE_METATYPE(QuickUI::Components::Internal::RulerTick)
