@@ -1,5 +1,7 @@
 #pragma once
 
+namespace QuickUI::Components::Internal {
+
 struct Yuv420Vertex
 {
     float x = 0.0f;
@@ -15,3 +17,5 @@ struct Yuv420Vertex
             && lhs.v == rhs.v;
     }
 };
+
+} // namespace QuickUI::Components::Internal

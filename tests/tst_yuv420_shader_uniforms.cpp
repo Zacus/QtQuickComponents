@@ -8,6 +8,8 @@
 
 #include <memory>
 
+using QuickUI::Components::Internal::Yuv420ShaderUniforms;
+
 namespace {
 
 struct ResourceUpdateBatchReleaser

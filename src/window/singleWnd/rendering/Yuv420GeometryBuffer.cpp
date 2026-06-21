@@ -4,6 +4,8 @@
 
 #include <rhi/qrhi.h>
 
+namespace QuickUI::Components::Internal {
+
 void Yuv420GeometryBuffer::BufferDeleter::operator()(QRhiBuffer* buffer) const
 {
     delete buffer;
@@ -73,3 +75,5 @@ bool Yuv420GeometryBuffer::isValid() const
 {
     return m_rhi && m_vertexBuffer && m_vertexCount > 0;
 }
+
+} // namespace QuickUI::Components::Internal

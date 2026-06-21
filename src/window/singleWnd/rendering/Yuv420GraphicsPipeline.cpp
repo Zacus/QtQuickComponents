@@ -4,6 +4,8 @@
 
 #include <rhi/qrhi.h>
 
+namespace QuickUI::Components::Internal {
+
 void Yuv420GraphicsPipeline::PipelineDeleter::operator()(QRhiGraphicsPipeline* pipeline) const
 {
     delete pipeline;
@@ -79,3 +81,5 @@ bool Yuv420GraphicsPipeline::isValid() const
 {
     return m_rhi && m_shaderResourceBindings && m_renderPassDescriptor && m_pipeline;
 }
+
+} // namespace QuickUI::Components::Internal

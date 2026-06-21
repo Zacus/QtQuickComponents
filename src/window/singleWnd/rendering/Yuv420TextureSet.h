@@ -13,6 +13,8 @@ class QRhiSampler;
 class QRhiShaderResourceBindings;
 class QRhiTexture;
 
+namespace QuickUI::Components::Internal {
+
 class Yuv420TextureSet
 {
 public:
@@ -86,3 +88,5 @@ private:
     QRhiBuffer* m_uniformBuffer = nullptr;
     quint64 m_uploadedSerial = 0;
 };
+
+} // namespace QuickUI::Components::Internal

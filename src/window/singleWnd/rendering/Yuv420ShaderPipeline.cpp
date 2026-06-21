@@ -18,6 +18,8 @@ QShader loadShader(const char* path)
 
 } // namespace
 
+namespace QuickUI::Components::Internal {
+
 bool Yuv420ShaderPipeline::loadShaders()
 {
     m_vertexShader = loadShader(VertexShaderPath);
@@ -83,3 +85,5 @@ QVector<Yuv420ShaderPipeline::Vertex> Yuv420ShaderPipeline::quadVertices(const Q
         {right, top, 1.0f, 0.0f},
     };
 }
+
+} // namespace QuickUI::Components::Internal

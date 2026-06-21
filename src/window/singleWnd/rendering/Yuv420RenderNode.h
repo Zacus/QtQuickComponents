@@ -16,6 +16,8 @@ class QRhiRenderPassDescriptor;
 class QRhiRenderTarget;
 class QRhiCommandBuffer;
 
+namespace QuickUI::Components::Internal {
+
 class Yuv420RenderNode : public QSGRenderNode
 {
 public:
@@ -88,3 +90,5 @@ private:
     Yuv420TextureSet m_textures;
     Yuv420ShaderUniforms m_uniforms;
 };
+
+} // namespace QuickUI::Components::Internal

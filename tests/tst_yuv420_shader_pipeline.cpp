@@ -4,6 +4,8 @@
 
 #include <QRectF>
 
+using QuickUI::Components::Internal::Yuv420ShaderPipeline;
+
 class Yuv420ShaderPipelineTest : public QObject
 {
     Q_OBJECT

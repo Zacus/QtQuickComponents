@@ -10,6 +10,8 @@ class QRhi;
 class QRhiBuffer;
 class QRhiResourceUpdateBatch;
 
+namespace QuickUI::Components::Internal {
+
 class Yuv420GeometryBuffer
 {
 public:
@@ -40,3 +42,5 @@ private:
     QVector<Yuv420Vertex> m_vertices;
     quint32 m_vertexCount = 0;
 };
+
+} // namespace QuickUI::Components::Internal

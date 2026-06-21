@@ -48,6 +48,8 @@ GlobalVideoRenderer::Yuv420Snapshot deepCopySnapshot(const GlobalVideoRenderer::
 
 } // namespace
 
+namespace QuickUI::Components::Internal {
+
 Yuv420RenderNode::Yuv420RenderNode(const GlobalVideoRenderer::Yuv420Snapshot& snapshot, const QRectF& rect)
     : m_snapshot(deepCopySnapshot(snapshot))
     , m_rect(rect)
@@ -306,3 +308,5 @@ void Yuv420RenderNode::updateTexturePlan()
     m_uTextureSize = QSize(frame.width / 2, frame.height / 2);
     m_vTextureSize = QSize(frame.width / 2, frame.height / 2);
 }
+
+} // namespace QuickUI::Components::Internal

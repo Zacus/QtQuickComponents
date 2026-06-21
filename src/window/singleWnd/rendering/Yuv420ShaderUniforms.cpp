@@ -6,6 +6,8 @@
 
 #include <algorithm>
 
+namespace QuickUI::Components::Internal {
+
 void Yuv420ShaderUniforms::BufferDeleter::operator()(QRhiBuffer* buffer) const
 {
     delete buffer;
@@ -117,3 +119,5 @@ bool Yuv420ShaderUniforms::ensureBuffer(QRhi* rhi)
     m_buffer = std::move(buffer);
     return true;
 }
+
+} // namespace QuickUI::Components::Internal

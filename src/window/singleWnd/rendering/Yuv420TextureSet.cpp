@@ -34,6 +34,8 @@ bool isValidYuv420Frame(const GlobalVideoRenderer::Yuv420Frame& frame)
 
 } // namespace
 
+namespace QuickUI::Components::Internal {
+
 void Yuv420TextureSet::TextureDeleter::operator()(QRhiTexture* texture) const
 {
     delete texture;
@@ -247,3 +249,5 @@ void Yuv420TextureSet::releasePlane(PlaneTexture& plane)
     }
     plane.size = QSize();
 }
+
+} // namespace QuickUI::Components::Internal

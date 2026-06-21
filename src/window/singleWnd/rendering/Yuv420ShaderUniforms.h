@@ -10,6 +10,8 @@ class QRhi;
 class QRhiBuffer;
 class QRhiResourceUpdateBatch;
 
+namespace QuickUI::Components::Internal {
+
 class Yuv420ShaderUniforms
 {
 public:
@@ -55,3 +57,5 @@ private:
     quint64 m_uploadedSerial = 0;
     float m_opacity = 1.0f;
 };
+
+} // namespace QuickUI::Components::Internal

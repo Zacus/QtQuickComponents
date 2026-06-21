@@ -7,6 +7,8 @@ class QRhiGraphicsPipeline;
 class QRhiRenderPassDescriptor;
 class QRhiShaderResourceBindings;
 
+namespace QuickUI::Components::Internal {
+
 class Yuv420GraphicsPipeline
 {
 public:
@@ -35,3 +37,5 @@ private:
     QRhiRenderPassDescriptor* m_renderPassDescriptor = nullptr;
     std::unique_ptr<QRhiGraphicsPipeline, PipelineDeleter> m_pipeline;
 };
+
+} // namespace QuickUI::Components::Internal

@@ -9,6 +9,10 @@
 
 #include <memory>
 
+using QuickUI::Components::Internal::Yuv420GraphicsPipeline;
+using QuickUI::Components::Internal::Yuv420ShaderUniforms;
+using QuickUI::Components::Internal::Yuv420TextureSet;
+
 namespace {
 
 struct ResourceUpdateBatchReleaser

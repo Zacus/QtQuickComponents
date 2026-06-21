@@ -8,6 +8,8 @@
 #include <rhi/qshader.h>
 #include <rhi/qrhi.h>
 
+namespace QuickUI::Components::Internal {
+
 class Yuv420ShaderPipeline
 {
 public:
@@ -29,3 +31,5 @@ private:
     QShader m_vertexShader;
     QShader m_fragmentShader;
 };
+
+} // namespace QuickUI::Components::Internal

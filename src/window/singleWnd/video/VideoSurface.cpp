@@ -7,6 +7,8 @@
 #include <QSGSimpleTextureNode>
 #include <QSGTexture>
 
+using QuickUI::Components::Internal::Yuv420RenderNode;
+
 namespace {
 
 QRectF fittedContentRect(const QRectF& bounds, const QSize& contentSize)

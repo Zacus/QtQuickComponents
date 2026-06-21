@@ -7,6 +7,9 @@
 
 #include <memory>
 
+using QuickUI::Components::Internal::Yuv420GeometryBuffer;
+using QuickUI::Components::Internal::Yuv420ShaderPipeline;
+
 namespace {
 
 struct ResourceUpdateBatchReleaser

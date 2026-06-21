@@ -7,6 +7,8 @@
 
 #include <memory>
 
+using QuickUI::Components::Internal::Yuv420RenderNode;
+
 namespace {
 
 struct ResourceUpdateBatchReleaser
