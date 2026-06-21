@@ -248,16 +248,22 @@ TestCase {
             target: wnd.vm,
             signalName: "channelClosed"
         })
+        var clickSpy = signalSpy.createObject(this, {
+            target: wnd.vm,
+            signalName: "clicked"
+        })
 
         mouseClick(child(wnd, "screenshotButton"))
         mouseClick(child(wnd, "recordButton"))
         mouseClick(child(wnd, "closeButton"))
+        wait(260)
 
         compare(screenshotSpy.count, 1)
         compare(screenshotSpy.signalArguments[0][0], 3)
         compare(screenshotSpy.signalArguments[0][1], 12)
         compare(recordSpy.count, 1)
         compare(closeSpy.count, 1)
+        compare(clickSpy.count, 0)
     }
 
     function test_titleBarRecordingIndicatorFollowsViewModel() {
