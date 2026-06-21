@@ -254,10 +254,14 @@ add_test(
 qt_add_executable(tst_qml_components
     tst_qml_components.cpp
 )
+target_include_directories(tst_qml_components PRIVATE
+    ${QTC_TEST_PRIVATE_INCLUDE_DIRS}
+)
 
 target_link_libraries(tst_qml_components PRIVATE
     QtQuickComponents
     QtQuickComponentsImpl
+    Qt6::Gui
     Qt6::QuickTest
 )
 

@@ -2,6 +2,7 @@ import QtQuick
 import QtTest
 import QuickUI.Components 1.0
 import QuickUI.Components.impl 1.0
+import QuickUI.Components.Tests 1.0
 
 TestCase {
     name: "SingleWnd"
@@ -67,6 +68,58 @@ TestCase {
                     channelId: 18
                     channelName: "Target camera"
                     signalState: WndViewModel.Normal
+                }
+            }
+        }
+    }
+
+    Component {
+        id: frameBackedDualWndComponent
+
+        Item {
+            width: 640
+            height: 180
+            visible: true
+
+            GlobalVideoRenderer {
+                id: renderer
+                objectName: "renderer"
+            }
+
+            TestVideoFrameSource {
+                objectName: "frameSource"
+            }
+
+            SingleWnd {
+                id: sourceWnd
+                objectName: "sourceWnd"
+                width: 320
+                height: 180
+                visible: true
+
+                vm: WndViewModel {
+                    wndId: 3
+                    channelId: 12
+                    channelName: "Source camera"
+                    signalState: WndViewModel.Normal
+                    videoSink: renderer
+                }
+            }
+
+            SingleWnd {
+                id: targetWnd
+                objectName: "targetWnd"
+                x: 320
+                width: 320
+                height: 180
+                visible: true
+
+                vm: WndViewModel {
+                    wndId: 4
+                    channelId: 18
+                    channelName: "Target camera"
+                    signalState: WndViewModel.Normal
+                    videoSink: renderer
                 }
             }
         }
@@ -438,6 +491,51 @@ TestCase {
         compare(targetDragLayer.border.width, 0)
 
         mouseRelease(source, 360, 80)
+    }
+
+    function test_dragKeepsVideoSurfaceFrameStateBound() {
+        var fixture = createTemporaryObject(frameBackedDualWndComponent, this)
+        verify(fixture !== null)
+
+        var source = child(fixture, "sourceWnd")
+        var target = child(fixture, "targetWnd")
+        var sourceVideo = child(source, "videoSurface")
+        var targetVideo = child(target, "videoSurface")
+        var frameSource = child(fixture, "frameSource")
+
+        verify(frameSource.pushSolidFrame(source.vm.videoSink, source.vm.channelId))
+        tryCompare(sourceVideo, "hasFrame", true)
+        var sourceSerial = sourceVideo.currentSerial
+
+        compare(sourceVideo.visible, true)
+        compare(sourceVideo.videoSink, source.vm.videoSink)
+        compare(sourceVideo.channelId, 12)
+        verify(sourceSerial > 0)
+        compare(targetVideo.visible, true)
+        compare(targetVideo.videoSink, target.vm.videoSink)
+        compare(targetVideo.channelId, 18)
+
+        mousePress(source, 20, 80)
+        mouseMove(source, 360, 80)
+        wait(80)
+
+        compare(sourceVideo.visible, true)
+        compare(sourceVideo.videoSink, source.vm.videoSink)
+        compare(sourceVideo.channelId, 12)
+        compare(sourceVideo.hasFrame, true)
+        compare(sourceVideo.currentSerial, sourceSerial)
+        compare(targetVideo.visible, true)
+        compare(targetVideo.videoSink, target.vm.videoSink)
+        compare(targetVideo.channelId, 18)
+
+        mouseRelease(source, 360, 80)
+        wait(80)
+
+        compare(sourceVideo.visible, true)
+        compare(sourceVideo.videoSink, source.vm.videoSink)
+        compare(sourceVideo.channelId, 12)
+        compare(sourceVideo.hasFrame, true)
+        compare(sourceVideo.currentSerial, sourceSerial)
     }
 
     function test_noSignalLayerShowsOnlyNonNormalStates() {
