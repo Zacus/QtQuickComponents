@@ -71,15 +71,15 @@ set(QTC_IMPL_HEADERS
     src/timeline/RulerTick.h
     src/timeline/RulerModel.h
     src/timeline/TimelineTrackModel.h
-    src/monitor/GlobalVideoRenderer.h
-    src/monitor/VideoSurface.h
-    src/monitor/Yuv420GeometryBuffer.h
-    src/monitor/Yuv420GraphicsPipeline.h
-    src/monitor/Yuv420ShaderPipeline.h
-    src/monitor/Yuv420ShaderUniforms.h
-    src/monitor/Yuv420TextureSet.h
-    src/monitor/Yuv420RenderNode.h
-    src/monitor/Yuv420Vertex.h
+    src/window/GlobalVideoRenderer.h
+    src/window/VideoSurface.h
+    src/window/Yuv420GeometryBuffer.h
+    src/window/Yuv420GraphicsPipeline.h
+    src/window/Yuv420ShaderPipeline.h
+    src/window/Yuv420ShaderUniforms.h
+    src/window/Yuv420TextureSet.h
+    src/window/Yuv420RenderNode.h
+    src/window/Yuv420Vertex.h
 )
 
 set(QTC_CPP_SOURCES
@@ -87,21 +87,21 @@ set(QTC_CPP_SOURCES
     src/theme/ThemeFileWatcher.cpp
     src/theme/ThemeJsonLoader.cpp
     src/timeline/TimelineModel.cpp
-    src/monitor/WndViewModel.cpp
+    src/window/WndViewModel.cpp
 )
 
 set(QTC_IMPL_CPP_SOURCES
     src/timeline/TimelineViewport.cpp
     src/timeline/RulerModel.cpp
     src/timeline/TimelineTrackModel.cpp
-    src/monitor/GlobalVideoRenderer.cpp
-    src/monitor/VideoSurface.cpp
-    src/monitor/Yuv420GeometryBuffer.cpp
-    src/monitor/Yuv420GraphicsPipeline.cpp
-    src/monitor/Yuv420ShaderPipeline.cpp
-    src/monitor/Yuv420ShaderUniforms.cpp
-    src/monitor/Yuv420TextureSet.cpp
-    src/monitor/Yuv420RenderNode.cpp
+    src/window/GlobalVideoRenderer.cpp
+    src/window/VideoSurface.cpp
+    src/window/Yuv420GeometryBuffer.cpp
+    src/window/Yuv420GraphicsPipeline.cpp
+    src/window/Yuv420ShaderPipeline.cpp
+    src/window/Yuv420ShaderUniforms.cpp
+    src/window/Yuv420TextureSet.cpp
+    src/window/Yuv420RenderNode.cpp
 )
 
 set(QTC_PUBLIC_QML_FILES
@@ -111,15 +111,15 @@ set(QTC_PUBLIC_QML_FILES
     src/controls/Button.qml
     src/controls/Label.qml
     src/controls/TextField.qml
-    src/monitor/SingleWnd.qml
+    src/window/SingleWnd.qml
     src/timeline/TimelineView.qml
 )
 
 set(QTC_INTERNAL_QML_FILES
-    src/monitor/NoSignalLayer.qml
-    src/monitor/OSDLayer.qml
-    src/monitor/BorderLayer.qml
-    src/monitor/TitleBar.qml
+    src/window/NoSignalLayer.qml
+    src/window/OSDLayer.qml
+    src/window/BorderLayer.qml
+    src/window/TitleBar.qml
     src/timeline/TimelineTrack.qml
     src/timeline/TimelineRuler.qml
     src/timeline/TimelineInputHandler.qml
@@ -161,19 +161,19 @@ set_source_files_properties(
     src/controls/TextField.qml PROPERTIES QT_RESOURCE_ALIAS TextField.qml
 )
 set_source_files_properties(
-    src/monitor/SingleWnd.qml PROPERTIES QT_RESOURCE_ALIAS SingleWnd.qml
+    src/window/SingleWnd.qml PROPERTIES QT_RESOURCE_ALIAS SingleWnd.qml
 )
 set_source_files_properties(
-    src/monitor/NoSignalLayer.qml PROPERTIES QT_RESOURCE_ALIAS NoSignalLayer.qml
+    src/window/NoSignalLayer.qml PROPERTIES QT_RESOURCE_ALIAS NoSignalLayer.qml
 )
 set_source_files_properties(
-    src/monitor/OSDLayer.qml PROPERTIES QT_RESOURCE_ALIAS OSDLayer.qml
+    src/window/OSDLayer.qml PROPERTIES QT_RESOURCE_ALIAS OSDLayer.qml
 )
 set_source_files_properties(
-    src/monitor/BorderLayer.qml PROPERTIES QT_RESOURCE_ALIAS BorderLayer.qml
+    src/window/BorderLayer.qml PROPERTIES QT_RESOURCE_ALIAS BorderLayer.qml
 )
 set_source_files_properties(
-    src/monitor/TitleBar.qml PROPERTIES QT_RESOURCE_ALIAS TitleBar.qml
+    src/window/TitleBar.qml PROPERTIES QT_RESOURCE_ALIAS TitleBar.qml
 )
 set_source_files_properties(
     src/timeline/TimelineTrack.qml PROPERTIES QT_RESOURCE_ALIAS TimelineTrack.qml
@@ -206,8 +206,8 @@ qt_add_shaders(QtQuickComponentsImpl "qtc_yuv420_shaders"
     QUIET
     PREFIX "/QuickUI/Components/impl/shaders"
     FILES
-        src/monitor/shaders/Yuv420Blit.vert
-        src/monitor/shaders/Yuv420Blit.frag
+        src/window/shaders/Yuv420Blit.vert
+        src/window/shaders/Yuv420Blit.frag
     OUTPUTS
         Yuv420Blit.vert.qsb
         Yuv420Blit.frag.qsb
@@ -254,13 +254,13 @@ target_include_directories(QtQuickComponents PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/src
     ${CMAKE_CURRENT_SOURCE_DIR}/src/theme
     ${CMAKE_CURRENT_SOURCE_DIR}/src/timeline
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/monitor
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/window
 )
 
 target_include_directories(QtQuickComponentsImpl PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/include/QtQuickComponents
     ${CMAKE_CURRENT_SOURCE_DIR}/src/timeline
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/monitor
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/window
 )
 
 target_link_libraries(QtQuickComponents PUBLIC
