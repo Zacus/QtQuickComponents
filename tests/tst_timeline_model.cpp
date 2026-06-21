@@ -1,7 +1,13 @@
 #include <QtTest/QtTest>
 
+#include <type_traits>
+
 #include "TimelineEnums.h"
 #include "TimelineModel.h"
+
+static_assert(std::is_same_v<TimelineEnums, QuickUI::Components::TimelineEnums>);
+static_assert(std::is_same_v<TimelineModel, QuickUI::Components::TimelineModel>);
+static_assert(std::is_same_v<TimelineSegment, QuickUI::Components::TimelineSegment>);
 
 class TimelineModelTest : public QObject
 {

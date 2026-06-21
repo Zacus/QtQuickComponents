@@ -3,6 +3,8 @@
 #include <QObject>
 #include <QQmlEngine>
 
+namespace QuickUI::Components {
+
 /**
  * @brief 时间轴组件枚举命名空间
  *
@@ -27,7 +29,7 @@
 class TimelineEnums : public QObject
 {
     Q_OBJECT
-    QML_ELEMENT
+    QML_NAMED_ELEMENT(TimelineEnums)
     QML_SINGLETON
 
 public:
@@ -69,3 +71,7 @@ public:
 private:
     explicit TimelineEnums(QObject* parent = nullptr) : QObject(parent) {}
 };
+
+} // namespace QuickUI::Components
+
+using TimelineEnums = QuickUI::Components::TimelineEnums;

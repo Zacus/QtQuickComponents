@@ -7,6 +7,8 @@
 
 #include "TimelineSegment.h"
 
+namespace QuickUI::Components {
+
 /**
  * @brief 时间轴录像/事件数据模型
  *
@@ -37,7 +39,7 @@
 class TimelineModel : public QAbstractListModel
 {
     Q_OBJECT
-    QML_ELEMENT
+    QML_NAMED_ELEMENT(TimelineModel)
 
     // ── 整体时间范围（自动随数据更新）───────────────────────
     Q_PROPERTY(qint64 totalStart READ totalStart NOTIFY boundsChanged)
@@ -77,7 +79,7 @@ public:
      * 批量追加，内部排序后一次性 insert，只发射一次 modelReset。
      * 适合初始化或大量数据导入场景，比循环 addSegment() 性能好得多。
      */
-    Q_INVOKABLE void addSegments(const QList<TimelineSegment>& segments);
+    Q_INVOKABLE void addSegments(const QList<QuickUI::Components::TimelineSegment>& segments);
 
     /** 移除指定索引的区间。索引越界时忽略。 */
     Q_INVOKABLE void removeSegment(int index);
@@ -107,7 +109,7 @@ public:
      * C++ 专用版本，返回原始 QList<TimelineSegment>，避免 QVariant 装箱开销。
      * 供 TimelineTrackModel 等 C++ 渲染优化层调用。
      */
-    QList<TimelineSegment> segmentsInRawRange(qint64 viewStart, qint64 viewEnd) const;
+    QList<QuickUI::Components::TimelineSegment> segmentsInRawRange(qint64 viewStart, qint64 viewEnd) const;
 
     /**
      * 返回包含时间点 t 的第一个区间的索引，不存在返回 -1。
@@ -116,10 +118,10 @@ public:
     Q_INVOKABLE int segmentIndexAt(qint64 timeMs) const;
 
     /** 按索引取区间（越界返回默认构造的空区间）。*/
-    Q_INVOKABLE TimelineSegment segmentAt(int index) const;
+    Q_INVOKABLE QuickUI::Components::TimelineSegment segmentAt(int index) const;
 
     /** 只读访问底层列表（给渲染层直接迭代用，避免逐元素 data() 调用）。*/
-    const QList<TimelineSegment>& segments() const { return m_segments; }
+    const QList<QuickUI::Components::TimelineSegment>& segments() const { return m_segments; }
 
 signals:
     void boundsChanged();
@@ -138,8 +140,12 @@ private:
     // 重新计算并在变化时发射 boundsChanged
     void updateBounds();
 
-    QList<TimelineSegment> m_segments;
+    QList<QuickUI::Components::TimelineSegment> m_segments;
     QList<qint64> m_prefixMaxEnd;
     qint64 m_totalStart = 0;
     qint64 m_totalEnd   = 0;
 };
+
+} // namespace QuickUI::Components
+
+using TimelineModel = QuickUI::Components::TimelineModel;

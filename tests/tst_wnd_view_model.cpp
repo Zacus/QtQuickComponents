@@ -1,6 +1,10 @@
 #include <QtTest/QtTest>
 
+#include <type_traits>
+
 #include "WndViewModel.h"
+
+static_assert(std::is_same_v<WndViewModel, QuickUI::Components::WndViewModel>);
 
 class WndViewModelTest : public QObject
 {

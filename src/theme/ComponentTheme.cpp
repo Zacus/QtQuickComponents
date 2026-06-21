@@ -6,10 +6,12 @@
 #include <QDir>
 #include <QFileInfo>
 
-using QuickUI::Components::Internal::ThemeFileWatcher;
-using QuickUI::Components::Internal::ThemeJsonLoader;
-using QuickUI::Components::Internal::ThemeLoadResult;
-using QuickUI::Components::Internal::ThemeTokens;
+namespace QuickUI::Components {
+
+using Internal::ThemeFileWatcher;
+using Internal::ThemeJsonLoader;
+using Internal::ThemeLoadResult;
+using Internal::ThemeTokens;
 
 struct ComponentTheme::Private
 {
@@ -294,3 +296,5 @@ void ComponentTheme::setLastError(const QString& error)
     m_lastError = error;
     emit lastErrorChanged();
 }
+
+} // namespace QuickUI::Components

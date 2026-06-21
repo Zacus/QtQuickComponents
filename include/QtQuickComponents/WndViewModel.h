@@ -6,10 +6,12 @@
 #include <QString>
 #include <QVariantList>
 
+namespace QuickUI::Components {
+
 class WndViewModel : public QObject
 {
     Q_OBJECT
-    QML_ELEMENT
+    QML_NAMED_ELEMENT(WndViewModel)
 
     Q_PROPERTY(int wndId READ wndId WRITE setWndId NOTIFY wndIdChanged)
     Q_PROPERTY(int channelId READ channelId WRITE setChannelId NOTIFY channelIdChanged)
@@ -88,3 +90,7 @@ private:
     QVariantList m_osdModel;
     QPointer<QObject> m_videoSink;
 };
+
+} // namespace QuickUI::Components
+
+using WndViewModel = QuickUI::Components::WndViewModel;

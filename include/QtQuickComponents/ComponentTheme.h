@@ -12,6 +12,8 @@ namespace QuickUI::Components::Internal {
 struct ThemeTokens;
 }
 
+namespace QuickUI::Components {
+
 /**
  * @brief 组件库全局主题单例
  *
@@ -39,7 +41,7 @@ struct ThemeTokens;
 class ComponentTheme : public QObject
 {
     Q_OBJECT
-    QML_ELEMENT
+    QML_NAMED_ELEMENT(ComponentTheme)
     QML_SINGLETON
 
 public:
@@ -293,3 +295,7 @@ private:
     int  m_durationNormal = 120;
     bool m_reducedMotion  = false;
 };
+
+} // namespace QuickUI::Components
+
+using ComponentTheme = QuickUI::Components::ComponentTheme;

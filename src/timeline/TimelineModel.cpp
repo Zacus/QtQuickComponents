@@ -4,6 +4,8 @@
 #include <limits>
 #include <QtCore/qdebug.h>
 
+namespace QuickUI::Components {
+
 // ── 构造 ──────────────────────────────────────────────────────────────
 
 TimelineModel::TimelineModel(QObject* parent)
@@ -292,3 +294,5 @@ void TimelineModel::updateBounds()
         emit boundsChanged();
     }
 }
+
+} // namespace QuickUI::Components

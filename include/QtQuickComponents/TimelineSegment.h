@@ -3,6 +3,8 @@
 #include <QtQml/qqml.h>
 #include <QtCore/qdatetime.h>
 
+namespace QuickUI::Components {
+
 /**
  * @brief 单条录像/事件区间
  *
@@ -74,5 +76,9 @@ private:
     int    m_type    = 0;
 };
 
+} // namespace QuickUI::Components
+
+using TimelineSegment = QuickUI::Components::TimelineSegment;
+
 // 让 QVariant / QML 能识别此类型
-Q_DECLARE_METATYPE(TimelineSegment)
+Q_DECLARE_METATYPE(QuickUI::Components::TimelineSegment)

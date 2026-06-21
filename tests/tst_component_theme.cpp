@@ -5,7 +5,11 @@
 #include <QSignalSpy>
 #include <QTemporaryDir>
 
+#include <type_traits>
+
 #include "ComponentTheme.h"
+
+static_assert(std::is_same_v<ComponentTheme, QuickUI::Components::ComponentTheme>);
 
 class ComponentThemeTest : public QObject
 {

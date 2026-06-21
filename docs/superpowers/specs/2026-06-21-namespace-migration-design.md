@@ -80,6 +80,10 @@ Evaluate public API migration separately. Acceptable enterprise options:
 
 This phase must include versioning and release-note decisions before implementation.
 
+Decision for this migration: choose option 2, migrate public C++ API into `QuickUI::Components` and provide temporary global aliases. This keeps existing source code compatible while giving new consumers a collision-resistant namespace. The aliases are a compatibility bridge and should remain until a future major-version decision explicitly removes them.
+
+Versioning decision: this is a backward-compatible public C++ API expansion, so publishing this phase should use a minor version bump. The implementation updates `VERSION.txt` from `1.0.0` to `1.1.0`; QML imports and type names remain unchanged.
+
 ## Compatibility Requirements
 
 - QML imports do not change.

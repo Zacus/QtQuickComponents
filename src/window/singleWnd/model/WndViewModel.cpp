@@ -1,5 +1,7 @@
 #include "WndViewModel.h"
 
+namespace QuickUI::Components {
+
 WndViewModel::WndViewModel(QObject* parent)
     : QObject(parent)
 {
@@ -85,3 +87,5 @@ void WndViewModel::setVideoSink(QObject* videoSink)
     m_videoSink = videoSink;
     emit videoSinkChanged();
 }
+
+} // namespace QuickUI::Components
