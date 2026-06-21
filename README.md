@@ -14,7 +14,7 @@ tests/
   qml/        # QML QuickTest 用例
 ```
 
-所有组件仍导出到同一个 QML 模块：`QuickUI.Components 1.0`。
+公开组件导出到 QML 模块：`QuickUI.Components 1.0`。库内部实现组件导出到 `QuickUI.Components.impl 1.0`，应用通常只需要导入公开模块；构建和部署时需要确保 impl 模块随主模块一起可被 QML 引擎找到。
 
 基础控件基于 `QtQuick.Controls.Basic` 扩展，保留 Qt Quick Controls 的焦点、键盘、hover/pressed 等状态语义，同时使用 `ComponentTheme` 定制视觉样式。
 
@@ -28,7 +28,11 @@ tests/
 | `Button` | 通用按钮，filled / outline / ghost 三种变体，支持 loading 状态 |
 | `Label` | 语义化文本标签，body / label / caption / heading 四种角色 |
 | `TextField` | 单行输入框，支持标签、占位、错误提示、密码模式、清除按钮 |
+| `TimelineView` | 时间轴视图，包含录像片段轨道、刻度尺、播放头、缩放/拖拽/seek 交互 |
+| `SingleWnd` | 单窗口视频组件，包含视频面、无信号层、OSD、边框告警、标题栏和拖拽交换 |
 | `ComponentTheme` | C++ 主题单例，提供颜色/字体/尺寸/动画 token，支持 Dark/Light/Custom |
+| `TimelineModel` | C++ 时间轴片段模型，向 QML 暴露录像片段和总时间范围 |
+| `WndViewModel` | C++ 单窗口视图模型，向 `SingleWnd` 提供窗口状态、通道、录像、OSD 和事件信号 |
 
 ## 引入方式（FetchContent）
 
@@ -44,10 +48,13 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(QtQuickComponents)
 ```
 
-链接到你的 target：
+链接到你的 target。完整组件集包含内部 QML 模块，推荐同时链接 `QtQuickComponentsImpl`，这样示例、测试和安装布局都能生成主模块与 impl 模块：
 
 ```cmake
-target_link_libraries(YourApp PRIVATE QtQuickComponents)
+target_link_libraries(YourApp PRIVATE
+    QtQuickComponents
+    QtQuickComponentsImpl
+)
 
 target_compile_definitions(YourApp PRIVATE
     QML_IMPORT_PATH="${CMAKE_BINARY_DIR}"
@@ -141,7 +148,34 @@ ProgressSlider {
     bufferPosition: player.bufferedPosition
     onMoved:        player.seek(value)
 }
+
+// ── TimelineView ─────────────────────────────────────────────
+TimelineModel {
+    id: timelineModel
+    Component.onCompleted: {
+        addSegment(0, 900000, TimelineEnums.SegmentNormal)
+        addSegment(1200000, 2300000, TimelineEnums.SegmentMotion)
+        addSegment(2600000, 3500000, TimelineEnums.SegmentAlarm)
+    }
+}
+
+TimelineView {
+    width: 640
+    height: 120
+    model: timelineModel
+    currentTime: player.positionMs
+    followMode: TimelineEnums.FollowEdge
+    onSeeked: function(timeMs) {
+        player.seek(timeMs)
+    }
+    onPlayRequested: function(timeMs) {
+        player.seek(timeMs)
+        player.play()
+    }
+}
 ```
+
+`TimelineView` 的底色、刻度尺底色和播放头默认跟随主题：`trackColor` / `rulerBg` 使用 `ComponentTheme.trackBg`，`playheadColor` 使用 `ComponentTheme.textPrimary`。录像片段颜色通过 `segmentColors` 表达业务语义，默认按普通/移动/告警区分，也可以按项目需要覆盖。
 
 ## JSON 主题
 
@@ -199,9 +233,12 @@ font.weight: ComponentTheme.fontWeightBold     // 700
 - CMake 3.21+
 - C++17
 
-## Demo App
+## Demo Apps
 
-仓库包含一个最小 demo app，用于人工验证 `import QuickUI.Components 1.0`、控件视觉状态和 `TimelineView` 基础交互。
+仓库包含两个 demo app：
+
+- `qtc_demo`：验证 `import QuickUI.Components 1.0`、基础控件视觉状态、主题切换和 `TimelineView` 基础交互。
+- `qtc_single_wnd_demo`：验证 `SingleWnd` 的视频面、状态层、OSD、标题栏、告警边框、拖拽交换和最大化交互。
 
 ```sh
 cmake -S . -B build -DQTC_BUILD_EXAMPLES=ON
@@ -209,10 +246,18 @@ cmake --build build --target qtc_demo
 ./build/examples/demo/qtc_demo
 ```
 
+运行 SingleWnd 示例：
+
+```sh
+cmake --build build --target qtc_single_wnd_demo
+./build/examples/single_wnd_demo/qtc_single_wnd_demo
+```
+
 Headless import smoke test:
 
 ```sh
-./build/examples/demo/qtc_demo -platform offscreen --quit-after-ms 100
+QT_QPA_PLATFORM=offscreen ./build/examples/demo/qtc_demo --quit-after-ms 100
+QT_QPA_PLATFORM=offscreen ./build/examples/single_wnd_demo/qtc_single_wnd_demo --quit-after-ms 100
 ```
 
 ## 版本规则
