@@ -43,7 +43,7 @@ public:
 
     explicit GlobalVideoRenderer(QObject* parent = nullptr);
 
-    Q_INVOKABLE bool pushFrame(int channelId, const QImage& image);
+    bool pushFrame(int channelId, const QImage& image);
     bool pushYuv420Frame(int channelId, const Yuv420Frame& frame);
     Q_INVOKABLE void clearChannel(int channelId);
     Q_INVOKABLE void clear();

@@ -195,6 +195,9 @@ qt_add_qml_module(QtQuickComponentsImpl
     URI     "QuickUI.Components.impl"
     VERSION ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
     OUTPUT_DIRECTORY "${QTC_QML_IMPL_MODULE_PATH}"
+    DEPENDENCIES
+        QtQuick
+        QuickUI.Components
     SOURCES ${QTC_IMPL_HEADERS} ${QTC_IMPL_CPP_SOURCES}
     QML_FILES ${QTC_INTERNAL_QML_FILES}
 )
@@ -214,6 +217,10 @@ qt_add_qml_module(QtQuickComponents
     URI     "QuickUI.Components"
     VERSION ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
     OUTPUT_DIRECTORY "${QTC_QML_MODULE_PATH}"
+    DEPENDENCIES
+        QtQuick
+        QtQuick.Controls.Basic
+        QtQml.Models
     SOURCES ${QTC_PUBLIC_HEADERS} ${QTC_PRIVATE_HEADERS} ${QTC_CPP_SOURCES}
     QML_FILES ${QTC_PUBLIC_QML_FILES}
     RESOURCES ${QTC_THEME_FILES}

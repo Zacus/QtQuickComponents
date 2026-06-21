@@ -245,6 +245,14 @@ add_test(
 )
 
 add_test(
+    NAME QmlLint
+    COMMAND ${CMAKE_COMMAND}
+        -D QTC_QMLLINT_EXECUTABLE=$<TARGET_FILE:Qt6::qmllint>
+        -D QTC_QML_IMPORT_PATH=${CMAKE_BINARY_DIR}
+        -P "${CMAKE_CURRENT_SOURCE_DIR}/verify_qmllint_clean.cmake"
+)
+
+add_test(
     NAME YuvRenderNodeContract
     COMMAND ${CMAKE_COMMAND}
         -D QTC_SOURCE_DIR=${PROJECT_SOURCE_DIR}
